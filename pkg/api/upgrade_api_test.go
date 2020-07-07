@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"gotest.tools/assert"
 
 	"helm.sh/helm/v3/pkg/api"
 	"helm.sh/helm/v3/pkg/api/logger"
@@ -20,61 +20,65 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
-type InstallerTestSuite struct {
+type UpgradeTestSuite struct {
 	suite.Suite
 	recorder        *httptest.ResponseRecorder
 	server          *httptest.Server
-	mockInstall     *mockInstall
+	mockUpgrader    *mockUpgrader
+	mockHistory     *mockHistory
 	mockChartLoader *mockChartLoader
-	mockList        *mockList
 	appConfig       *cli.EnvSettings
 }
 
-func (s *InstallerTestSuite) SetupSuite() {
+func (s *UpgradeTestSuite) SetupSuite() {
 	logger.Setup("default")
 }
 
-func (s *InstallerTestSuite) SetupTest() {
+func (s *UpgradeTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
-	s.mockInstall = new(mockInstall)
+	s.mockUpgrader = new(mockUpgrader)
+	s.mockHistory = new(mockHistory)
 	s.mockChartLoader = new(mockChartLoader)
-	s.mockList = new(mockList)
 	s.appConfig = &cli.EnvSettings{
 		RepositoryConfig: "./testdata/helm",
 		PluginsDirectory: "./testdata/helm/plugin",
 	}
-	service := api.NewService(s.appConfig, s.mockChartLoader, nil, s.mockInstall, nil, nil)
-	handler := api.Install(service)
+	service := api.NewService(s.appConfig, s.mockChartLoader, nil, nil, s.mockUpgrader, s.mockHistory)
+	handler := api.Upgrade(service)
 	s.server = httptest.NewServer(handler)
 }
 
-func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstall() {
+func (s *UpgradeTestSuite) TestShouldReturnDeployedStatusOnSuccessfulUpgrade() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{
     "chart":"%s",
     "name": "redis-v5",
     "namespace": "something"}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/install", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/upgrade", s.server.URL), strings.NewReader(body))
 	s.mockChartLoader.On("LocateChart", chartName, s.appConfig).Return("./testdata/albatross", nil)
-	icfg := api.ReleaseConfig{ChartName: chartName, Name: "redis-v5", Namespace: "something"}
-	s.mockInstall.On("SetConfig", icfg)
+	ucfg := api.ReleaseConfig{ChartName: chartName, Name: "redis-v5", Namespace: "something"}
+	s.mockUpgrader.On("GetInstall").Return(false)
+	s.mockUpgrader.On("SetConfig", ucfg)
 	release := &release.Release{Info: &release.Info{Status: release.StatusDeployed}}
 	var vals map[string]interface{}
 	//TODO: pass chart object and verify values present testdata chart yml
-	s.mockInstall.On("Run", mock.AnythingOfType("*chart.Chart"), vals).Return(release, nil)
+	s.mockUpgrader.On("Run", "redis-v5", mock.AnythingOfType("*chart.Chart"), vals).Return(release, nil)
 
 	resp, err := http.DefaultClient.Do(req)
 
 	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
 	expectedResponse := `{"status":"deployed"}` + "\n"
 	respBody, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(expectedResponse)
+	fmt.Println(respBody)
+
 	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)
-	s.mockInstall.AssertExpectations(s.T())
+	s.mockUpgrader.AssertExpectations(s.T())
 	s.mockChartLoader.AssertExpectations(s.T())
 }
 
-func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
+func (s *UpgradeTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{
     "chart":"%s",
@@ -90,14 +94,14 @@ func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)
-	s.mockInstall.AssertExpectations(s.T())
+	s.mockUpgrader.AssertExpectations(s.T())
 	s.mockChartLoader.AssertExpectations(s.T())
 }
 
-func (s *InstallerTestSuite) TearDownTest() {
+func (s *UpgradeTestSuite) TearDownTest() {
 	s.server.Close()
 }
 
-func TestInstallAPI(t *testing.T) {
-	suite.Run(t, new(InstallerTestSuite))
+func TestUpgradeAPI(t *testing.T) {
+	suite.Run(t, new(UpgradeTestSuite))
 }

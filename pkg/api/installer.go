@@ -10,15 +10,16 @@ type Installer struct {
 	*action.Install
 }
 
-type runner interface {
+type InstallRunner interface {
 	Run(*chart.Chart, map[string]interface{}) (*release.Release, error)
+	SetConfig(ReleaseConfig)
 }
 
-func (i *Installer) SetConfig(cfg InstallConfig) {
+func (i *Installer) SetConfig(cfg ReleaseConfig) {
 	i.ReleaseName = cfg.Name
 	i.Namespace = cfg.Namespace
 }
 
-func NewInstaller(ai *action.Install) *Installer {
+func NewInstall(ai *action.Install) *Installer {
 	return &Installer{ai}
 }
