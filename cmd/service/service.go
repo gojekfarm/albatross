@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/api"
 	"helm.sh/helm/v3/pkg/api/logger"
-	"helm.sh/helm/v3/pkg/api/ping"
 	"helm.sh/helm/v3/pkg/servercontext"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	startServer()
 }
 
-func setContentType(next http.Handler) http.Handler {
+func ContentTypeMiddle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
@@ -24,9 +25,8 @@ func setContentType(next http.Handler) http.Handler {
 }
 
 func startServer() {
-	router := http.NewServeMux()
+	router := mux.NewRouter()
 
-	//TODO: use gorilla mux and add middleware to write content type and other headers
 	app := servercontext.App()
 	logger.Setup("debug")
 
@@ -42,13 +42,13 @@ func startServer() {
 		api.NewUpgrader(actionUpgrade),
 		api.NewHistory(actionHistory))
 
-	router.Handle("/ping", setContentType(ping.Handler()))
-	router.Handle("/list", setContentType(api.List(service)))
-	router.Handle("/install", setContentType(api.Install(service)))
-	router.Handle("/upgrade", setContentType(api.Upgrade(service)))
+	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
+	router.Handle("/list", ContentTypeMiddle(api.List(service))).Methods(http.MethodGet)
+	router.Handle("/install", ContentTypeMiddle(api.Install(service))).Methods(http.MethodPut)
+	router.Handle("/upgrade", ContentTypeMiddle(api.Upgrade(service))).Methods(http.MethodPost)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)
 	if err != nil {
-		fmt.Println("error starting server", err)
+		logger.Errorf("error starting server", err)
 	}
 }
