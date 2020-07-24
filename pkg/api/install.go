@@ -19,7 +19,7 @@ type InstallResponse struct {
 	Status string `json:"status,omitempty"`
 }
 
-// RODO: we could use interface as well if everything's in same package
+// TODO: we could use interface as well if everything's in same package
 func Install(svc Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

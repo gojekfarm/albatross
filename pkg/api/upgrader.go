@@ -24,6 +24,8 @@ type historyrunner interface {
 
 func (u *Upgrader) SetConfig(cfg ReleaseConfig) {
 	u.Namespace = cfg.Namespace
+	u.ChartPathOptions.Version = cfg.Version
+	u.Install = cfg.Install
 }
 
 func (u *Upgrader) GetInstall() bool {

@@ -88,7 +88,7 @@ func (s *ServiceTestSuite) TestInstallShouldReturnErrorOnLocalChartReference() {
 
 func (s *ServiceTestSuite) TestInstallShouldReturnErrorOnFailedInstallRun() {
 	var release *release.Release
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	chartName := "stable/valid-chart"
 	cfg := api.ReleaseConfig{
 		Name:      "some-component",
@@ -110,7 +110,7 @@ func (s *ServiceTestSuite) TestInstallShouldReturnErrorOnFailedInstallRun() {
 }
 
 func (s *ServiceTestSuite) TestInstallShouldReturnResultOnSuccess() {
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	chartName := "stable/valid-chart"
 	cfg := api.ReleaseConfig{
 		Name:      "some-component",
@@ -134,18 +134,18 @@ func (s *ServiceTestSuite) TestInstallShouldReturnResultOnSuccess() {
 }
 
 func (s *ServiceTestSuite) TestUpgradeInstallTrueShouldInstallChart() {
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	chartName := "stable/valid-chart"
 	cfg := api.ReleaseConfig{
 		Name:      "some-component",
 		Namespace: "hermes",
 		ChartName: chartName,
 	}
-
+	s.upgrader.On("SetConfig", cfg)
 	s.chartloader.On("LocateChart", chartName, s.settings).Return("testdata/albatross", nil)
 	s.upgrader.On("GetInstall").Return(true)
-	s.history.On("Run", "some-component").Return([]*release.Release{}, driver.ErrReleaseNotFound)
 	s.installer.On("SetConfig", cfg)
+	s.history.On("Run", "some-component").Return([]*release.Release{}, driver.ErrReleaseNotFound)
 	release := &release.Release{Name: "some-comp-release", Info: &release.Info{Status: release.StatusDeployed}}
 	s.installer.On("Run", mock.AnythingOfType("*chart.Chart"), vals).Return(release, nil)
 
@@ -169,7 +169,7 @@ func (s *ServiceTestSuite) TestUpgradeInstallFalseShouldNotInstallChart() {
 		Namespace: "hermes",
 		ChartName: chartName,
 	}
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	s.chartloader.On("LocateChart", chartName, s.settings).Return("testdata/albatross", nil)
 	s.upgrader.On("GetInstall").Return(false)
 	s.upgrader.On("SetConfig", cfg)
@@ -195,7 +195,7 @@ func (s *ServiceTestSuite) TestUpgradeShouldReturnErrorOnFailedUpgradeRun() {
 		Namespace: "hermes",
 		ChartName: chartName,
 	}
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	s.chartloader.On("LocateChart", chartName, s.settings).Return("testdata/albatross", nil)
 	s.upgrader.On("GetInstall").Return(false)
 	s.upgrader.On("SetConfig", cfg)
@@ -218,7 +218,7 @@ func (s *ServiceTestSuite) TestUpgradeShouldReturnResultOnSuccess() {
 		Namespace: "hermes",
 		ChartName: chartName,
 	}
-	var vals map[string]interface{}
+	vals := map[string]interface{}{}
 	s.chartloader.On("LocateChart", chartName, s.settings).Return("testdata/albatross", nil)
 	s.upgrader.On("GetInstall").Return(false)
 	s.upgrader.On("SetConfig", cfg)
@@ -243,7 +243,7 @@ func (s *ServiceTestSuite) TestUpgradeValidateFailShouldResultFailure() {
 		Namespace: "hermes",
 		ChartName: chartName,
 	}
-
+	s.upgrader.On("SetConfig", cfg)
 	res, err := s.svc.Upgrade(s.ctx, cfg, vals)
 
 	t := s.T()
@@ -263,7 +263,7 @@ func (s *ServiceTestSuite) TestUpgradeShouldReturnErrorOnInvalidChart() {
 	}
 	var vals api.ChartValues
 	s.chartloader.On("LocateChart", chartName, s.settings).Return("", errors.New("Unable to find chart"))
-
+	s.upgrader.On("SetConfig", cfg)
 	res, err := s.svc.Upgrade(s.ctx, cfg, vals)
 
 	t := s.T()
