@@ -14,8 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"helm.sh/helm/v3/pkg/api"
-	"helm.sh/helm/v3/pkg/api/logger"
+	"albatross/pkg/api/logger"
+
+	"albatross/pkg/api"
+
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 )

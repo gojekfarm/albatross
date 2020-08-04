@@ -6,10 +6,11 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"albatross/pkg/api"
+	"albatross/pkg/api/logger"
+	"albatross/pkg/servercontext"
+
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/api"
-	"helm.sh/helm/v3/pkg/api/logger"
-	"helm.sh/helm/v3/pkg/servercontext"
 )
 
 func main() {

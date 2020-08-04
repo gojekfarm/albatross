@@ -8,10 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"albatross/pkg/api"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"helm.sh/helm/v3/pkg/api"
 )
 
 type PingTestSuite struct {
