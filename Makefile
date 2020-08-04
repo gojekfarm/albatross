@@ -4,7 +4,7 @@ ALL_PACKAGES=$(shell go list ./...)
 SOURCE_DIRS=$(shell go list ./... | cut -d "/" -f2 | uniq)
 
 clean:
-	rm -rf ./out
+	rm -rf ./bin
 	GO111MODULE=on go mod tidy -v
 
 check-quality: setup lint fmt imports vet
@@ -41,9 +41,9 @@ golangci:
 
 
 build:
-	@echo "Building './out/albatross'"
-	@mkdir -p ./out
-	@go build -o out/albatross ./cmd/service
+	@echo "Building './bin/albatross'"
+	@mkdir -p ./bin
+	@go build -o bin/albatross ./cmd/service
 
 test:
 	go test -race ./...
@@ -52,4 +52,4 @@ testcodecov:
 	go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
 run: build
-	./out/albatross
+	./bin/albatross
