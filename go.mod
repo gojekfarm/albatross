@@ -8,4 +8,5 @@ require (
 	go.uber.org/zap v1.10.0
 	gotest.tools v2.2.0+incompatible
 	helm.sh/helm/v3 v3.2.4
+	rsc.io/letsencrypt v0.0.3 // indirect
 )
