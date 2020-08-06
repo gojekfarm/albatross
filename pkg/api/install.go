@@ -19,6 +19,7 @@ type InstallResponse struct {
 	Status string `json:"status,omitempty"`
 }
 
+// Install return an http handler that handles the install request
 // TODO: we could use interface as well if everything's in same package
 func Install(svc Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
