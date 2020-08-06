@@ -36,8 +36,8 @@ fix_imports:
 	goimports -l -w .
 
 golangci:
-	GO111MODULE=on go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
-	golangci-lint run -v --deadline 5m0s
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b bin/ v1.30.0
+	bin/golangci-lint run -v --deadline 5m0s
 
 
 build:
