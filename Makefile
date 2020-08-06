@@ -1,7 +1,7 @@
 all: clean check-quality build test golangci
 
 ALL_PACKAGES=$(shell go list ./...)
-SOURCE_DIRS=$(shell go list ./... | cut -d "/" -f2 | uniq)
+SOURCE_DIRS=$(shell go list ./... | cut -d "/" -f4 | uniq)
 
 clean:
 	rm -rf ./bin
@@ -36,7 +36,7 @@ fix_imports:
 	goimports -l -w .
 
 golangci:
-	GO111MODULE=off go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
+	GO111MODULE=on go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
 	golangci-lint run -v --deadline 5m0s
 
 
