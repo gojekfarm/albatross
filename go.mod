@@ -1,4 +1,4 @@
-module albatross
+module github.com/gojekfarm/albatross
 
 go 1.13
 

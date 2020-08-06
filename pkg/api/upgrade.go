@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/pkg/api/logger"
 )
 
 type UpgradeRequest struct {

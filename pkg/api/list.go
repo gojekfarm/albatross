@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/pkg/api/logger"
 
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/time"

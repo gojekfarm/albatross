@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gotest.tools/assert"
 
-	"albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/pkg/api/logger"
 
-	"albatross/pkg/api"
+	"github.com/gojekfarm/albatross/pkg/api"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"

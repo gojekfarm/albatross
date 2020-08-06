@@ -6,9 +6,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"albatross/pkg/api"
-	"albatross/pkg/api/logger"
-	"albatross/pkg/servercontext"
+	"github.com/gojekfarm/albatross/pkg/api"
+	"github.com/gojekfarm/albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/pkg/servercontext"
 
 	"helm.sh/helm/v3/pkg/action"
 )

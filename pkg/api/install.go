@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/pkg/api/logger"
 )
 
 type InstallRequest struct {
