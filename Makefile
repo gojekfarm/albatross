@@ -43,7 +43,7 @@ golangci:
 build:
 	@echo "Building './bin/albatross'"
 	@mkdir -p ./bin
-	@go build -o bin/albatross ./cmd/service
+	@go build -o bin/albatross ./cmd/albatross
 
 test:
 	go test -race ./...
