@@ -1,0 +1,40 @@
+language: go
+services:
+  - docker
+
+go:
+  1.41.4
+
+stages:
+  - test
+  - name: deploy
+    if: branch = master AND type = push and fork = false
+
+docker_login:
+  before_script: &docker_login
+  - |
+    docker version
+    [ -z $DOCKER_PASSWORD ] && echo "docker password not configured!"
+    [ -z $DOCKER_USERNAME ] && echo "docker username not configured!"
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+
+jobs:
+  include:
+  - stage: test
+    script: make test
+  - stage: deploy
+    before_script: *docker_login
+    name: build docker
+    script:
+      - docker build -t gojektech/albatross:latest .
+      - docker images
+      - docker push gojektech/albatross:latest
+    - |
+      ([ ! -z "$TRAVIS_TAG" ] && \
+      docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_TAG  && \ 
+      docker push gojektech/albatross:$TRAVIS_TAG) || true
+    - |
+      [ ! -z "$TRAVIS_COMMIT" ] && \
+      docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_COMMIT && \
+      docker push gojektech/albatross:$TRAVIS_COMMIT
