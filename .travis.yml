@@ -38,4 +38,3 @@ jobs:
       [ ! -z "$TRAVIS_COMMIT" ] && \
       docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_COMMIT && \
       docker push gojektech/albatross:$TRAVIS_COMMIT
-    
