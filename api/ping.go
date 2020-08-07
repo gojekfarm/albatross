@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/api/logger"
 )
 
 type PingResponse struct {

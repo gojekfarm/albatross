@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gojekfarm/albatross/pkg/api"
+	"github.com/gojekfarm/albatross/api"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

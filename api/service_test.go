@@ -7,7 +7,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/time"
 
-	"github.com/gojekfarm/albatross/pkg/api"
+	"github.com/gojekfarm/albatross/api"
 
 	"helm.sh/helm/v3/pkg/action"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/gojekfarm/albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/api/logger"
 
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/cli"

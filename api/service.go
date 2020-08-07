@@ -8,7 +8,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/action"
 
-	"github.com/gojekfarm/albatross/pkg/api/logger"
+	"github.com/gojekfarm/albatross/api/logger"
 
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
