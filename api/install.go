@@ -9,9 +9,9 @@ import (
 )
 
 type InstallRequest struct {
-	Name   string                 `json:"name"`
-	Chart  string                 `json:"chart"`
-	Values map[string]interface{} `json:"values"`
+	Name   string
+	Chart  string
+	Values map[string]interface{}
 	Flags  map[string]interface{}
 }
 
