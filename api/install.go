@@ -16,8 +16,9 @@ type InstallRequest struct {
 }
 
 type InstallResponse struct {
-	Error  string `json:"error,omitempty"`
-	Status string `json:"status,omitempty"`
+	Error    string `json:"error,omitempty"`
+	Status   string `json:"status,omitempty"`
+	Manifest string `json:"manifest,omitempty"`
 }
 
 // Install return an http handler that handles the install request
@@ -43,6 +44,7 @@ func Install() http.Handler {
 		}
 
 		response.Status = result.Info.Status.String()
+		response.Manifest = result.Manifest
 		if err := json.NewEncoder(w).Encode(&response); err != nil {
 			respondInstallError(w, "error writing response: %v", err)
 			return
