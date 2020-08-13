@@ -20,9 +20,8 @@ func NewEnvConfigHandler() *EnvConfigHandler {
 // WithFlags sets the appropriate config members corresponding to the flags argument
 // There is gotacha here, the EnvSettings does not expose the namespace as a publicly
 // writable field and takes it from the environment. The problem here is that we cannot
-// set the namespace here, which means that the namespace needs to be set in individual actions
-// TODO: Make it easier to add flag support here
-func (config *EnvConfigHandler) WithEnvFlags(flags Flags) {
+// set the namespace here, which means that the namespace needs to be set in individual actions.
+func (config *EnvConfigHandler) SetEnvFlags(flags Flags) {
 	if kubectx, ok := flags["kube-context"]; ok {
 		config.KubeContext = kubectx.(string)
 	}

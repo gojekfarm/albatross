@@ -37,7 +37,7 @@ func kubeClientConfig(envconfig *EnvConfigHandler, namespace string) genericclio
 }
 
 // WithEnvironment initializes the action configuration with the environment values
-func (ac *ActionConfig) WithEnvironmentFlags(envconfig *EnvConfigHandler, flags Flags) {
+func (ac *ActionConfig) SetCommonFlags(envconfig *EnvConfigHandler, flags Flags) {
 	actionNamespace := envconfig.Namespace()
 	if namespace, ok := flags["namespace"].(string); ok {
 		actionNamespace = namespace
@@ -50,9 +50,9 @@ func (ac *ActionConfig) WithEnvironmentFlags(envconfig *EnvConfigHandler, flags 
 		logger.Debug,
 	)
 
-	ac.WithBaseFlags(flags)
+	ac.withCommonFlags(flags)
 }
 
 // WithBaseFlags updates the action config with a base set of flags common to all actions
-func (ac *ActionConfig) WithBaseFlags(flags Flags) {
+func (ac *ActionConfig) withCommonFlags(flags Flags) {
 }

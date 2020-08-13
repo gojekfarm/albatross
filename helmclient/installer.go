@@ -32,12 +32,10 @@ func NewInstaller() *Installer {
 
 // NewInstall returns a new instance of the installer
 func (i *Installer) Setup(name string, chartName string, flags Flags) {
-	i.EnvConfigHandler.WithEnvFlags(flags)
+	i.SetEnvFlags(flags)
+	i.SetCommonFlags(i.EnvConfigHandler, flags)
 
-	i.ActionConfig.WithEnvironmentFlags(i.EnvConfigHandler, flags)
-	i.ActionConfig.WithBaseFlags(flags)
-
-	i.action = action.NewInstall(i.ActionConfig.Configuration)
+	i.action = action.NewInstall(i.Configuration)
 	i.action.ReleaseName = name
 	i.SetFlags(flags)
 
