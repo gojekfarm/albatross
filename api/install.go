@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/helmclient"
 )
 
 type InstallRequest struct {
-	Name      string                 `json:"name"`
-	Namespace string                 `json:"namespace"`
-	Chart     string                 `json:"chart"`
-	Values    map[string]interface{} `json:"values"`
+	Name   string                 `json:"name"`
+	Chart  string                 `json:"chart"`
+	Values map[string]interface{} `json:"values"`
+	Flags  map[string]interface{}
 }
 
 type InstallResponse struct {
@@ -21,7 +22,7 @@ type InstallResponse struct {
 
 // Install return an http handler that handles the install request
 // TODO: we could use interface as well if everything's in same package
-func Install(svc Service) http.Handler {
+func Install() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var req InstallRequest
@@ -32,13 +33,16 @@ func Install(svc Service) http.Handler {
 		}
 		defer r.Body.Close()
 		var response InstallResponse
-		cfg := ReleaseConfig{ChartName: req.Chart, Name: req.Name, Namespace: req.Namespace}
-		res, err := svc.Install(r.Context(), cfg, req.Values)
+
+		installer := helmclient.NewInstaller()
+		installer.Setup(req.Name, req.Chart, req.Flags)
+		result, err := installer.Run(req.Values)
 		if err != nil {
 			respondInstallError(w, "error while installing chart: %v", err)
 			return
 		}
-		response.Status = res.Status
+
+		response.Status = result.Info.Status.String()
 		if err := json.NewEncoder(w).Encode(&response); err != nil {
 			respondInstallError(w, "error writing response: %v", err)
 			return
