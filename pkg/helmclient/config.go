@@ -3,7 +3,7 @@ package helmclient
 import (
 	"os"
 
-	"github.com/gojekfarm/albatross/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/kube"
 	"k8s.io/cli-runtime/pkg/genericclioptions"

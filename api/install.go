@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gojekfarm/albatross/api/logger"
-	"github.com/gojekfarm/albatross/helmclient"
+	"github.com/gojekfarm/albatross/pkg/helmclient"
 )
 
 type InstallRequest struct {
