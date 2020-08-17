@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
 // PingResponse represents the API response for the ping request

@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/gojekfarm/albatross/api"
-	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
 func main() {

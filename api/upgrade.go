@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/api/logger"
 	"github.com/gojekfarm/albatross/pkg/helmclient"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
 // UpgradeResponse represents the api response for upgrade request

@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gotest.tools/assert"
 
-	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 
 	"github.com/gojekfarm/albatross/api"
 

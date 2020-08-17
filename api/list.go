@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/api/logger"
 	"github.com/gojekfarm/albatross/pkg/helmclient"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
 // ListResponse represents the API response for the list request

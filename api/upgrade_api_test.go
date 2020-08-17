@@ -15,7 +15,7 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/gojekfarm/albatross/api"
-	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"

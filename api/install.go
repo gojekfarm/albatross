@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/api/logger"
 	"github.com/gojekfarm/albatross/pkg/helmclient"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
 // InstallResponse represents the API response to the install request
