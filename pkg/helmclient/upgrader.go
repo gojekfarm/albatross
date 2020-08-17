@@ -5,6 +5,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
 // UpgradeResult represents the results for an upgrade action.
@@ -62,14 +63,19 @@ func (upgrader *Upgrader) Run() (*UpgradeResult, error) {
 	upgrade := upgrader.newUpgradeAction(actionconfig)
 
 	// Install the release first if install is set to true
-	// TODO: Add check for history
 	if flags.Install {
-		result, err := upgrader.installRelease()
-		if err != nil {
+		history := action.NewHistory(actionconfig.Configuration)
+		history.Max = 1
+		if _, err := history.Run(upgrader.operation.Name); err == driver.ErrReleaseNotFound {
+			result, err := upgrader.installRelease()
+			if err != nil {
+				return nil, err
+			}
+
+			return NewUpgradeResult(result.helmrelease, upgrader), nil
+		} else if err != nil {
 			return nil, err
 		}
-
-		return NewUpgradeResult(result.helmrelease, upgrader), nil
 	}
 
 	chart, err := upgrader.LoadChart(upgrade, envconfig)
