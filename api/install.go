@@ -22,7 +22,6 @@ type InstallResponse struct {
 }
 
 // Install return an http handler that handles the install request
-// TODO: we could use interface as well if everything's in same package
 func Install() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

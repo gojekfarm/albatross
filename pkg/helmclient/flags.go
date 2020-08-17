@@ -59,6 +59,8 @@ type GlobalFlags struct {
 	KubeToken     string
 	KubeAPIServer string
 	Namespace     string
+
+	flagmap FlagMap
 }
 
 // flagSetterFunc is a flag setter type that that each flag setter func should conform with
@@ -91,6 +93,7 @@ var flagSetters = []flagSetterFunc{
 // Returns a new GlobalFlags instance
 func NewGlobalFlags(flagmap FlagMap) (*GlobalFlags, error) {
 	flags := new(GlobalFlags)
+	flags.flagmap = flagmap
 
 	for _, setter := range flagSetters {
 		err := setter(flagmap, flags)

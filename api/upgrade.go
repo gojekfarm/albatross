@@ -6,22 +6,23 @@ import (
 	"net/http"
 
 	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/helmclient"
 )
 
 type UpgradeRequest struct {
-	Name      string                 `json:"name"`
-	Namespace string                 `json:"namespace"`
-	Chart     string                 `json:"chart"`
-	Values    map[string]interface{} `json:"values,omitempty"`
-	Flags     map[string]interface{} `json:"flags,omitempty"`
+	Name   string                 `json:"name"`
+	Chart  string                 `json:"chart"`
+	Values map[string]interface{} `json:"values,omitempty"`
+	Flags  map[string]interface{} `json:"flags,omitempty"`
 }
 
 type UpgradeResponse struct {
 	Error  string `json:"error,omitempty"`
 	Status string `json:"status,omitempty"`
+	Data   string `json:"data,omitempty"`
 }
 
-func Upgrade(svc Service) http.Handler {
+func Upgrade() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 		var req UpgradeRequest
@@ -33,31 +34,21 @@ func Upgrade(svc Service) http.Handler {
 		}
 		defer r.Body.Close()
 
-		var install bool
-		var version string
-		for key, value := range req.Flags {
-			if key == "install" {
-				install = value.(bool)
-			}
-			if key == "version" {
-				version = value.(string)
-			}
-		}
-
-		if version == "" {
-			logger.Debugf("setting version to >0.0.0-0")
-			version = ">0.0.0-0"
-		}
-
 		var response UpgradeResponse
-		cfg := ReleaseConfig{ChartName: req.Chart, Name: req.Name, Namespace: req.Namespace, Version: version, Install: install}
-
-		res, err := svc.Upgrade(r.Context(), cfg, req.Values)
+		upgrader, err := helmclient.NewUpgrader(req.Name, req.Chart, req.Flags)
 		if err != nil {
-			respondUpgradeError(w, "error while upgrading chart: %v", err)
+			respondUpgradeError(w, "error while initializing the upgrader", err)
 			return
 		}
-		response.Status = res.Status
+
+		result, err := upgrader.Run(req.Values)
+		if err != nil {
+			respondUpgradeError(w, "error while upgrading release: %v", err)
+			return
+		}
+
+		response.Status = result.Status
+		response.Data = result.Data
 		if err := json.NewEncoder(w).Encode(&response); err != nil {
 			respondUpgradeError(w, "error writing response: %v", err)
 			return
