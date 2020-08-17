@@ -9,26 +9,34 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
+// ActionConfig acts as a proxy to helm package's action configuration.
+// It defines methods to set the default/common action config members
 type ActionConfig struct {
 	*action.Configuration
 }
 
-func NewActionConfig() *ActionConfig {
-	return &ActionConfig{
+// NewActionConfig returns a new instance of actionconfig
+func NewActionConfig(envconfig *EnvConfig, flags *GlobalFlags) *ActionConfig {
+	config := &ActionConfig{
 		new(action.Configuration),
 	}
+
+	config.setFlags(envconfig, flags)
+	return config
 }
 
-// clientGetter returns a kube config that is scoped to a namespace.
+// kubeClientConfig returns a kube config that is scoped to a namespace.
 // Context: The EnvSetting struct does not expose any way to set the namespace,
 // so we cannot set it directly. However, it is used to create kubeclients.
 // So in order to configure the kubeclient with the proper namespace, we define a custom getter
 // here that sets the correct namespace in the kubeconfig
-func kubeClientConfig(envconfig *EnvConfigHandler, namespace string) genericclioptions.RESTClientGetter {
+func kubeClientConfig(envconfig *EnvConfig, namespace string) genericclioptions.RESTClientGetter {
 	clientConfig := kube.GetConfig(envconfig.KubeConfig, envconfig.KubeContext, namespace)
+
 	if envconfig.KubeToken != "" {
 		clientConfig.BearerToken = &envconfig.KubeToken
 	}
+
 	if envconfig.KubeAPIServer != "" {
 		clientConfig.APIServer = &envconfig.KubeAPIServer
 	}
@@ -36,11 +44,11 @@ func kubeClientConfig(envconfig *EnvConfigHandler, namespace string) genericclio
 	return clientConfig
 }
 
-// WithEnvironment initializes the action configuration with the environment values
-func (ac *ActionConfig) SetCommonFlags(envconfig *EnvConfigHandler, flags Flags) {
+// setFlags initializes the action configuration with proper config flags
+func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flags *GlobalFlags) {
 	actionNamespace := envconfig.Namespace()
-	if namespace, ok := flags["namespace"].(string); ok {
-		actionNamespace = namespace
+	if flags.Namespace != "" {
+		actionNamespace = flags.Namespace
 	}
 
 	ac.Configuration.Init(
@@ -49,10 +57,4 @@ func (ac *ActionConfig) SetCommonFlags(envconfig *EnvConfigHandler, flags Flags)
 		os.Getenv("HELM_DRIVER"),
 		logger.Debug,
 	)
-
-	ac.withCommonFlags(flags)
-}
-
-// WithBaseFlags updates the action config with a base set of flags common to all actions
-func (ac *ActionConfig) withCommonFlags(flags Flags) {
 }

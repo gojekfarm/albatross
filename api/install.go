@@ -16,9 +16,9 @@ type InstallRequest struct {
 }
 
 type InstallResponse struct {
-	Error    string `json:"error,omitempty"`
-	Status   string `json:"status,omitempty"`
-	Manifest string `json:"manifest,omitempty"`
+	Error  string `json:"error,omitempty"`
+	Status string `json:"status,omitempty"`
+	Data   string `json:"data,omitempty"`
 }
 
 // Install return an http handler that handles the install request
@@ -35,16 +35,20 @@ func Install() http.Handler {
 		defer r.Body.Close()
 		var response InstallResponse
 
-		installer := helmclient.NewInstaller()
-		installer.Setup(req.Name, req.Chart, req.Flags)
+		installer, err := helmclient.NewInstaller(req.Name, req.Chart, req.Flags)
+		if err != nil {
+			respondInstallError(w, "error while initializing the installer", err)
+			return
+		}
+
 		result, err := installer.Run(req.Values)
 		if err != nil {
 			respondInstallError(w, "error while installing chart: %v", err)
 			return
 		}
 
-		response.Status = result.Info.Status.String()
-		response.Manifest = result.Manifest
+		response.Status = result.Status
+		response.Data = result.Data
 		if err := json.NewEncoder(w).Encode(&response); err != nil {
 			respondInstallError(w, "error writing response: %v", err)
 			return
@@ -52,6 +56,7 @@ func Install() http.Handler {
 	})
 }
 
+// TODO: This does not handle different status codes.
 func respondInstallError(w http.ResponseWriter, logprefix string, err error) {
 	response := InstallResponse{Error: err.Error()}
 	w.WriteHeader(http.StatusInternalServerError)
