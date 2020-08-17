@@ -8,13 +8,7 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmclient"
 )
 
-type InstallRequest struct {
-	Name   string
-	Chart  string
-	Values map[string]interface{}
-	Flags  map[string]interface{}
-}
-
+// InstallResponse represents the API response to the install request
 type InstallResponse struct {
 	Error  string `json:"error,omitempty"`
 	Status string `json:"status,omitempty"`
@@ -24,28 +18,23 @@ type InstallResponse struct {
 // Install return an http handler that handles the install request
 func Install() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
 
-		var req InstallRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		operation := helmclient.NewInstallOperation()
+		if err := json.NewDecoder(r.Body).Decode(operation); err != nil {
 			logger.Errorf("[Install] error decoding request: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		defer r.Body.Close()
-		var response InstallResponse
 
-		installer, err := helmclient.NewInstaller(req.Name, req.Chart, req.Flags)
-		if err != nil {
-			respondInstallError(w, "error while initializing the installer", err)
-			return
-		}
-
-		result, err := installer.Run(req.Values)
+		installer := helmclient.NewInstaller(operation)
+		result, err := installer.Run()
 		if err != nil {
 			respondInstallError(w, "error while installing chart: %v", err)
 			return
 		}
 
+		var response InstallResponse
 		response.Status = result.Status
 		response.Data = result.Data
 		if err := json.NewEncoder(w).Encode(&response); err != nil {

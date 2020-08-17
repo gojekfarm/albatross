@@ -6,36 +6,21 @@ import (
 	"net/http"
 
 	"github.com/gojekfarm/albatross/api/logger"
-
-	"helm.sh/helm/v3/pkg/release"
-	"helm.sh/helm/v3/pkg/time"
+	"github.com/gojekfarm/albatross/pkg/helmclient"
 )
 
-type ListRequest struct {
-	NameSpace     string `json:"namespace"`
-	ReleaseStatus string `json:"release_status"`
-}
-
+// ListResponse represents the API response for the list request
 type ListResponse struct {
-	Error    string    `json:"error,omitempty"`
-	Releases []Release `json:"releases,omitempty"`
+	Error    string                `json:"error,omitempty"`
+	Releases []*helmclient.Release `json:"releases,omitempty"`
 }
 
-type Release struct {
-	Name       string         `json:"name"`
-	Namespace  string         `json:"namespace"`
-	Revision   int            `json:"revision"`
-	Updated    time.Time      `json:"updated_at,omitempty"`
-	Status     release.Status `json:"status"`
-	Chart      string         `json:"chart"`
-	AppVersion string         `json:"app_version"`
-}
-
-func List(svc Service) http.Handler {
+// List return a http handler to handle the list request
+func List() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var response ListResponse
-		var request ListRequest
-		if err := json.NewDecoder(r.Body).Decode(&request); err == io.EOF || err != nil {
+		operation := helmclient.NewListOperation()
+		if err := json.NewDecoder(r.Body).Decode(operation); err == io.EOF || err != nil {
 			logger.Errorf("[List] error decoding request: %v", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			response.Error = err.Error()
@@ -44,13 +29,13 @@ func List(svc Service) http.Handler {
 		}
 		defer r.Body.Close()
 
-		helmReleases, err := svc.List(request.ReleaseStatus, request.NameSpace)
-
+		lister := helmclient.NewLister(operation)
+		listResult, err := lister.Run()
 		if err != nil {
 			respondListError(w, "error while listing charts: %v", err)
 		}
 
-		response = ListResponse{"", helmReleases}
+		response = ListResponse{"", listResult.Releases}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
 			respondListError(w, "error writing response: %v", err)

@@ -46,11 +46,13 @@ func kubeClientConfig(envconfig *EnvConfig, namespace string) genericclioptions.
 
 // setFlags initializes the action configuration with proper config flags
 func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flags *GlobalFlags) {
-	actionNamespace := envconfig.Namespace()
-	if flags.Namespace != "" {
-		actionNamespace = flags.Namespace
-	}
+	// TODO: Can we remove the check altogether?
+	// actionNamespace := envconfig.Namespace()
+	// if flags.Namespace != "" {
+	// 	actionNamespace = flags.Namespace
+	// }
 
+	actionNamespace := flags.Namespace
 	ac.Configuration.Init(
 		kubeClientConfig(envconfig, actionNamespace),
 		actionNamespace,
