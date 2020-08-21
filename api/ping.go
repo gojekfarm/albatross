@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gojekfarm/albatross/api/logger"
+	"github.com/gojekfarm/albatross/pkg/logger"
 )
 
+// PingResponse represents the API response for the ping request
 type PingResponse struct {
 	Error string `json:"error,omitempty"`
 	Data  string `json:"data,omitempty"`
 }
 
+// Ping returns a http handler that handles the ping api request
 func Ping() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
