@@ -9,12 +9,9 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 )
 
-// TODO: Move the service interface to a common place for all apis
-type service interface {
-	Install(ctx context.Context, req Request) (Response, error)
+type Service struct {
+	cli helmcli.Client
 }
-
-type Service struct{}
 
 func (s Service) Install(ctx context.Context, req Request) (Response, error) {
 	installflags := flags.InstallFlags{
@@ -22,7 +19,7 @@ func (s Service) Install(ctx context.Context, req Request) (Response, error) {
 		Version:     req.Flags.Version,
 		GlobalFlags: req.Flags.GlobalFlags,
 	}
-	icli := helmcli.NewInstaller(installflags)
+	icli := s.cli.NewInstaller(installflags)
 	release, err := icli.Install(ctx, req.Name, req.Chart, req.Values)
 	if err != nil {
 		return Response{}, err

@@ -3,18 +3,24 @@ package helmcli
 import (
 	"context"
 
-	"github.com/gojekfarm/albatross/pkg/helmcli/config"
-	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
+
+	"github.com/gojekfarm/albatross/pkg/helmcli/config"
+	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 )
 
 type Client interface {
 	NewUpgrader(flags.UpgradeFlags) Upgrader
+	NewInstaller(flags.InstallFlags) Installer
 }
 
 type Upgrader interface {
 	Upgrade(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error)
+}
+
+type Installer interface {
+	Install(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error)
 }
 
 func New() Client {
@@ -30,7 +36,7 @@ func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) Upgrader {
 
 	upgrade := action.NewUpgrade(actionconfig.Configuration)
 	history := action.NewHistory(actionconfig.Configuration)
-	installer := NewInstaller(flags.InstallFlags{
+	installer := c.NewInstaller(flags.InstallFlags{
 		DryRun:      flg.DryRun,
 		Version:     flg.Version,
 		GlobalFlags: flg.GlobalFlags,
@@ -45,5 +51,20 @@ func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) Upgrader {
 		envSettings: envconfig.EnvSettings,
 		history:     history,
 		installer:   installer,
+	}
+}
+
+// NewInstaller returns a new instance of Installer struct
+func (c helmClient) NewInstaller(flg flags.InstallFlags) Installer {
+	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
+	actionconfig := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+
+	install := action.NewInstall(actionconfig.Configuration)
+	install.Namespace = flg.Namespace
+	install.DryRun = flg.DryRun
+
+	return &installer{
+		action:      install,
+		envSettings: envconfig.EnvSettings,
 	}
 }

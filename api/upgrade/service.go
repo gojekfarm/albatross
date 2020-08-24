@@ -9,10 +9,6 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 )
 
-type upgrader interface {
-	Upgrade(ctx context.Context, release, chart string, values map[string]interface{}) (*release.Release, error)
-}
-
 type Service struct {
 	cli helmcli.Client
 }

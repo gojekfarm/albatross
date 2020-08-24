@@ -16,11 +16,7 @@ type upgrader struct {
 	action      *action.Upgrade
 	history     *action.History
 	envSettings *cli.EnvSettings
-	installer   installer
-}
-
-type installer interface {
-	Install(ctx context.Context, relName string, chartName string, values map[string]interface{}) (*release.Release, error)
+	installer   Installer
 }
 
 // Upgrade executes the upgrade action
