@@ -29,6 +29,10 @@ func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) helmcli.Installer {
 	return m.Called().Get(0).(helmcli.Installer)
 }
 
+func (m *mockHelmClient) NewLister(fl flags.ListFlags) helmcli.Lister {
+	return m.Called().Get(0).(helmcli.Lister)
+}
+
 type mockInstaller struct{ mock.Mock }
 
 func (m *mockInstaller) Install(ctx context.Context, relName, chart string, values map[string]interface{}) (*release.Release, error) {

@@ -13,6 +13,7 @@ import (
 type Client interface {
 	NewUpgrader(flags.UpgradeFlags) Upgrader
 	NewInstaller(flags.InstallFlags) Installer
+	NewLister(flags.ListFlags) Lister
 }
 
 type Upgrader interface {
@@ -21,6 +22,10 @@ type Upgrader interface {
 
 type Installer interface {
 	Install(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error)
+}
+
+type Lister interface {
+	List(ctx context.Context) ([]*release.Release, error)
 }
 
 func New() Client {
@@ -65,6 +70,25 @@ func (c helmClient) NewInstaller(flg flags.InstallFlags) Installer {
 
 	return &installer{
 		action:      install,
+		envSettings: envconfig.EnvSettings,
+	}
+}
+
+// NewLister returns a new Lister instance
+func (c helmClient) NewLister(flg flags.ListFlags) Lister {
+	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
+	actionconfig := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+
+	list := action.NewList(actionconfig.Configuration)
+	list.AllNamespaces = flg.AllNamespaces
+	list.Deployed = flg.Deployed
+	list.Failed = flg.Failed
+	list.Pending = flg.Pending
+	list.Uninstalling = flg.Uninstalling
+	list.Uninstalled = flg.Uninstalled
+
+	return &lister{
+		action:      list,
 		envSettings: envconfig.EnvSettings,
 	}
 }

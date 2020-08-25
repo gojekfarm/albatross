@@ -1,6 +1,7 @@
 package list
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -39,6 +40,10 @@ type Release struct {
 type Response struct {
 	Error    string    `json:"error,omitempty"`
 	Releases []Release `json:"releases,omitempty"`
+}
+
+type service interface {
+	List(ctx context.Context, req Request) (Response, error)
 }
 
 func Handler(service service) http.Handler {
