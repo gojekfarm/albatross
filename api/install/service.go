@@ -22,7 +22,7 @@ func (s Service) Install(ctx context.Context, req Request) (Response, error) {
 	icli := s.cli.NewInstaller(installflags)
 	release, err := icli.Install(ctx, req.Name, req.Chart, req.Values)
 	if err != nil {
-		return Response{}, err
+		return responseWithStatus(release), err
 	}
 	resp := Response{Status: release.Info.Status.String(), Release: releaseInfo(release)}
 	if req.Flags.DryRun {
@@ -41,4 +41,16 @@ func releaseInfo(release *release.Release) Release {
 		Chart:      release.Chart.ChartFullPath(),
 		AppVersion: release.Chart.AppVersion(),
 	}
+}
+
+func responseWithStatus(rel *release.Release) Response {
+	resp := Response{}
+	if rel != nil && rel.Info != nil {
+		resp.Status = rel.Info.Status.String()
+	}
+	return resp
+}
+
+func NewService(cli helmcli.Client) Service {
+	return Service{cli}
 }

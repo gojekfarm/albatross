@@ -16,7 +16,7 @@ import (
 	"helm.sh/helm/v3/pkg/time"
 )
 
-func fakeActionConfiguration(t *testing.T) *action.Configuration {
+func fakeUpgradeConfiguration(t *testing.T) *action.Configuration {
 	return &action.Configuration{
 		Releases: storage.Init(driver.NewMemory()),
 		KubeClient: &kubefake.FailingKubeClient{
@@ -33,8 +33,8 @@ func fakeActionConfiguration(t *testing.T) *action.Configuration {
 
 }
 
-func TestShouldFailForNonExistentReleaseWithoutInstall(t *testing.T) {
-	config := fakeActionConfiguration(t)
+func TestUpgradeShouldFailForNonExistentReleaseWithoutInstall(t *testing.T) {
+	config := fakeUpgradeConfiguration(t)
 	u := &upgrader{
 		action:      action.NewUpgrade(config),
 		history:     action.NewHistory(config),
@@ -54,8 +54,8 @@ func TestShouldFailForNonExistentReleaseWithoutInstall(t *testing.T) {
 	assert.EqualError(t, err, "\"test-release\" has no deployed releases")
 }
 
-func TestShouldSucceedForNonExistentReleaseWithInstall(t *testing.T) {
-	config := fakeActionConfiguration(t)
+func TestUpgradeShouldSucceedForNonExistentReleaseWithInstall(t *testing.T) {
+	config := fakeUpgradeConfiguration(t)
 	u := &upgrader{
 		action:      action.NewUpgrade(config),
 		history:     action.NewHistory(config),
@@ -77,8 +77,8 @@ func TestShouldSucceedForNonExistentReleaseWithInstall(t *testing.T) {
 	assert.Equal(t, release.Name, "test-release")
 }
 
-func TestShouldFailForInvalidChart(t *testing.T) {
-	config := fakeActionConfiguration(t)
+func TestUpgradeShouldFailForInvalidChart(t *testing.T) {
+	config := fakeUpgradeConfiguration(t)
 	u := &upgrader{
 		action:      action.NewUpgrade(config),
 		history:     action.NewHistory(config),
@@ -100,8 +100,8 @@ func TestShouldFailForInvalidChart(t *testing.T) {
 	assert.EqualError(t, err, "error loading chart: path \"../../api/testdata/albatrossdne\" not found")
 }
 
-func TestShouldReturnUpgradedReleaseOnSuccess(t *testing.T) {
-	config := fakeActionConfiguration(t)
+func TestUpgradeShouldReturnUpgradedReleaseOnSuccess(t *testing.T) {
+	config := fakeUpgradeConfiguration(t)
 
 	// Mark that the release is already created
 	existingRelease := &release.Release{
