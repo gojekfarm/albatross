@@ -1,5 +1,7 @@
 # Albatross
 
+[![Build Status](https://travis-ci.org/gojekfarm/albatross.svg?branch=master)](https://travis-ci.org/gojekfarm/albatross)
+
 Albatross wraps the helm package to expose helm operations as HTTP APIs.
 
 ## Getting Started
