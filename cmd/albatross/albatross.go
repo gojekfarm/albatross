@@ -32,9 +32,9 @@ func startServer() {
 	logger.Setup("debug")
 	cli := helmcli.New()
 
-	installHandler := install.Handler(install.Service{})
+	installHandler := install.Handler(install.NewService(cli))
 	upgradeHandler := upgrade.Handler(upgrade.NewService(cli))
-	listHandler := list.Handler(list.Service{})
+	listHandler := list.Handler(list.NewService(cli))
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
 	router.Handle("/list", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
