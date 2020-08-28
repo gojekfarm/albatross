@@ -9,11 +9,9 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 )
 
-type service interface {
-	Upgrade(ctx context.Context, req Request) (Response, error)
+type Service struct {
+	cli helmcli.Client
 }
-
-type Service struct{}
 
 func (s Service) Upgrade(ctx context.Context, req Request) (Response, error) {
 	upgradeflags := flags.UpgradeFlags{
@@ -23,10 +21,10 @@ func (s Service) Upgrade(ctx context.Context, req Request) (Response, error) {
 		GlobalFlags: req.Flags.GlobalFlags,
 	}
 
-	ucli := helmcli.NewUpgrader(upgradeflags)
+	ucli := s.cli.NewUpgrader(upgradeflags)
 	release, err := ucli.Upgrade(ctx, req.Name, req.Chart, req.Values)
 	if err != nil {
-		return Response{}, err
+		return responseWithStatus(release), err
 	}
 	resp := Response{Status: release.Info.Status.String(), Release: releaseInfo(release)}
 	if req.Flags.DryRun {
@@ -45,4 +43,16 @@ func releaseInfo(release *release.Release) Release {
 		Chart:      release.Chart.ChartFullPath(),
 		AppVersion: release.Chart.AppVersion(),
 	}
+}
+
+func responseWithStatus(rel *release.Release) Response {
+	resp := Response{}
+	if rel != nil && rel.Info != nil {
+		resp.Status = rel.Info.Status.String()
+	}
+	return resp
+}
+
+func NewService(cli helmcli.Client) Service {
+	return Service{cli}
 }

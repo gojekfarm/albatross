@@ -1,6 +1,7 @@
 package install
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -39,6 +40,10 @@ type Response struct {
 	Status  string `json:"status,omitempty"`
 	Data    string `json:"data,omitempty"`
 	Release `json:"-"`
+}
+
+type service interface {
+	Install(ctx context.Context, req Request) (Response, error)
 }
 
 func Handler(service service) http.Handler {

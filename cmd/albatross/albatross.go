@@ -10,6 +10,7 @@ import (
 	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
 	"github.com/gojekfarm/albatross/api/upgrade"
+	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/logger"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -29,10 +30,11 @@ func ContentTypeMiddle(next http.Handler) http.Handler {
 func startServer() {
 	router := mux.NewRouter()
 	logger.Setup("debug")
+	cli := helmcli.New()
 
-	installHandler := install.Handler(install.Service{})
-	upgradeHandler := upgrade.Handler(upgrade.Service{})
-	listHandler := list.Handler(list.Service{})
+	installHandler := install.Handler(install.NewService(cli))
+	upgradeHandler := upgrade.Handler(upgrade.NewService(cli))
+	listHandler := list.Handler(list.NewService(cli))
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
 	router.Handle("/list", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)

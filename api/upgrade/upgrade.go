@@ -1,6 +1,7 @@
 package upgrade
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -18,7 +19,6 @@ type Request struct {
 	Values map[string]interface{}
 	Flags  Flags
 }
-
 type Flags struct {
 	DryRun  bool `json:"dry_run"`
 	Version string
@@ -42,6 +42,10 @@ type Response struct {
 	Status  string `json:"status,omitempty"`
 	Data    string `json:"data,omitempty"`
 	Release `json:"-"`
+}
+
+type service interface {
+	Upgrade(ctx context.Context, req Request) (Response, error)
 }
 
 func Handler(service service) http.Handler {
@@ -71,9 +75,9 @@ func Handler(service service) http.Handler {
 
 func respondUpgradeError(w http.ResponseWriter, logprefix string, err error) {
 	response := Response{Error: err.Error()}
+	logger.Errorf("[Upgrade] %s %v", logprefix, err)
 	w.WriteHeader(http.StatusInternalServerError)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
-		logger.Errorf("[Upgrade] %s %v", logprefix, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

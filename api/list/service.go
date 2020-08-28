@@ -9,17 +9,15 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 )
 
-type service interface {
-	List(ctx context.Context, req Request) (Response, error)
+type Service struct {
+	cli helmcli.Client
 }
-
-type Service struct{}
 
 func (s Service) List(ctx context.Context, req Request) (Response, error) {
 	listflags := flags.ListFlags{
 		GlobalFlags: req.Flags.GlobalFlags,
 	}
-	lcli := helmcli.NewLister(listflags)
+	lcli := s.cli.NewLister(listflags)
 	releases, err := lcli.List(ctx)
 	if err != nil {
 		return Response{}, err
@@ -44,4 +42,8 @@ func releaseInfo(release *release.Release) Release {
 		Chart:      release.Chart.ChartFullPath(),
 		AppVersion: release.Chart.AppVersion(),
 	}
+}
+
+func NewService(cli helmcli.Client) Service {
+	return Service{cli}
 }

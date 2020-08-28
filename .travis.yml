@@ -3,7 +3,7 @@ services:
   - docker
 
 go:
-  1.41.4
+  - 1.14.4
 
 stages:
   - test
@@ -30,11 +30,11 @@ jobs:
       - docker build -t gojektech/albatross:latest .
       - docker images
       - docker push gojektech/albatross:latest
-    - |
-      ([ ! -z "$TRAVIS_TAG" ] && \
-      docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_TAG  && \ 
-      docker push gojektech/albatross:$TRAVIS_TAG) || true
-    - |
-      [ ! -z "$TRAVIS_COMMIT" ] && \
-      docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_COMMIT && \
-      docker push gojektech/albatross:$TRAVIS_COMMIT
+      - |
+        ([ ! -z "$TRAVIS_TAG" ] && \
+        docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_TAG  && \
+        docker push gojektech/albatross:$TRAVIS_TAG) || true
+      - |
+        [ ! -z "$TRAVIS_COMMIT" ] && \
+        docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_COMMIT && \
+        docker push gojektech/albatross:$TRAVIS_COMMIT
