@@ -6,6 +6,7 @@ go:
   - 1.14.4
 
 stages:
+  - lint
   - test
   - name: deploy
     if: branch = master AND type = push and fork = false
@@ -21,6 +22,8 @@ docker_login:
 
 jobs:
   include:
+  - stage: lint
+    script: make golangci
   - stage: test
     script: make test
   - stage: deploy
