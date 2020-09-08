@@ -18,12 +18,12 @@ type installer struct {
 func (i *installer) Install(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error) {
 	i.action.ReleaseName = relName
 
-	chart, err := i.loadChart(chartName)
+	ch, err := i.loadChart(chartName)
 	if err != nil {
 		return nil, err
 	}
 
-	return i.action.Run(chart, values)
+	return i.action.Run(ch, values)
 }
 
 func (i *installer) loadChart(chartName string) (*chart.Chart, error) {

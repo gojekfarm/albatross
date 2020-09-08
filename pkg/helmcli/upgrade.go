@@ -25,23 +25,23 @@ func (u *upgrader) Upgrade(ctx context.Context, relName, chartName string, value
 	if u.action.Install {
 		u.history.Max = 1
 		if _, err := u.history.Run(relName); err == driver.ErrReleaseNotFound {
-			release, err := u.installer.Install(ctx, relName, chartName, values)
+			rel, err := u.installer.Install(ctx, relName, chartName, values)
 			if err != nil {
 				return nil, err
 			}
 
-			return release, nil
+			return rel, nil
 		} else if err != nil {
 			return nil, err
 		}
 	}
 
-	chart, err := u.loadChart(chartName)
+	ch, err := u.loadChart(chartName)
 	if err != nil {
 		return nil, fmt.Errorf("error loading chart: %w", err)
 	}
 
-	return u.action.Run(relName, chart, values)
+	return u.action.Run(relName, ch, values)
 }
 
 func (u *upgrader) loadChart(chartName string) (*chart.Chart, error) {

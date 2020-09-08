@@ -32,15 +32,15 @@ func (s Service) List(ctx context.Context, req Request) (Response, error) {
 	return resp, nil
 }
 
-func releaseInfo(release *release.Release) Release {
+func releaseInfo(rel *release.Release) Release {
 	return Release{
-		Name:       release.Name,
-		Namespace:  release.Namespace,
-		Version:    release.Version,
-		Updated:    release.Info.FirstDeployed.Local().Time,
-		Status:     release.Info.Status,
-		Chart:      release.Chart.ChartFullPath(),
-		AppVersion: release.Chart.AppVersion(),
+		Name:       rel.Name,
+		Namespace:  rel.Namespace,
+		Version:    rel.Version,
+		Updated:    rel.Info.FirstDeployed.Local().Time,
+		Status:     rel.Info.Status,
+		Chart:      rel.Chart.ChartFullPath(),
+		AppVersion: rel.Chart.AppVersion(),
 	}
 }
 
