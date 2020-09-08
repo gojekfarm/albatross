@@ -27,5 +27,5 @@ func NewEnvConfig(flg *flags.GlobalFlags) *EnvConfig {
 // writable field and takes it from the environment. The problem here is that we cannot
 // set the namespace here, which means that the namespace needs to be set in individual actions.
 func (config *EnvConfig) setEnvFlags(flg *flags.GlobalFlags) {
-	config.KubeContext = flg.KubeCtx
+	config.KubeContext = flg.KubeContext
 }
