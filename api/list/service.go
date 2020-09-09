@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 
 	"helm.sh/helm/v3/pkg/release"
 
@@ -17,7 +18,11 @@ func (s Service) List(ctx context.Context, req Request) (Response, error) {
 	listflags := flags.ListFlags{
 		GlobalFlags: req.Flags.GlobalFlags,
 	}
-	lcli := s.cli.NewLister(listflags)
+	lcli, err := s.cli.NewLister(listflags)
+	if err != nil {
+		return Response{}, fmt.Errorf("error while initializing lister: %s", err)
+	}
+
 	releases, err := lcli.List(ctx)
 	if err != nil {
 		return Response{}, err

@@ -24,15 +24,15 @@ func (u *upgrader) Upgrade(ctx context.Context, relName, chartName string, value
 	// Install the release first if install is set to true
 	if u.action.Install {
 		u.history.Max = 1
-		if _, err := u.history.Run(relName); err == driver.ErrReleaseNotFound {
+		if _, runErr := u.history.Run(relName); runErr == driver.ErrReleaseNotFound {
 			rel, err := u.installer.Install(ctx, relName, chartName, values)
 			if err != nil {
 				return nil, err
 			}
 
 			return rel, nil
-		} else if err != nil {
-			return nil, err
+		} else if runErr != nil {
+			return nil, runErr
 		}
 	}
 

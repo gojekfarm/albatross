@@ -18,13 +18,15 @@ type ActionConfig struct {
 }
 
 // NewActionConfig returns a new instance of actionconfig
-func NewActionConfig(envconfig *EnvConfig, flg *flags.GlobalFlags) *ActionConfig {
+func NewActionConfig(envconfig *EnvConfig, flg *flags.GlobalFlags) (*ActionConfig, error) {
 	config := &ActionConfig{
 		new(action.Configuration),
 	}
 
-	config.setFlags(envconfig, flg)
-	return config
+	if err := config.setFlags(envconfig, flg); err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 // kubeClientConfig returns a kube config that is scoped to a namespace.
@@ -47,13 +49,13 @@ func kubeClientConfig(envconfig *EnvConfig, namespace string) genericclioptions.
 }
 
 // setFlags initializes the action configuration with proper config flags
-func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flg *flags.GlobalFlags) {
+func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flg *flags.GlobalFlags) error {
 	actionNamespace := envconfig.Namespace()
 	if flg.Namespace != "" {
 		actionNamespace = flg.Namespace
 	}
 
-	ac.Configuration.Init(
+	return ac.Configuration.Init(
 		kubeClientConfig(envconfig, actionNamespace),
 		actionNamespace,
 		os.Getenv("HELM_DRIVER"),

@@ -20,16 +20,19 @@ import (
 // TODO: Find a way to isolate interface only for upgrade
 type mockHelmClient struct{ mock.Mock }
 
-func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) helmcli.Upgrader {
-	return m.Called().Get(0).(helmcli.Upgrader)
+func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) (helmcli.Upgrader, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Upgrader), args.Error(1)
 }
 
-func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) helmcli.Installer {
-	return m.Called().Get(0).(helmcli.Installer)
+func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) (helmcli.Installer, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Installer), args.Error(1)
 }
 
-func (m *mockHelmClient) NewLister(fl flags.ListFlags) helmcli.Lister {
-	return m.Called().Get(0).(helmcli.Lister)
+func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Lister), args.Error(1)
 }
 
 type mockLister struct{ mock.Mock }
@@ -48,7 +51,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	service := NewService(helmcli)
 	ctx := context.Background()
 	req := Request{Flags: Flags{Deployed: true}}
-	helmcli.On("NewLister").Return(lic)
+	helmcli.On("NewLister", mock.AnythingOfType("flags.ListFlags")).Return(lic, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")

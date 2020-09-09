@@ -11,9 +11,9 @@ import (
 )
 
 type Client interface {
-	NewUpgrader(flags.UpgradeFlags) Upgrader
-	NewInstaller(flags.InstallFlags) Installer
-	NewLister(flags.ListFlags) Lister
+	NewUpgrader(flags.UpgradeFlags) (Upgrader, error)
+	NewInstaller(flags.InstallFlags) (Installer, error)
+	NewLister(flags.ListFlags) (Lister, error)
 }
 
 type Upgrader interface {
@@ -34,18 +34,24 @@ func New() Client {
 
 type helmClient struct{}
 
-func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) Upgrader {
+func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) (Upgrader, error) {
 	//TODO: ifpossible envconfig could be moved to actionconfig new, remove pointer usage of globalflags
 	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
-	actionconfig := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	if err != nil {
+		return nil, err
+	}
 
 	upgrade := action.NewUpgrade(actionconfig.Configuration)
 	history := action.NewHistory(actionconfig.Configuration)
-	installer := c.NewInstaller(flags.InstallFlags{
+	installer, err := c.NewInstaller(flags.InstallFlags{
 		DryRun:      flg.DryRun,
 		Version:     flg.Version,
 		GlobalFlags: flg.GlobalFlags,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	upgrade.Namespace = flg.Namespace
 	upgrade.Install = flg.Install
@@ -56,13 +62,16 @@ func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) Upgrader {
 		envSettings: envconfig.EnvSettings,
 		history:     history,
 		installer:   installer,
-	}
+	}, nil
 }
 
 // NewInstaller returns a new instance of Installer struct
-func (c helmClient) NewInstaller(flg flags.InstallFlags) Installer {
+func (c helmClient) NewInstaller(flg flags.InstallFlags) (Installer, error) {
 	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
-	actionconfig := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	if err != nil {
+		return nil, err
+	}
 
 	install := action.NewInstall(actionconfig.Configuration)
 	install.Namespace = flg.Namespace
@@ -71,13 +80,16 @@ func (c helmClient) NewInstaller(flg flags.InstallFlags) Installer {
 	return &installer{
 		action:      install,
 		envSettings: envconfig.EnvSettings,
-	}
+	}, nil
 }
 
 // NewLister returns a new Lister instance
-func (c helmClient) NewLister(flg flags.ListFlags) Lister {
+func (c helmClient) NewLister(flg flags.ListFlags) (Lister, error) {
 	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
-	actionconfig := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	if err != nil {
+		return nil, err
+	}
 
 	list := action.NewList(actionconfig.Configuration)
 	list.AllNamespaces = flg.AllNamespaces
@@ -90,5 +102,5 @@ func (c helmClient) NewLister(flg flags.ListFlags) Lister {
 	return &lister{
 		action:      list,
 		envSettings: envconfig.EnvSettings,
-	}
+	}, nil
 }

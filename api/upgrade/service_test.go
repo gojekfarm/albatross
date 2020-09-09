@@ -21,16 +21,19 @@ import (
 // TODO: Find a way to isolate interface only for upgrade
 type mockHelmClient struct{ mock.Mock }
 
-func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) helmcli.Upgrader {
-	return m.Called().Get(0).(helmcli.Upgrader)
+func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) (helmcli.Upgrader, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Upgrader), args.Error(1)
 }
 
-func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) helmcli.Installer {
-	return m.Called().Get(0).(helmcli.Installer)
+func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) (helmcli.Installer, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Installer), args.Error(1)
 }
 
-func (m *mockHelmClient) NewLister(fl flags.ListFlags) helmcli.Lister {
-	return m.Called().Get(0).(helmcli.Lister)
+func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Lister), args.Error(1)
 }
 
 type mockUpgrader struct{ mock.Mock }
@@ -49,7 +52,7 @@ func TestShouldReturnErrorOnInvalidChart(t *testing.T) {
 	service := NewService(helmcli)
 	ctx := context.Background()
 	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
-	helmcli.On("NewUpgrader").Return(upgc)
+	helmcli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
 	release := &release.Release{Info: &release.Info{Status: release.StatusFailed}}
 	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(release, errors.New("failed to download invalid-chart"))
 
@@ -69,7 +72,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	service := NewService(helmcli)
 	ctx := context.Background()
 	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
-	helmcli.On("NewUpgrader").Return(upgc)
+	helmcli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")
