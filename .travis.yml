@@ -20,32 +20,26 @@ docker_login:
     [ -z $DOCKER_USERNAME ] && echo "docker username not configured!"
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-
 jobs:
   include:
   - stage: lint
-    name: "Golangci Lint"
+    name: "Lint"
     script: make golangci
+
   - stage: test
     name: "Run tests and publish coverage"
     script:
       - make testcodecov
       - bash <(curl -s https://codecov.io/bash)
+
   - stage: build
-    name: "Build albatross"
+    name: "Build"
     script: make clean build
+
   - stage: deploy
     before_script: *docker_login
-    name: "Publish docker image"
-    script:
-      - docker build -t gojektech/albatross:latest .
-      - docker images
-      - docker push gojektech/albatross:latest
-      - |
-        ([ ! -z "$TRAVIS_TAG" ] && \
-        docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_TAG  && \
-        docker push gojektech/albatross:$TRAVIS_TAG) || true
-      - |
-        [ ! -z "$TRAVIS_COMMIT" ] && \
-        docker tag gojektech/albatross:latest gojektech/albatross:$TRAVIS_COMMIT && \
-        docker push gojektech/albatross:$TRAVIS_COMMIT
+    name: "Deploy/Release"
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux
