@@ -28,7 +28,6 @@ func fakeInstallConfiguration(t *testing.T) *action.Configuration {
 			t.Logf(format, v...)
 		},
 	}
-
 }
 
 func TestInstallShouldFailForInvalidChart(t *testing.T) {

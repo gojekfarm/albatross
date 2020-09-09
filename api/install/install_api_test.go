@@ -72,12 +72,12 @@ func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	body := fmt.Sprintf(`{"chart":"%s", "name": "redis-v5"}`, chartName)
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/install", s.server.URL), strings.NewReader(body))
-	s.mockService.On("Install", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errors.New("Invalid chart"))
+	s.mockService.On("Install", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errors.New("invalid chart"))
 
 	resp, err := http.DefaultClient.Do(req)
 
 	assert.Equal(s.T(), http.StatusInternalServerError, resp.StatusCode)
-	expectedResponse := `{"error":"Invalid chart"}` + "\n"
+	expectedResponse := `{"error":"invalid chart"}` + "\n"
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)

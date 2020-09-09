@@ -17,7 +17,7 @@ import (
 )
 
 // To satisfy the client interface, we have to define all methods(NewUpgrade, NewInstaller) on the mock struct
-// TODO: Find a way to isolate interface only for upgrade
+// TODO: Find a way to isolate interface only for upgrade.
 type mockHelmClient struct{ mock.Mock }
 
 func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) (helmcli.Upgrader, error) {
@@ -46,12 +46,12 @@ func (m *mockLister) List(ctx context.Context) ([]*release.Release, error) {
 }
 
 func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
-	helmcli := new(mockHelmClient)
+	cli := new(mockHelmClient)
 	lic := new(mockLister)
-	service := NewService(helmcli)
+	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{Flags: Flags{Deployed: true}}
-	helmcli.On("NewLister", mock.AnythingOfType("flags.ListFlags")).Return(lic, nil)
+	cli.On("NewLister", mock.AnythingOfType("flags.ListFlags")).Return(lic, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")
@@ -90,6 +90,6 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	assert.Equal(t, rel.Updated, releases[0].Info.FirstDeployed.Local().Time)
 	assert.Equal(t, rel.AppVersion, releases[0].Chart.AppVersion())
 	assert.Empty(t, resp.Error)
-	helmcli.AssertExpectations(t)
+	cli.AssertExpectations(t)
 	lic.AssertExpectations(t)
 }

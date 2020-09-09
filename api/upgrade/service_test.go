@@ -18,7 +18,7 @@ import (
 )
 
 // To satisfy the client interface, we have to define all methods(NewUpgrade, NewInstaller) on the mock struct
-// TODO: Find a way to isolate interface only for upgrade
+// TODO: Find a way to isolate interface only for upgrade.
 type mockHelmClient struct{ mock.Mock }
 
 func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) (helmcli.Upgrader, error) {
@@ -47,14 +47,14 @@ func (m *mockUpgrader) Upgrade(ctx context.Context, relName, chart string, value
 }
 
 func TestShouldReturnErrorOnInvalidChart(t *testing.T) {
-	helmcli := new(mockHelmClient)
+	cli := new(mockHelmClient)
 	upgc := new(mockUpgrader)
-	service := NewService(helmcli)
+	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
-	helmcli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
-	release := &release.Release{Info: &release.Info{Status: release.StatusFailed}}
-	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(release, errors.New("failed to download invalid-chart"))
+	cli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
+	rel := &release.Release{Info: &release.Info{Status: release.StatusFailed}}
+	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(rel, errors.New("failed to download invalid-chart"))
 
 	resp, err := service.Upgrade(ctx, req)
 
@@ -62,17 +62,17 @@ func TestShouldReturnErrorOnInvalidChart(t *testing.T) {
 	require.NotNil(t, resp)
 	assert.Empty(t, resp.Error)
 	assert.Equal(t, "failed", resp.Status)
-	helmcli.AssertExpectations(t)
+	cli.AssertExpectations(t)
 	upgc.AssertExpectations(t)
 }
 
 func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
-	helmcli := new(mockHelmClient)
+	cli := new(mockHelmClient)
 	upgc := new(mockUpgrader)
-	service := NewService(helmcli)
+	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
-	helmcli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
+	cli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")
@@ -83,7 +83,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 		panic("Unable to load chart")
 	}
 
-	release := &release.Release{
+	rel := &release.Release{
 		Name:      "test-release",
 		Namespace: "test-namespace",
 		Version:   1,
@@ -94,20 +94,20 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 		Chart: chart,
 	}
 
-	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(release, nil)
+	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(rel, nil)
 
 	resp, err := service.Upgrade(ctx, req)
 
 	assert.NoError(t, err)
 	require.NotNil(t, resp)
-	assert.Equal(t, resp.Name, release.Name)
-	assert.Equal(t, resp.Namespace, release.Namespace)
-	assert.Equal(t, resp.Version, release.Version)
-	assert.Equal(t, resp.Status, release.Info.Status.String())
-	assert.Equal(t, resp.Chart, release.Chart.ChartFullPath())
-	assert.Equal(t, resp.Updated, release.Info.FirstDeployed.Local().Time)
-	assert.Equal(t, resp.AppVersion, release.Chart.AppVersion())
+	assert.Equal(t, resp.Name, rel.Name)
+	assert.Equal(t, resp.Namespace, rel.Namespace)
+	assert.Equal(t, resp.Version, rel.Version)
+	assert.Equal(t, resp.Status, rel.Info.Status.String())
+	assert.Equal(t, resp.Chart, rel.Chart.ChartFullPath())
+	assert.Equal(t, resp.Updated, rel.Info.FirstDeployed.Local().Time)
+	assert.Equal(t, resp.AppVersion, rel.Chart.AppVersion())
 	assert.Empty(t, resp.Error)
-	helmcli.AssertExpectations(t)
+	cli.AssertExpectations(t)
 	upgc.AssertExpectations(t)
 }

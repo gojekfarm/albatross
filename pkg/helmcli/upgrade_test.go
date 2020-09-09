@@ -30,7 +30,6 @@ func fakeUpgradeConfiguration(t *testing.T) *action.Configuration {
 			t.Logf(format, v...)
 		},
 	}
-
 }
 
 func TestUpgradeShouldFailForNonExistentReleaseWithoutInstall(t *testing.T) {
@@ -71,10 +70,10 @@ func TestUpgradeShouldSucceedForNonExistentReleaseWithInstall(t *testing.T) {
 	values := map[string]interface{}{
 		"test": "test",
 	}
-	release, err := u.Upgrade(context.Background(), "test-release", "../../api/testdata/albatross", values)
+	rel, err := u.Upgrade(context.Background(), "test-release", "../../api/testdata/albatross", values)
 
 	assert.NoError(t, err)
-	assert.Equal(t, release.Name, "test-release")
+	assert.Equal(t, rel.Name, "test-release")
 }
 
 func TestUpgradeShouldFailForInvalidChart(t *testing.T) {
@@ -113,7 +112,9 @@ func TestUpgradeShouldReturnUpgradedReleaseOnSuccess(t *testing.T) {
 			Status:        release.StatusDeployed,
 		},
 	}
-	config.Releases.Create(existingRelease)
+	if err := config.Releases.Create(existingRelease); err != nil {
+		t.Error(err)
+	}
 
 	u := &upgrader{
 		action:      action.NewUpgrade(config),
@@ -129,9 +130,9 @@ func TestUpgradeShouldReturnUpgradedReleaseOnSuccess(t *testing.T) {
 		"test": "test",
 	}
 
-	release, err := u.Upgrade(context.Background(), "test-release", "../../api/testdata/albatross", values)
+	rel, err := u.Upgrade(context.Background(), "test-release", "../../api/testdata/albatross", values)
 
 	assert.NoError(t, err)
-	assert.Equal(t, release.Name, existingRelease.Name)
-	assert.Equal(t, release.Version, existingRelease.Version+1)
+	assert.Equal(t, rel.Name, existingRelease.Name)
+	assert.Equal(t, rel.Version, existingRelease.Version+1)
 }
