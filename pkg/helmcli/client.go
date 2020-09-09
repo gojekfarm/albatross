@@ -65,7 +65,7 @@ func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) (Upgrader, error) {
 	}, nil
 }
 
-// NewInstaller returns a new instance of Installer struct
+// NewInstaller returns a new instance of Installer struct.
 func (c helmClient) NewInstaller(flg flags.InstallFlags) (Installer, error) {
 	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
 	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)
@@ -83,7 +83,7 @@ func (c helmClient) NewInstaller(flg flags.InstallFlags) (Installer, error) {
 	}, nil
 }
 
-// NewLister returns a new Lister instance
+// NewLister returns a new Lister instance.
 func (c helmClient) NewLister(flg flags.ListFlags) (Lister, error) {
 	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
 	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)

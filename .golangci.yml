@@ -1,4 +1,10 @@
 linters-settings:
+  funlen:
+    lines: 100
+    statements: 50
+  goconst:
+    min-len: 2
+    min-occurrences: 2
   govet:
     check-shadowing: true
     settings:
@@ -44,49 +50,56 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-  - deadcode
-  - depguard
-  - dupl
-  - errcheck
-  - goconst
-  - gocritic
-  - gocyclo
-  - gofmt
-  - goimports
-  - golint
-  - gosec
-  - gosimple
-  - govet
-  - ineffassign
-  - interfacer
-  - lll
-  - misspell
-  - nakedret
-  - scopelint
-  - staticcheck
-  - structcheck
-  - stylecheck
-  - typecheck
-  - unconvert
-  - unparam
-  - unused
-  - varcheck
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exhaustive
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - goimports
+    - golint
+    - gomnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - nestif
+    - noctx
+    - nolintlint
+    - rowserrcheck
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
 
 run:
   skip-dirs:
-    - test/testdata_etc
-    - pkg/golinters/goanalysis/(checker|passes)
+    - scripts
   tests: false
-
-issues:
-  exclude-rules:
-    - text: "weak cryptographic primitive"
-      linters:
-        - gosec
 
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 service:
-  golangci-lint-version: 1.15.x # use the fixed version to not introduce new linters unexpectedly
+  golangci-lint-version: 1.30.x # use the fixed version to not introduce new linters unexpectedly
   prepare:
     - echo "here I can run custom commands, but no preparation needed for this repo"

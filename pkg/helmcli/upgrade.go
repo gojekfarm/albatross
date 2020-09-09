@@ -19,7 +19,7 @@ type upgrader struct {
 	installer   Installer
 }
 
-// Upgrade executes the upgrade action
+// Upgrade executes the upgrade action.
 func (u *upgrader) Upgrade(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error) {
 	// Install the release first if install is set to true
 	if u.action.Install {
