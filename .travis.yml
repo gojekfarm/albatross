@@ -25,7 +25,9 @@ jobs:
   - stage: lint
     script: make golangci
   - stage: test
-    script: make test
+    script:
+      - make testcodecov
+      - bash <(curl -s https://codecov.io/bash)
   - stage: deploy
     before_script: *docker_login
     name: build docker
