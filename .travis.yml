@@ -8,6 +8,7 @@ go:
 stages:
   - lint
   - test
+  - build
   - name: deploy
     if: branch = master AND type = push and fork = false
 
@@ -23,14 +24,19 @@ docker_login:
 jobs:
   include:
   - stage: lint
+    name: "Golangci Lint"
     script: make golangci
   - stage: test
+    name: "Run tests and publish coverage"
     script:
       - make testcodecov
       - bash <(curl -s https://codecov.io/bash)
+  - stage: build
+    name: "Build albatross"
+    script: make clean build
   - stage: deploy
     before_script: *docker_login
-    name: build docker
+    name: "Publish docker image"
     script:
       - docker build -t gojektech/albatross:latest .
       - docker images
