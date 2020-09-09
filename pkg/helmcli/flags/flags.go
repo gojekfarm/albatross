@@ -1,9 +1,9 @@
 package flags
 
 type GlobalFlags struct {
-	KubeCtx       string
-	KubeToken     string
-	KubeAPIServer string
+	KubeContext   string `json:"kube_context,omitempty"`
+	KubeToken     string `json:"kube_token,omitempty"`
+	KubeAPIServer string `json:"kube_apiserver,omitempty"`
 	Namespace     string
 }
 
