@@ -10,10 +10,10 @@ stages:
   - test
   - build
   - name: deploy
-    if: branch = master AND type = push AND fork = false AND tag IS present
+    if: branch = master AND type = push AND fork = false
 
 docker_login:
-  before_script: &docker_login
+  script: &docker_login
   - |
     docker version
     [ -z $DOCKER_PASSWORD ] && echo "docker password not configured!"
@@ -37,9 +37,12 @@ jobs:
     script: make clean build
 
   - stage: deploy
-    before_script: *docker_login
     name: "Deploy/Release"
-    script: curl -sL https://git.io/goreleaser | bash
-    on:
-      tags: true
-      condition: $TRAVIS_OS_NAME = linux
+    script: *docker_login
+    deploy:
+      - provider: script
+        skip_cleanup: true
+        script: curl -sL https://git.io/goreleaser | bash
+        on:
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux
