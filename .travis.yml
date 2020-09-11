@@ -31,6 +31,12 @@ jobs:
       tags: true
 
   - stage: experiment
+    name: "display vals"
+    script: echo "branch: $TRAVIS_BRANCH  tag: $TRAVIS_TAG"
+    on:
+      branch: ci_test
+
+  - stage: experiment
     name: "Build"
     script: make clean build
     on:
@@ -44,5 +50,5 @@ jobs:
         skip_cleanup: true
         script: curl -sL https://git.io/goreleaser | bash
     on:
-      tags: true
       branch: ci_test
+      condition: tag IS present
