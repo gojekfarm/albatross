@@ -10,7 +10,7 @@ stages:
   - test
   - build
   - name: deploy
-    if: type = push AND fork = false
+    if: (branch = master OR tag IS present) AND type = push AND fork = false
 
 docker_login:
   script: &docker_login
