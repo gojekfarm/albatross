@@ -17,19 +17,22 @@ import (
 )
 
 // To satisfy the client interface, we have to define all methods(NewUpgrade, NewInstaller) on the mock struct
-// TODO: Find a way to isolate interface only for upgrade
+// TODO: Find a way to isolate interface only for upgrade.
 type mockHelmClient struct{ mock.Mock }
 
-func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) helmcli.Upgrader {
-	return m.Called().Get(0).(helmcli.Upgrader)
+func (m *mockHelmClient) NewUpgrader(fl flags.UpgradeFlags) (helmcli.Upgrader, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Upgrader), args.Error(1)
 }
 
-func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) helmcli.Installer {
-	return m.Called().Get(0).(helmcli.Installer)
+func (m *mockHelmClient) NewInstaller(fl flags.InstallFlags) (helmcli.Installer, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Installer), args.Error(1)
 }
 
-func (m *mockHelmClient) NewLister(fl flags.ListFlags) helmcli.Lister {
-	return m.Called().Get(0).(helmcli.Lister)
+func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.Lister), args.Error(1)
 }
 
 type mockLister struct{ mock.Mock }
@@ -43,12 +46,12 @@ func (m *mockLister) List(ctx context.Context) ([]*release.Release, error) {
 }
 
 func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
-	helmcli := new(mockHelmClient)
+	cli := new(mockHelmClient)
 	lic := new(mockLister)
-	service := NewService(helmcli)
+	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{Flags: Flags{Deployed: true}}
-	helmcli.On("NewLister").Return(lic)
+	cli.On("NewLister", mock.AnythingOfType("flags.ListFlags")).Return(lic, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")
@@ -87,6 +90,6 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	assert.Equal(t, rel.Updated, releases[0].Info.FirstDeployed.Local().Time)
 	assert.Equal(t, rel.AppVersion, releases[0].Chart.AppVersion())
 	assert.Empty(t, resp.Error)
-	helmcli.AssertExpectations(t)
+	cli.AssertExpectations(t)
 	lic.AssertExpectations(t)
 }

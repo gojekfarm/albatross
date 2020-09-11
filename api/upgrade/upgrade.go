@@ -36,7 +36,7 @@ type Release struct {
 	AppVersion string         `json:"app_version"`
 }
 
-// Response represents the api response for upgrade request
+// Response represents the api response for upgrade request.
 type Response struct {
 	Error   string `json:"error,omitempty"`
 	Status  string `json:"status,omitempty"`

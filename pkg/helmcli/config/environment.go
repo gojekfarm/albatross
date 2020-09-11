@@ -8,7 +8,7 @@ import (
 
 // EnvConfig serves as a proxy to cli.EnvSettings.
 // The methods on this struct take care of updating the EnvSettings struct
-// with appropriate values
+// with appropriate values.
 type EnvConfig struct {
 	*cli.EnvSettings
 }

@@ -13,7 +13,7 @@ type lister struct {
 	envSettings *cli.EnvSettings
 }
 
-// List runs the list operation
+// List runs the list operation.
 func (l *lister) List(ctx context.Context) ([]*release.Release, error) {
 	return l.action.Run()
 }

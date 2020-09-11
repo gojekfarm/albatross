@@ -19,29 +19,29 @@ type upgrader struct {
 	installer   Installer
 }
 
-// Upgrade executes the upgrade action
+// Upgrade executes the upgrade action.
 func (u *upgrader) Upgrade(ctx context.Context, relName, chartName string, values map[string]interface{}) (*release.Release, error) {
 	// Install the release first if install is set to true
 	if u.action.Install {
 		u.history.Max = 1
-		if _, err := u.history.Run(relName); err == driver.ErrReleaseNotFound {
-			release, err := u.installer.Install(ctx, relName, chartName, values)
+		if _, runErr := u.history.Run(relName); runErr == driver.ErrReleaseNotFound {
+			rel, err := u.installer.Install(ctx, relName, chartName, values)
 			if err != nil {
 				return nil, err
 			}
 
-			return release, nil
-		} else if err != nil {
-			return nil, err
+			return rel, nil
+		} else if runErr != nil {
+			return nil, runErr
 		}
 	}
 
-	chart, err := u.loadChart(chartName)
+	ch, err := u.loadChart(chartName)
 	if err != nil {
 		return nil, fmt.Errorf("error loading chart: %w", err)
 	}
 
-	return u.action.Run(relName, chart, values)
+	return u.action.Run(relName, ch, values)
 }
 
 func (u *upgrader) loadChart(chartName string) (*chart.Chart, error) {

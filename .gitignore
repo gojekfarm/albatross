@@ -5,6 +5,7 @@
 .vimrc
 .vscode/
 _dist/
+dist/
 bin/
 vendor/
 *.swp

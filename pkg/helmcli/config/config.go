@@ -12,26 +12,28 @@ import (
 )
 
 // ActionConfig acts as a proxy to helm package's action configuration.
-// It defines methods to set the default/common action config members
+// It defines methods to set the default/common action config members.
 type ActionConfig struct {
 	*action.Configuration
 }
 
-// NewActionConfig returns a new instance of actionconfig
-func NewActionConfig(envconfig *EnvConfig, flg *flags.GlobalFlags) *ActionConfig {
+// NewActionConfig returns a new instance of actionconfig.
+func NewActionConfig(envconfig *EnvConfig, flg *flags.GlobalFlags) (*ActionConfig, error) {
 	config := &ActionConfig{
 		new(action.Configuration),
 	}
 
-	config.setFlags(envconfig, flg)
-	return config
+	if err := config.setFlags(envconfig, flg); err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 // kubeClientConfig returns a kube config that is scoped to a namespace.
 // Context: The EnvSetting struct does not expose any way to set the namespace,
 // so we cannot set it directly. However, it is used to create kubeclients.
 // So in order to configure the kubeclient with the proper namespace, we define a custom getter
-// here that sets the correct namespace in the kubeconfig
+// here that sets the correct namespace in the kubeconfig.
 func kubeClientConfig(envconfig *EnvConfig, namespace string) genericclioptions.RESTClientGetter {
 	clientConfig := kube.GetConfig(envconfig.KubeConfig, envconfig.KubeContext, namespace)
 
@@ -46,14 +48,14 @@ func kubeClientConfig(envconfig *EnvConfig, namespace string) genericclioptions.
 	return clientConfig
 }
 
-// setFlags initializes the action configuration with proper config flags
-func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flg *flags.GlobalFlags) {
+// setFlags initializes the action configuration with proper config flags.
+func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flg *flags.GlobalFlags) error {
 	actionNamespace := envconfig.Namespace()
 	if flg.Namespace != "" {
 		actionNamespace = flg.Namespace
 	}
 
-	ac.Configuration.Init(
+	return ac.Configuration.Init(
 		kubeClientConfig(envconfig, actionNamespace),
 		actionNamespace,
 		os.Getenv("HELM_DRIVER"),

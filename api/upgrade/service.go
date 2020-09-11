@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"fmt"
 
 	"helm.sh/helm/v3/pkg/release"
 
@@ -21,27 +22,31 @@ func (s Service) Upgrade(ctx context.Context, req Request) (Response, error) {
 		GlobalFlags: req.Flags.GlobalFlags,
 	}
 
-	ucli := s.cli.NewUpgrader(upgradeflags)
-	release, err := ucli.Upgrade(ctx, req.Name, req.Chart, req.Values)
+	ucli, err := s.cli.NewUpgrader(upgradeflags)
 	if err != nil {
-		return responseWithStatus(release), err
+		return Response{}, fmt.Errorf("error while initializing upgrader: %s", err)
 	}
-	resp := Response{Status: release.Info.Status.String(), Release: releaseInfo(release)}
+
+	rel, err := ucli.Upgrade(ctx, req.Name, req.Chart, req.Values)
+	if err != nil {
+		return responseWithStatus(rel), err
+	}
+	resp := Response{Status: rel.Info.Status.String(), Release: releaseInfo(rel)}
 	if req.Flags.DryRun {
-		resp.Data = release.Manifest
+		resp.Data = rel.Manifest
 	}
 	return resp, nil
 }
 
-func releaseInfo(release *release.Release) Release {
+func releaseInfo(rel *release.Release) Release {
 	return Release{
-		Name:       release.Name,
-		Namespace:  release.Namespace,
-		Version:    release.Version,
-		Updated:    release.Info.FirstDeployed.Local().Time,
-		Status:     release.Info.Status,
-		Chart:      release.Chart.ChartFullPath(),
-		AppVersion: release.Chart.AppVersion(),
+		Name:       rel.Name,
+		Namespace:  rel.Namespace,
+		Version:    rel.Version,
+		Updated:    rel.Info.FirstDeployed.Local().Time,
+		Status:     rel.Info.Status,
+		Chart:      rel.Chart.ChartFullPath(),
+		AppVersion: rel.Chart.AppVersion(),
 	}
 }
 

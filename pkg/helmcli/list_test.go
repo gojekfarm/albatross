@@ -2,36 +2,14 @@ package helmcli
 
 import (
 	"context"
-	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
-	kubefake "helm.sh/helm/v3/pkg/kube/fake"
 	"helm.sh/helm/v3/pkg/release"
-	"helm.sh/helm/v3/pkg/storage"
-	"helm.sh/helm/v3/pkg/storage/driver"
 	"helm.sh/helm/v3/pkg/time"
 )
-
-func fakeListConfiguration(t *testing.T) *action.Configuration {
-	return &action.Configuration{
-		Releases: storage.Init(driver.NewMemory()),
-		KubeClient: &kubefake.FailingKubeClient{
-			PrintingKubeClient: kubefake.PrintingKubeClient{
-				Out: ioutil.Discard,
-			},
-		},
-		Capabilities: chartutil.DefaultCapabilities,
-		Log: func(format string, v ...interface{}) {
-			t.Helper()
-			t.Logf(format, v...)
-		},
-	}
-
-}
 
 func TestListShouldReturnListOfReleasesOnSuccess(t *testing.T) {
 	config := fakeInstallConfiguration(t)
@@ -45,7 +23,9 @@ func TestListShouldReturnListOfReleasesOnSuccess(t *testing.T) {
 			Status:        release.StatusDeployed,
 		},
 	}
-	config.Releases.Create(existingRelease)
+	if err := config.Releases.Create(existingRelease); err != nil {
+		t.Error(err)
+	}
 
 	l := &lister{
 		action:      action.NewList(config),

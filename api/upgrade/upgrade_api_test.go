@@ -81,7 +81,7 @@ func (s *UpgradeTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	    "install": true, "namespace": "something", "version": "7.5.4"
 	}}`, chartName)
 	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/install", s.server.URL), strings.NewReader(body))
-	s.mockService.On("Upgrade", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errors.New("Invalid Chart"))
+	s.mockService.On("Upgrade", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errors.New("invalid chart"))
 
 	resp, err := http.DefaultClient.Do(req)
 

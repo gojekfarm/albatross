@@ -1,6 +1,10 @@
 # Albatross
 
 [![Build Status](https://travis-ci.org/gojekfarm/albatross.svg?branch=master)](https://travis-ci.org/gojekfarm/albatross)
+[![codecov](https://codecov.io/gh/gojekfarm/albatross/branch/master/graph/badge.svg)](https://codecov.io/gh/gojekfarm/albatross)
+[![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg)](https://github.com/goreleaser)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 
 Albatross wraps the helm package to expose helm operations as HTTP APIs.
 
