@@ -9,8 +9,6 @@ stages:
   - lint
   - test
   - build
-  - name: deploy
-    if: branch = master AND type = push AND fork = false
 
 docker_login:
   script: &docker_login
@@ -31,10 +29,14 @@ jobs:
     script:
       - make testcodecov
       - bash <(curl -s https://codecov.io/bash)
+    on:
+      tags: true
 
   - stage: build
     name: "Build"
     script: make clean build
+    on:
+      branch: ci_test
 
   - stage: deploy
     name: "Deploy/Release"
@@ -45,4 +47,4 @@ jobs:
         script: curl -sL https://git.io/goreleaser | bash
         on:
           tags: true
-          condition: $TRAVIS_OS_NAME = linux
+          branch: ci_test
