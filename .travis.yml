@@ -6,9 +6,7 @@ go:
   - 1.14.4
 
 stages:
-  - lint
-  - test
-  - build
+  - experiment
 
 docker_login:
   script: &docker_login
@@ -20,11 +18,11 @@ docker_login:
 
 jobs:
   include:
-  - stage: lint
+  - stage: experiment
     name: "Lint"
     script: make golangci
 
-  - stage: test
+  - stage: experiment
     name: "Run tests and publish coverage"
     script:
       - make testcodecov
@@ -32,19 +30,19 @@ jobs:
     on:
       tags: true
 
-  - stage: build
+  - stage: experiment
     name: "Build"
     script: make clean build
     on:
       branch: ci_test
 
-  - stage: deploy
+  - stage: experiment
     name: "Deploy/Release"
     script: *docker_login
     deploy:
       - provider: script
         skip_cleanup: true
         script: curl -sL https://git.io/goreleaser | bash
-        on:
-          tags: true
-          branch: ci_test
+    on:
+      tags: true
+      branch: ci_test
