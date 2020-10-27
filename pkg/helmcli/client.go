@@ -56,6 +56,7 @@ func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) (Upgrader, error) {
 	upgrade.Namespace = flg.Namespace
 	upgrade.Install = flg.Install
 	upgrade.DryRun = flg.DryRun
+	upgrade.Version = flg.Version
 
 	return &upgrader{
 		action:      upgrade,
@@ -76,6 +77,7 @@ func (c helmClient) NewInstaller(flg flags.InstallFlags) (Installer, error) {
 	install := action.NewInstall(actionconfig.Configuration)
 	install.Namespace = flg.Namespace
 	install.DryRun = flg.DryRun
+	install.Version = flg.Version
 
 	return &installer{
 		action:      install,
