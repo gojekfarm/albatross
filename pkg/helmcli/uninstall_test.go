@@ -38,6 +38,24 @@ func TestUninstallShouldSucceedForValidRelease(t *testing.T){
 	assert.NotNil(t, response)
 }
 
+func TestUninstallShouldRemoveTheRelease(t *testing.T){
+	actionConfig := fakeUninstallConfiguration(t)
+	u := &uninstaller{
+		action: action.NewUninstall(actionConfig),
+		envSettings: cli.New(),
+	}
+	l := &lister{
+		action: action.NewList(actionConfig),
+		envSettings: cli.New(),
+	}
+	releaseList, err := l.List(context.Background())
+	assert.Len(t, releaseList, 1)
+	u.Uninstall(context.Background(), testReleaseName)
+	releaseList, err = l.List(context.Background())
+	assert.Len(t, releaseList, 0)
+	assert.Nil(t, err) 
+}
+
 func fakeUninstallConfiguration(t *testing.T) *action.Configuration{
 	newStorage := storage.Init(driver.NewMemory())
 	newStorage.Create(getMockRelease())
