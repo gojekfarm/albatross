@@ -36,7 +36,7 @@ func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
 	return args.Get(0).(helmcli.Lister), args.Error(1)
 }
 
-func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error){
+func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error) {
 	args := m.Called(fl)
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }

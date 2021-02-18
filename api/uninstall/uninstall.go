@@ -9,18 +9,18 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
-var errInvalidReleaseName = errors.New("Uninstall: Invalid Release Name")
+var errInvalidReleaseName = errors.New("uninstall: invalid release name")
 
-
-// Request encapsulates an Http Request
+// Request encapsulates an Http Request.
 type Request struct {
 	ReleaseName  string `json:"release_name"`
-	Dryrun       bool   `json:"dry_run,omitEmpty"`
+	Dryrun       bool   `json:"dry_run,omitempty"`
 	KeepHistory  bool   `json:"keep_history"`
 	DisableHooks bool   `json:"disable_hooks"`
 	flags.GlobalFlags
@@ -37,8 +37,8 @@ type Release struct {
 }
 
 type Response struct {
-	Error   string `json:"error,omitempty"`
-	Status  string `json:"status"`
+	Error   string  `json:"error,omitempty"`
+	Status  string  `json:"status"`
 	Release Release `json:"release"`
 }
 
@@ -46,7 +46,7 @@ type service interface {
 	Uninstall(context.Context, Request) (Response, error)
 }
 
-// Handler creates a handler function to respond to delete requests
+// Handler creates a handler function to respond to delete requests.
 func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -66,10 +66,10 @@ func Handler(s service) http.Handler {
 
 		resp, err := s.Uninstall(r.Context(), req)
 		if err != nil {
-			if isInvalidRequest(err) {
+			if errors.Is(err, driver.ErrReleaseNotFound) {
 				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
 				w.WriteHeader(http.StatusBadRequest)
-			}else{
+			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 
@@ -94,16 +94,9 @@ func respondWithUninstallError(w http.ResponseWriter, logPrefix string, err erro
 	}
 }
 
-func isInvalidRequest(err error) bool{
-	if errors.Is(err, driver.ErrReleaseNotFound) {
-		return true
-	}
-	return false;
-}
-
-//preemptive checking of params to ensure correct request params, is duplicated in action.Uninstall.Run, 
-//but cannot fetch the type of error that's being returned since it's privately scoped.
-func checkMandatoryParams(req Request) error{ 
+// preemptive checking of params to ensure correct request params, is duplicated in action.Uninstall.Run,
+// but cannot fetch the type of error that's being returned since it's privately scoped.
+func checkMandatoryParams(req Request) error {
 	releaseName := req.ReleaseName
 	if releaseName == "" || !action.ValidName.MatchString(releaseName) || len(releaseName) > 53 {
 		return errInvalidReleaseName

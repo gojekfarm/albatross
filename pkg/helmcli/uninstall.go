@@ -8,7 +8,6 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
-
 type uninstaller struct {
 	action      *action.Uninstall
 	envSettings *cli.EnvSettings

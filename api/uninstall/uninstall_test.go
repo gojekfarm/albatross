@@ -62,7 +62,7 @@ func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	err = json.NewDecoder(res.Body).Decode(&actualResponse)
 	assert.NilError(s.T(), err)
 	expectedResponse := Response{
-		Error:    "",
+		Error:   "",
 		Release: releaseInfo(getMockRelease()),
 	}
 
@@ -81,7 +81,7 @@ func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasUnavailableRe
 	require.NoError(s.T(), err)
 }
 
-func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidReleaseName(){
+func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidReleaseName() {
 	body := `{"release_name":""}`
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/uninstall", s.server.URL), strings.NewReader(body))
 	s.mockService.On("Uninstall", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errInvalidReleaseName)

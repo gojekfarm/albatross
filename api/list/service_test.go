@@ -45,7 +45,7 @@ func (m *mockLister) List(ctx context.Context) ([]*release.Release, error) {
 	return args.Get(0).([]*release.Release), args.Error(1)
 }
 
-func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error){
+func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error) {
 	args := m.Called(fl)
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }

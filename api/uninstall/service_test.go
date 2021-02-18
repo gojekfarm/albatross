@@ -7,6 +7,7 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -15,6 +16,7 @@ import (
 )
 
 const testReleaseName = "test-release-name"
+
 // To satisfy the client interface, we have to define all methods(NewUpgrade, NewInstaller) on the mock struct
 // TODO: Find a way to isolate interface only for upgrade.
 type mockHelmClient struct{ mock.Mock }
@@ -34,7 +36,7 @@ func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
 	return args.Get(0).(helmcli.Lister), args.Error(1)
 }
 
-func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error){
+func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error) {
 	args := m.Called(fl)
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }
@@ -61,7 +63,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	cli.On("NewUninstaller", mock.AnythingOfType("flags.UninstallFlags")).Return(uic, nil)
 
 	mockRelease := getMockRelease()
-	uiResponse := release.UninstallReleaseResponse{Release: mockRelease}	
+	uiResponse := release.UninstallReleaseResponse{Release: mockRelease}
 	uic.On("Uninstall", ctx, testReleaseName).Return(&uiResponse, nil)
 
 	resp, err := service.Uninstall(ctx, req)
@@ -83,7 +85,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	uic.AssertExpectations(t)
 }
 
-func TestShouldNotCrashOnFailure(t *testing.T){
+func TestShouldNotCrashOnFailure(t *testing.T) {
 	cli := new(mockHelmClient)
 	uic := new(mockUninstaller)
 	service := NewService(cli)
@@ -101,13 +103,13 @@ func TestShouldNotCrashOnFailure(t *testing.T){
 	uic.AssertExpectations(t)
 }
 
-func getMockRelease() *release.Release{
+func getMockRelease() *release.Release {
 	releaseOptions := &release.MockReleaseOptions{
-		Name: testReleaseName,
-		Version: 1,
+		Name:      testReleaseName,
+		Version:   1,
 		Namespace: "default",
-		Chart: nil,
-		Status: release.StatusDeployed,
+		Chart:     nil,
+		Status:    release.StatusDeployed,
 	}
 
 	return release.Mock(releaseOptions)

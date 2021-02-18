@@ -32,13 +32,12 @@ type ListFlags struct {
 	GlobalFlags
 }
 
-
-// UninstallFlags maps the list of options that can be passed to the helm action 
+// UninstallFlags maps the list of options that can be passed to the helm action.
 type UninstallFlags struct {
-	Release string
-	KeepHistory bool
+	Release      string
+	KeepHistory  bool
 	DisableHooks bool
-	DryRun bool
-	Timeout time.Duration
+	DryRun       bool
+	Timeout      time.Duration
 	GlobalFlags
 }

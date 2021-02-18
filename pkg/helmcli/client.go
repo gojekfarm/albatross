@@ -126,7 +126,7 @@ func (c helmClient) NewUninstaller(flg flags.UninstallFlags) (Uninstaller, error
 	uninstall.Timeout = flg.Timeout
 
 	return &uninstaller{
-		action: uninstall,
+		action:      uninstall,
 		envSettings: envconfig.EnvSettings,
 	}, nil
 }
