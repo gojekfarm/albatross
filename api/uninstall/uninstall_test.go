@@ -66,7 +66,10 @@ func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 		Release: releaseInfo(getMockRelease()),
 	}
 
-	assert.Equal(s.T(), expectedResponse.Release, actualResponse.Release)
+	assert.Equal(s.T(), expectedResponse.Release.Name, actualResponse.Release.Name)
+	assert.Equal(s.T(), expectedResponse.Release.Version, actualResponse.Release.Version)
+	assert.Equal(s.T(), expectedResponse.Release.Namespace, actualResponse.Release.Namespace)
+	assert.Equal(s.T(), expectedResponse.Release.Status, actualResponse.Release.Status)
 	require.NoError(s.T(), err)
 	s.mockService.AssertExpectations(s.T())
 }
@@ -95,6 +98,6 @@ func (s *UninstallTestSuite) TearDownTest() {
 	s.server.Close()
 }
 
-func TestListAPI(t *testing.T) {
+func TestUninstallApi(t *testing.T) {
 	suite.Run(t, new(UninstallTestSuite))
 }
