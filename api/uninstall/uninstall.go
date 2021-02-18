@@ -20,7 +20,7 @@ var errInvalidReleaseName = errors.New("Uninstall: Invalid Release Name")
 // Request encapsulates an Http Request
 type Request struct {
 	ReleaseName  string `json:"release_name"`
-	Dryrun       bool   `json:"dry_run",omitEmpty`
+	Dryrun       bool   `json:"dry_run,omitEmpty"`
 	KeepHistory  bool   `json:"keep_history"`
 	DisableHooks bool   `json:"disable_hooks"`
 	flags.GlobalFlags
@@ -37,7 +37,7 @@ type Release struct {
 }
 
 type Response struct {
-	Error   string `json:"error"`
+	Error   string `json:"error,omitempty"`
 	Status  string `json:"status"`
 	Release Release `json:"release"`
 }

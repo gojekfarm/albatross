@@ -1,18 +1,17 @@
 package uninstall
 
-import "helm.sh/helm/v3/pkg/release"
-
 import (
 	"context"
 	"log"
 	"testing"
 
+	"github.com/gojekfarm/albatross/pkg/helmcli"
+	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/gojekfarm/albatross/pkg/helmcli"
-	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
+	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
 const testReleaseName = "test-release-name"
@@ -47,6 +46,9 @@ func (m *mockUninstaller) Uninstall(ctx context.Context, releaseName string) (*r
 	if len(args) < 1 {
 		log.Fatalf("error while mocking response for uninstall")
 	}
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*release.UninstallReleaseResponse), args.Error(1)
 }
 
@@ -77,6 +79,24 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	assert.Equal(t, rel.Updated, mockRelease.Info.FirstDeployed.Local().Time)
 	assert.Equal(t, rel.AppVersion, mockRelease.Chart.AppVersion())
 	assert.Empty(t, resp.Error)
+	cli.AssertExpectations(t)
+	uic.AssertExpectations(t)
+}
+
+func TestShouldNotCrashOnFailure(t *testing.T){
+	cli := new(mockHelmClient)
+	uic := new(mockUninstaller)
+	service := NewService(cli)
+	ctx := context.Background()
+	req := Request{ReleaseName: testReleaseName}
+
+	cli.On("NewUninstaller", mock.AnythingOfType("flags.UninstallFlags")).Return(uic, nil)
+	uic.On("Uninstall", ctx, testReleaseName).Return(nil, driver.ErrReleaseNotFound)
+
+	resp, err := service.Uninstall(ctx, req)
+
+	assert.Error(t, err)
+	require.NotNil(t, resp)
 	cli.AssertExpectations(t)
 	uic.AssertExpectations(t)
 }

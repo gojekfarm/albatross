@@ -35,8 +35,12 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 
 	resp, err := u.Uninstall(ctx, req.ReleaseName)
 
-	if err != nil && resp != nil{
-		return responseWithStatus(resp.Release), err
+	if err != nil {
+		if resp != nil {
+			return responseWithStatus(resp.Release), err
+		}else{
+			return Response{}, err
+		}
 	}
 
 	return Response{
