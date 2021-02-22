@@ -63,6 +63,29 @@ func (s *TestSuite) TestNewInstallerSetsChartOptionsUsingFlagValues() {
 	assert.Equal(t, globalFlags.Namespace, newInstaller.action.Namespace)
 }
 
+func (s *TestSuite) TestNewUninstallerUsingFlagValues() {
+	t := s.T()
+	dryRun := false
+	keepHistory := false
+	disableHooks := false
+	globalFlags := flags.GlobalFlags{
+		Namespace: "namespace",
+	}
+	uiFlags := flags.UninstallFlags{
+		GlobalFlags: globalFlags,
+		DryRun:      dryRun,
+		KeepHistory: keepHistory,
+	}
+	u, err := s.c.NewUninstaller(uiFlags)
+	newUninstaller, ok := u.(*uninstaller)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+	assert.Equal(t, dryRun, newUninstaller.action.DryRun)
+	assert.Equal(t, disableHooks, newUninstaller.action.DisableHooks)
+	assert.Equal(t, keepHistory, newUninstaller.action.KeepHistory)
+	// assert.Equal(t, globalFlags.Namespace, newUninstaller.) // todo fails, uninstall does not have support for custom namespace
+}
+
 func TestHandler(t *testing.T) {
 	suite.Run(t, new(TestSuite))
 }
