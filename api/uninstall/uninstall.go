@@ -68,7 +68,7 @@ func Handler(s service) http.Handler {
 		if err != nil {
 			if errors.Is(err, driver.ErrReleaseNotFound) {
 				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
-				w.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusNotFound)
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}

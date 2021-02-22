@@ -46,7 +46,7 @@ func (s *UninstallTestSuite) SetupTest() {
 }
 
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
-	body := `{"release_name":"test-release-name"}`
+	body := fmt.Sprintf(`{"release_name":"%v"}`, testReleaseName)
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/uninstall", s.server.URL), strings.NewReader(body))
 
 	response := Response{
@@ -80,7 +80,7 @@ func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasUnavailableRe
 	s.mockService.On("Uninstall", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, driver.ErrReleaseNotFound)
 	res, err := http.DefaultClient.Do(req)
 	require.NoError(s.T(), err)
-	assert.Equal(s.T(), 400, res.StatusCode)
+	assert.Equal(s.T(), 404, res.StatusCode)
 	require.NoError(s.T(), err)
 }
 
