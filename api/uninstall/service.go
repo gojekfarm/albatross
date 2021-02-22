@@ -24,7 +24,7 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 	unInstallFlags := &flags.UninstallFlags{
 		Release:      req.ReleaseName,
 		KeepHistory:  req.KeepHistory,
-		DryRun:       req.Dryrun,
+		DryRun:       req.DryRun,
 		DisableHooks: req.DisableHooks,
 		GlobalFlags:  req.GlobalFlags,
 	}
