@@ -67,7 +67,15 @@ func TestUninstallShouldRemoveTheRelease(t *testing.T) {
 
 func fakeUninstallConfiguration(t *testing.T) *action.Configuration {
 	newStorage := storage.Init(driver.NewMemory())
-	err := newStorage.Create(getMockRelease())
+	err := newStorage.Create(
+		release.Mock(
+			&release.MockReleaseOptions{
+				Name:      testReleaseName,
+				Version:   1,
+				Namespace: "default",
+				Chart:     nil,
+				Status:    release.StatusDeployed,
+			}))
 	require.NoError(t, err)
 
 	return &action.Configuration{
@@ -83,16 +91,4 @@ func fakeUninstallConfiguration(t *testing.T) *action.Configuration {
 			t.Logf(format, v...)
 		},
 	}
-}
-
-func getMockRelease() *release.Release {
-	releaseOptions := &release.MockReleaseOptions{
-		Name:      testReleaseName,
-		Version:   1,
-		Namespace: "default",
-		Chart:     nil,
-		Status:    release.StatusDeployed,
-	}
-
-	return release.Mock(releaseOptions)
 }
