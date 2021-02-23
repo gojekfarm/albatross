@@ -76,7 +76,9 @@ func (s *TestSuite) TestNewUninstallerUsingFlagValues() {
 		DryRun:      dryRun,
 		KeepHistory: keepHistory,
 	}
+
 	u, err := s.c.NewUninstaller(uiFlags)
+
 	newUninstaller, ok := u.(*uninstaller)
 	assert.NoError(t, err)
 	assert.True(t, ok)

@@ -24,7 +24,9 @@ func TestUninstallShouldFailForInvalidRelease(t *testing.T) {
 		action:      action.NewUninstall(actionConfig),
 		envSettings: cli.New(),
 	}
+
 	_, err := u.Uninstall(context.Background(), testReleaseName+"-incorrect")
+
 	assert.Error(t, err)
 }
 
@@ -35,6 +37,7 @@ func TestUninstallShouldSucceedForValidRelease(t *testing.T) {
 		envSettings: cli.New(),
 	}
 	response, err := u.Uninstall(context.Background(), testReleaseName)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
 }
@@ -52,7 +55,9 @@ func TestUninstallShouldRemoveTheRelease(t *testing.T) {
 	releaseList, err := l.List(context.Background())
 	assert.Len(t, releaseList, 1)
 	require.NoError(t, err)
+
 	resp, err := u.Uninstall(context.Background(), testReleaseName)
+
 	assert.NotNil(t, resp)
 	require.NoError(t, err)
 	releaseList, err = l.List(context.Background())
