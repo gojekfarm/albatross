@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gotest.tools/assert"
+	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 
 	"github.com/gojekfarm/albatross/pkg/logger"
@@ -48,9 +49,17 @@ func (s *UninstallTestSuite) SetupTest() {
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	body := fmt.Sprintf(`{"release_name":"%v"}`, testReleaseName)
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/uninstall", s.server.URL), strings.NewReader(body))
-
+	
+	releaseOptions := &release.MockReleaseOptions{
+		Name:      testReleaseName,
+		Version:   1,
+		Namespace: "default",
+		Chart:     nil,
+		Status:    release.StatusDeployed,
+	}
+	mockRelease := releaseInfo(release.Mock(releaseOptions))
 	response := Response{
-		Release: releaseInfo(getMockRelease()),
+		Release: mockRelease,
 	}
 	s.mockService.On("Uninstall", mock.Anything, mock.AnythingOfType("Request")).Return(response, nil)
 
@@ -61,15 +70,10 @@ func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	var actualResponse Response
 	err = json.NewDecoder(res.Body).Decode(&actualResponse)
 	assert.NilError(s.T(), err)
-	expectedResponse := Response{
-		Error:   "",
-		Release: releaseInfo(getMockRelease()),
-	}
-
-	assert.Equal(s.T(), expectedResponse.Release.Name, actualResponse.Release.Name)
-	assert.Equal(s.T(), expectedResponse.Release.Version, actualResponse.Release.Version)
-	assert.Equal(s.T(), expectedResponse.Release.Namespace, actualResponse.Release.Namespace)
-	assert.Equal(s.T(), expectedResponse.Release.Status, actualResponse.Release.Status)
+	assert.Equal(s.T(), mockRelease.Name, actualResponse.Release.Name)
+	assert.Equal(s.T(), mockRelease.Version, actualResponse.Release.Version)
+	assert.Equal(s.T(), mockRelease.Namespace, actualResponse.Release.Namespace)
+	assert.Equal(s.T(), mockRelease.Status, actualResponse.Release.Status)
 	require.NoError(s.T(), err)
 	s.mockService.AssertExpectations(s.T())
 }

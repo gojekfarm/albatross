@@ -62,7 +62,14 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	req := Request{ReleaseName: testReleaseName}
 	cli.On("NewUninstaller", mock.AnythingOfType("flags.UninstallFlags")).Return(uic, nil)
 
-	mockRelease := getMockRelease()
+	releaseOptions := &release.MockReleaseOptions{
+		Name:      testReleaseName,
+		Version:   1,
+		Namespace: "default",
+		Chart:     nil,
+		Status:    release.StatusDeployed,
+	}
+	mockRelease := release.Mock(releaseOptions)
 	uiResponse := release.UninstallReleaseResponse{Release: mockRelease}
 	uic.On("Uninstall", ctx, testReleaseName).Return(&uiResponse, nil)
 
@@ -101,16 +108,4 @@ func TestShouldNotCrashOnFailure(t *testing.T) {
 	require.NotNil(t, resp)
 	cli.AssertExpectations(t)
 	uic.AssertExpectations(t)
-}
-
-func getMockRelease() *release.Release {
-	releaseOptions := &release.MockReleaseOptions{
-		Name:      testReleaseName,
-		Version:   1,
-		Namespace: "default",
-		Chart:     nil,
-		Status:    release.StatusDeployed,
-	}
-
-	return release.Mock(releaseOptions)
 }
