@@ -14,21 +14,16 @@ type Service struct {
 	cli helmcli.Client
 }
 
-// NewService returns an uninstall service.
-func NewService(cli helmcli.Client) Service {
-	return Service{cli}
-}
-
 // Uninstall a release according to the request provided and fails if req is incorrect.
 func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
-	unInstallFlags := &flags.UninstallFlags{
+	unInstallFlags := flags.UninstallFlags{
 		Release:      req.ReleaseName,
 		KeepHistory:  req.KeepHistory,
 		DryRun:       req.DryRun,
 		DisableHooks: req.DisableHooks,
 		GlobalFlags:  req.GlobalFlags,
 	}
-	u, err := s.cli.NewUninstaller(*unInstallFlags)
+	u, err := s.cli.NewUninstaller(unInstallFlags)
 
 	if err != nil {
 		return Response{}, fmt.Errorf("error while initializing uninstaller: %s", err)
@@ -43,15 +38,13 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 		return Response{}, err
 	}
 
-	return Response{
-		Status:  string(resp.Release.Info.Status),
-		Release: releaseInfo(resp.Release),
-	}, nil
+	return responseWithStatus(resp.Release), nil
 }
 
 func responseWithStatus(rel *release.Release) Response {
 	resp := Response{}
 	if rel != nil && rel.Info != nil {
+		resp.Release = releaseInfo(rel)
 		resp.Status = rel.Info.Status.String()
 	}
 	return resp
@@ -67,4 +60,9 @@ func releaseInfo(rel *release.Release) Release {
 		Chart:      rel.Chart.ChartFullPath(),
 		AppVersion: rel.Chart.AppVersion(),
 	}
+}
+
+// NewService returns an uninstall service.
+func NewService(cli helmcli.Client) Service {
+	return Service{cli}
 }

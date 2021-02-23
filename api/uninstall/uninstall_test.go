@@ -49,7 +49,7 @@ func (s *UninstallTestSuite) SetupTest() {
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	body := fmt.Sprintf(`{"release_name":"%v"}`, testReleaseName)
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/uninstall", s.server.URL), strings.NewReader(body))
-	
+
 	releaseOptions := &release.MockReleaseOptions{
 		Name:      testReleaseName,
 		Version:   1,
@@ -64,6 +64,7 @@ func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	s.mockService.On("Uninstall", mock.Anything, mock.AnythingOfType("Request")).Return(response, nil)
 
 	res, err := http.DefaultClient.Do(req)
+	
 	assert.Equal(s.T(), 200, res.StatusCode)
 	require.NoError(s.T(), err)
 
