@@ -70,6 +70,7 @@ func Handler(s service) http.Handler {
 				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
 				w.WriteHeader(http.StatusNotFound)
 			} else {
+				logger.Errorf("[Uninstall] unexpected error occured: %v", err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 
