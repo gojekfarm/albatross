@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
@@ -65,27 +66,28 @@ func (s *TestSuite) TestNewInstallerSetsChartOptionsUsingFlagValues() {
 
 func (s *TestSuite) TestNewUninstallerUsingFlagValues() {
 	t := s.T()
-	dryRun := false
-	keepHistory := false
-	disableHooks := false
+	dryRun := true
+	keepHistory := true
+	disableHooks := true
 	globalFlags := flags.GlobalFlags{
-		Namespace: "namespace",
+		Namespace: "minikube",
 	}
 	uiFlags := flags.UninstallFlags{
-		GlobalFlags: globalFlags,
-		DryRun:      dryRun,
-		KeepHistory: keepHistory,
+		GlobalFlags:  globalFlags,
+		DryRun:       dryRun,
+		KeepHistory:  keepHistory,
+		DisableHooks: disableHooks,
 	}
 
 	u, err := s.c.NewUninstaller(uiFlags)
 
 	newUninstaller, ok := u.(*uninstaller)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Equal(t, dryRun, newUninstaller.action.DryRun)
 	assert.Equal(t, disableHooks, newUninstaller.action.DisableHooks)
 	assert.Equal(t, keepHistory, newUninstaller.action.KeepHistory)
-	// assert.Equal(t, globalFlags.Namespace, newUninstaller.) // todo fails, uninstall does not have support for custom namespace
+	assert.Equal(t, globalFlags.KubeContext, newUninstaller.envSettings.KubeContext)
 }
 
 func TestHandler(t *testing.T) {

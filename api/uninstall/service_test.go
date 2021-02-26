@@ -2,6 +2,7 @@ package uninstall
 
 import (
 	"context"
+	"errors"
 	"log"
 	"testing"
 
@@ -16,6 +17,11 @@ import (
 )
 
 const testReleaseName = "test-release-name"
+
+var (
+	errNewUninstallerError  = errors.New("new uninstaller error")
+	errUninstallActionError = errors.New("uninstall action error")
+)
 
 // To satisfy the client interface, we have to define all methods(NewUpgrade, NewInstaller) on the mock struct
 // TODO: Find a way to isolate interface only for upgrade.
@@ -38,6 +44,9 @@ func (m *mockHelmClient) NewLister(fl flags.ListFlags) (helmcli.Lister, error) {
 
 func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninstaller, error) {
 	args := m.Called(fl)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }
 
@@ -60,8 +69,6 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{ReleaseName: testReleaseName}
-	cli.On("NewUninstaller", mock.AnythingOfType("flags.UninstallFlags")).Return(uic, nil)
-
 	releaseOptions := &release.MockReleaseOptions{
 		Name:      testReleaseName,
 		Version:   1,
@@ -69,17 +76,21 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 		Chart:     nil,
 		Status:    release.StatusDeployed,
 	}
+	uninstallFlags := flags.UninstallFlags{
+		Release: testReleaseName,
+	}
 	mockRelease := release.Mock(releaseOptions)
 	uiResponse := release.UninstallReleaseResponse{Release: mockRelease}
-	uic.On("Uninstall", ctx, testReleaseName).Return(&uiResponse, nil)
+	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
+	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(&uiResponse, nil)
 
 	resp, err := service.Uninstall(ctx, req)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Status)
+	assert.Empty(t, resp.Error)
 	rel := resp.Release
-	assert.Equal(t, resp.Error, "")
 	assert.Equal(t, rel.Name, mockRelease.Name)
 	assert.Equal(t, rel.Namespace, mockRelease.Namespace)
 	assert.Equal(t, rel.Version, mockRelease.Version)
@@ -92,20 +103,59 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	uic.AssertExpectations(t)
 }
 
-func TestShouldNotCrashOnFailure(t *testing.T) {
+func TestShouldHandleNewUninstallerFailureWithError(t *testing.T) {
+	cli := new(mockHelmClient)
+	service := NewService(cli)
+	ctx := context.Background()
+	req := Request{ReleaseName: testReleaseName}
+	uninstallFlags := flags.UninstallFlags{
+		Release:     testReleaseName,
+		GlobalFlags: flags.GlobalFlags{},
+	}
+	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(nil, errNewUninstallerError)
+
+	resp, err := service.Uninstall(ctx, req)
+
+	assert.True(t, errors.Is(err, errNewUninstallerError))
+	require.NotNil(t, resp)
+	cli.AssertExpectations(t)
+}
+
+func TestShouldReturnResponseAndProperErrorWhenReleaseIsNotFound(t *testing.T) {
 	cli := new(mockHelmClient)
 	uic := new(mockUninstaller)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{ReleaseName: testReleaseName}
-
-	cli.On("NewUninstaller", mock.AnythingOfType("flags.UninstallFlags")).Return(uic, nil)
-	uic.On("Uninstall", ctx, testReleaseName).Return(nil, driver.ErrReleaseNotFound)
+	globalFlag := flags.GlobalFlags{KubeContext: "minikube"}
+	req := Request{ReleaseName: testReleaseName, GlobalFlags: globalFlag}
+	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, GlobalFlags: globalFlag}
+	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
+	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(nil, driver.ErrReleaseNotFound)
 
 	resp, err := service.Uninstall(ctx, req)
 
 	assert.Error(t, err)
 	require.NotNil(t, resp)
+	assert.True(t, errors.Is(err, driver.ErrReleaseNotFound))
+	cli.AssertExpectations(t)
+	uic.AssertExpectations(t)
+}
+
+func TestShouldReturnResponseAndProperErrorWhenUninstallActionFails(t *testing.T) {
+	cli := new(mockHelmClient)
+	uic := new(mockUninstaller)
+	service := NewService(cli)
+	ctx := context.Background()
+	req := Request{ReleaseName: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
+	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
+	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
+	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(&release.UninstallReleaseResponse{}, errUninstallActionError)
+
+	resp, err := service.Uninstall(ctx, req)
+
+	assert.Error(t, err)
+	require.NotNil(t, resp)
+	assert.True(t, errors.Is(err, errUninstallActionError))
 	cli.AssertExpectations(t)
 	uic.AssertExpectations(t)
 }

@@ -24,20 +24,16 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 		GlobalFlags:  req.GlobalFlags,
 	}
 	u, err := s.cli.NewUninstaller(unInstallFlags)
-
 	if err != nil {
-		return Response{}, fmt.Errorf("error while initializing uninstaller: %s", err)
+		return Response{}, fmt.Errorf("error while initializing uninstaller: %w", err)
 	}
-
 	resp, err := u.Uninstall(ctx, req.ReleaseName)
-
 	if err != nil {
 		if resp != nil {
 			return responseWithStatus(resp.Release), err
 		}
 		return Response{}, err
 	}
-
 	return responseWithStatus(resp.Release), nil
 }
 

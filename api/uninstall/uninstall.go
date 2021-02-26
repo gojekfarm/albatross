@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"time"
 
@@ -15,7 +16,10 @@ import (
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
-var errInvalidReleaseName = errors.New("uninstall: invalid release name")
+var (
+	errInvalidReleaseName    = errors.New("uninstall: invalid release name")
+	errUnableToDecodeRequest = errors.New("unable to decode the json payload")
+)
 
 // Request encapsulates an Http Request.
 type Request struct {
@@ -55,12 +59,14 @@ func Handler(s service) http.Handler {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			logger.Errorf("[Uninstall] error decoding request: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
+			respondWithUninstallError(w, "", errUnableToDecodeRequest)
 			return
 		}
 
-		if err := checkMandatoryParams(req); err != nil {
+		if err := req.valid(); err != nil {
 			logger.Errorf("[Uninstall] error in request parameters: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
+			respondWithUninstallError(w, "", err)
 			return
 		}
 
@@ -73,8 +79,11 @@ func Handler(s service) http.Handler {
 				logger.Errorf("[Uninstall] unexpected error occurred: %v", err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-
-			respondWithUninstallError(w, "error while uninstalling release: %v", err)
+			resp.Error = err.Error()
+			err := json.NewEncoder(w).Encode(&resp)
+			if err != nil {
+				logger.Errorf("[Uninstall] Error writing response", err)
+			}
 			return
 		}
 
@@ -86,21 +95,20 @@ func Handler(s service) http.Handler {
 	})
 }
 
-func respondWithUninstallError(w http.ResponseWriter, logPrefix string, err error) {
-	response := Response{Error: err.Error()}
-	if err := json.NewEncoder(w).Encode(&response); err != nil {
-		logger.Errorf("[Uninstall] %s %v", logPrefix, err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
 // preemptive checking of params to ensure correct request params, is duplicated in action.Uninstall.Run,
 // but cannot fetch the type of error that's being returned since it's privately scoped.
-func checkMandatoryParams(req Request) error {
+func (req Request) valid() error {
 	releaseName := req.ReleaseName
 	if releaseName == "" || !action.ValidName.MatchString(releaseName) || len(releaseName) > 53 {
 		return errInvalidReleaseName
 	}
 	return nil
+}
+
+func respondWithUninstallError(w io.Writer, logPrefix string, err error) {
+	response := Response{Error: err.Error()}
+	if err := json.NewEncoder(w).Encode(&response); err != nil {
+		logger.Errorf("[Uninstall] %s %v", logPrefix, err)
+		return
+	}
 }
