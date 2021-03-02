@@ -88,6 +88,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, resp)
+	require.NotNil(t, resp.Release)
 	assert.NotEmpty(t, resp.Status)
 	assert.Empty(t, resp.Error)
 	rel := resp.Release
@@ -117,6 +118,7 @@ func TestShouldHandleNewUninstallerFailureWithError(t *testing.T) {
 	resp, err := service.Uninstall(ctx, req)
 
 	assert.True(t, errors.Is(err, errNewUninstallerError))
+	assert.Nil(t, resp.Release)
 	require.NotNil(t, resp)
 	cli.AssertExpectations(t)
 }
@@ -136,6 +138,7 @@ func TestShouldReturnResponseAndProperErrorWhenReleaseIsNotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	require.NotNil(t, resp)
+	assert.Nil(t, resp.Release)
 	assert.True(t, errors.Is(err, driver.ErrReleaseNotFound))
 	cli.AssertExpectations(t)
 	uic.AssertExpectations(t)
@@ -155,6 +158,7 @@ func TestShouldReturnResponseAndProperErrorWhenUninstallActionFails(t *testing.T
 
 	assert.Error(t, err)
 	require.NotNil(t, resp)
+	assert.Nil(t, resp.Release)
 	assert.True(t, errors.Is(err, errUninstallActionError))
 	cli.AssertExpectations(t)
 	uic.AssertExpectations(t)

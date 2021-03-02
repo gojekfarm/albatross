@@ -46,8 +46,8 @@ func responseWithStatus(rel *release.Release) Response {
 	return resp
 }
 
-func releaseInfo(rel *release.Release) Release {
-	return Release{
+func releaseInfo(rel *release.Release) *Release {
+	return &Release{
 		Name:       rel.Name,
 		Namespace:  rel.Namespace,
 		Version:    rel.Version,

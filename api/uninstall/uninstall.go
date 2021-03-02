@@ -41,9 +41,9 @@ type Release struct {
 }
 
 type Response struct {
-	Error   string  `json:"error,omitempty"`
-	Status  string  `json:"status"`
-	Release Release `json:"release"`
+	Error   string   `json:"error,omitempty"`
+	Status  string   `json:"status,omitempty"`
+	Release *Release `json:"release,omitempty"`
 }
 
 type service interface {
