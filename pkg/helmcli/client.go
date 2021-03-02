@@ -2,6 +2,7 @@ package helmcli
 
 import (
 	"context"
+	"time"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
@@ -38,6 +39,8 @@ func New() Client {
 }
 
 type helmClient struct{}
+
+const hooksTimeout time.Duration = time.Minute*5
 
 func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) (Upgrader, error) {
 	//TODO: ifpossible envconfig could be moved to actionconfig new, remove pointer usage of globalflags
@@ -123,7 +126,7 @@ func (c helmClient) NewUninstaller(flg flags.UninstallFlags) (Uninstaller, error
 	uninstall.KeepHistory = flg.KeepHistory
 	uninstall.DisableHooks = flg.DisableHooks
 	uninstall.DryRun = flg.DryRun
-	uninstall.Timeout = flg.Timeout
+	uninstall.Timeout = hooksTimeout
 
 	return &uninstaller{
 		action:      uninstall,

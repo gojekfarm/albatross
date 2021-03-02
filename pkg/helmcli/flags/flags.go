@@ -1,6 +1,5 @@
 package flags
 
-import "time"
 
 type GlobalFlags struct {
 	KubeContext   string `json:"kube_context,omitempty"`
@@ -38,6 +37,5 @@ type UninstallFlags struct {
 	KeepHistory  bool
 	DisableHooks bool
 	DryRun       bool
-	Timeout      time.Duration
 	GlobalFlags
 }
