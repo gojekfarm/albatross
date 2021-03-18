@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
@@ -61,6 +62,32 @@ func (s *TestSuite) TestNewInstallerSetsChartOptionsUsingFlagValues() {
 	assert.Equal(t, version, newInstaller.action.Version)
 	assert.Equal(t, dryRun, newInstaller.action.DryRun)
 	assert.Equal(t, globalFlags.Namespace, newInstaller.action.Namespace)
+}
+
+func (s *TestSuite) TestNewUninstallerUsingFlagValues() {
+	t := s.T()
+	dryRun := true
+	keepHistory := true
+	disableHooks := true
+	globalFlags := flags.GlobalFlags{
+		Namespace: "minikube",
+	}
+	uiFlags := flags.UninstallFlags{
+		GlobalFlags:  globalFlags,
+		DryRun:       dryRun,
+		KeepHistory:  keepHistory,
+		DisableHooks: disableHooks,
+	}
+
+	u, err := s.c.NewUninstaller(uiFlags)
+
+	newUninstaller, ok := u.(*uninstaller)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Equal(t, dryRun, newUninstaller.action.DryRun)
+	assert.Equal(t, disableHooks, newUninstaller.action.DisableHooks)
+	assert.Equal(t, keepHistory, newUninstaller.action.KeepHistory)
+	assert.Equal(t, globalFlags.KubeContext, newUninstaller.envSettings.KubeContext)
 }
 
 func TestHandler(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"github.com/gojekfarm/albatross/api"
 	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
+	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/logger"
@@ -35,9 +36,11 @@ func startServer() {
 	installHandler := install.Handler(install.NewService(cli))
 	upgradeHandler := upgrade.Handler(upgrade.NewService(cli))
 	listHandler := list.Handler(list.NewService(cli))
+	uninstallHandler := uninstall.Handler(uninstall.NewService(cli))
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
 	router.Handle("/list", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
+	router.Handle("/uninstall", ContentTypeMiddle(uninstallHandler)).Methods(http.MethodDelete)
 	router.Handle("/install", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
 	router.Handle("/upgrade", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
 

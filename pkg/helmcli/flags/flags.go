@@ -1,5 +1,7 @@
 package flags
 
+import "time"
+
 type GlobalFlags struct {
 	KubeContext   string `json:"kube_context,omitempty"`
 	KubeToken     string `json:"kube_token,omitempty"`
@@ -27,5 +29,15 @@ type ListFlags struct {
 	Pending       bool
 	Uninstalled   bool
 	Uninstalling  bool
+	GlobalFlags
+}
+
+// UninstallFlags maps the list of options that can be passed to the helm action.
+type UninstallFlags struct {
+	Release      string
+	KeepHistory  bool
+	DisableHooks bool
+	DryRun       bool
+	Timeout      time.Duration
 	GlobalFlags
 }
