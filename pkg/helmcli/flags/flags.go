@@ -1,6 +1,5 @@
 package flags
 
-
 type GlobalFlags struct {
 	KubeContext   string `json:"kube_context,omitempty"`
 	KubeToken     string `json:"kube_token,omitempty"`

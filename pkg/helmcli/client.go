@@ -40,7 +40,7 @@ func New() Client {
 
 type helmClient struct{}
 
-const hooksTimeout time.Duration = time.Minute*5
+const hooksTimeout time.Duration = time.Minute * 5
 
 func (c helmClient) NewUpgrader(flg flags.UpgradeFlags) (Upgrader, error) {
 	//TODO: ifpossible envconfig could be moved to actionconfig new, remove pointer usage of globalflags
