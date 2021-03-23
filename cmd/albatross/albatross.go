@@ -11,6 +11,7 @@ import (
 	"github.com/gojekfarm/albatross/api/list"
 	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
+	_ "github.com/gojekfarm/albatross/docs"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/logger"
 

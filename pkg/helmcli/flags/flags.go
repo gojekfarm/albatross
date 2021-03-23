@@ -2,11 +2,15 @@ package flags
 
 import "time"
 
+// GlobalFlags flags which give context about kubernetes cluster to connect to
+// swagger:model globalFlags
 type GlobalFlags struct {
+	// required: true
 	KubeContext   string `json:"kube_context,omitempty"`
 	KubeToken     string `json:"kube_token,omitempty"`
 	KubeAPIServer string `json:"kube_apiserver,omitempty"`
-	Namespace     string
+	// required: true
+	Namespace string
 }
 
 type UpgradeFlags struct {

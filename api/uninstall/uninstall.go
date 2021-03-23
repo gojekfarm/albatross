@@ -21,19 +21,33 @@ var (
 	errUnableToDecodeRequest = errors.New("unable to decode the json payload")
 )
 
-// Request encapsulates an Http Request.
+// Request Uninstall request body
+// swagger:model uninstall-request model
 type Request struct {
-	ReleaseName  string `json:"release_name"`
-	DryRun       bool   `json:"dry_run"`
-	KeepHistory  bool   `json:"keep_history"`
-	DisableHooks bool   `json:"disable_hooks"`
+	// required: true
+	ReleaseName string `json:"release_name"`
+
+	// required: false
+	DryRun bool `json:"dry_run"`
+
+	// required: false
+	KeepHistory bool `json:"keep_history"`
+
+	// required: false
+	DisableHooks bool `json:"disable_hooks"`
 	flags.GlobalFlags
 }
 
+// Release contains metadata about a helm release object
+// swagger:model uninstallRelease
 type Release struct {
-	Name       string         `json:"name"`
-	Namespace  string         `json:"namespace"`
-	Version    int            `json:"version"`
+	// example: mysql
+	Name string `json:"name"`
+	// example: default
+	Namespace string `json:"namespace"`
+	// example: 1
+	Version int `json:"version"`
+	// example:
 	Updated    time.Time      `json:"updated_at,omitempty"`
 	Status     release.Status `json:"status"`
 	Chart      string         `json:"chart"`
@@ -41,8 +55,11 @@ type Release struct {
 }
 
 type Response struct {
-	Error   string   `json:"error,omitempty"`
-	Status  string   `json:"status,omitempty"`
+	// Error error message, field is available only when status code is non 2xx
+	Error string `json:"error,omitempty"`
+	// Status status of the release, field is available only when status code is 2xx
+	Status string `json:"status,omitempty"`
+	// Release release meta data, field is available only when status code is 2xx
 	Release *Release `json:"release,omitempty"`
 }
 
@@ -50,7 +67,18 @@ type service interface {
 	Uninstall(context.Context, Request) (Response, error)
 }
 
-// Handler creates a handler function to respond to delete requests.
+// Handler handles an uninstall request
+// swagger:route DELETE /uninstall uninstallRelease
+//
+// Uninstall a helm release as specified in the request
+//
+// consumes:
+//	- application/json
+// produces:
+// 	- application/json
+// schemes: http
+// responses:
+//   200: uninstallResponse
 func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
