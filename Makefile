@@ -56,8 +56,6 @@ run: build
 
 update-doc:
 	./scripts/swagger.sh create_doc
-
-validate-doc:
 	./scripts/swagger.sh validate_doc
 
 serve-api-doc:

@@ -1,6 +1,7 @@
 package docs
 
 import (
+	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
 	"github.com/gojekfarm/albatross/api/uninstall"
 )
@@ -31,4 +32,18 @@ type ListRequest struct {
 type ListResponse struct {
 	//in: body
 	Body list.Response
+}
+
+// InstallRequest installing a release
+// swagger:parameters installRelease
+type InstallRequest struct {
+	//in: body
+	Body install.Request
+}
+
+// InstallResponse response from an install request
+// swagger:response installResponse
+type InstallResponse struct {
+	//in: body
+	Body install.Response
 }

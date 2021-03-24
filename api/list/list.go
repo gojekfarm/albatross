@@ -47,19 +47,19 @@ type Flags struct {
 // swagger:model listRelease
 type Release struct {
 	// example: mysql-5.7
-	Name       string         `json:"name"`
+	Name string `json:"name"`
 	// example: default
-	Namespace  string         `json:"namespace"`
+	Namespace string `json:"namespace"`
 	// example: 1
-	Version    int            `json:"version"`
+	Version int `json:"version"`
 	// example: 2021-03-24T12:24:18.450869+05:30
-	Updated    time.Time      `json:"updated_at,omitempty"`
+	Updated time.Time `json:"updated_at,omitempty"`
 	// example: deployed
-	Status     release.Status `json:"status"`
+	Status release.Status `json:"status"`
 	// example: mysql
-	Chart      string         `json:"chart"`
+	Chart string `json:"chart"`
 	// example: 5.7.30
-	AppVersion string         `json:"app_version"`
+	AppVersion string `json:"app_version"`
 }
 
 // Response is the body of /list
@@ -74,10 +74,10 @@ type service interface {
 	List(ctx context.Context, req Request) (Response, error)
 }
 
-// Handler handles an uninstall request
+// Handler handles a list request
 // swagger:route GET /list listRelease
 //
-// Uninstall a helm release as specified in the request
+// List helm releases as specified in the request
 //
 // consumes:
 //	- application/json
