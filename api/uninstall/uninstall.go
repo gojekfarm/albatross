@@ -22,18 +22,22 @@ var (
 )
 
 // Request Uninstall request body
-// swagger:model uninstall-request model
+// swagger:model uninstallRequestBody
 type Request struct {
 	// required: true
+	// example: mysql-5.7
 	ReleaseName string `json:"release_name"`
 
 	// required: false
+	// example: false
 	DryRun bool `json:"dry_run"`
 
 	// required: false
+	// example: false
 	KeepHistory bool `json:"keep_history"`
 
 	// required: false
+	// example: false
 	DisableHooks bool `json:"disable_hooks"`
 	flags.GlobalFlags
 }
@@ -41,19 +45,24 @@ type Request struct {
 // Release contains metadata about a helm release object
 // swagger:model uninstallRelease
 type Release struct {
-	// example: mysql
+	// example: mysql-5.7
 	Name string `json:"name"`
 	// example: default
 	Namespace string `json:"namespace"`
 	// example: 1
 	Version int `json:"version"`
-	// example:
-	Updated    time.Time      `json:"updated_at,omitempty"`
-	Status     release.Status `json:"status"`
-	Chart      string         `json:"chart"`
-	AppVersion string         `json:"app_version"`
+	// example: 2021-03-24T12:24:18.450869+05:30
+	Updated time.Time `json:"updated_at,omitempty"`
+	// example: deployed
+	Status release.Status `json:"status"`
+	// example: mysql
+	Chart string `json:"chart"`
+	// example: 5.7.30
+	AppVersion string `json:"app_version"`
 }
 
+// Response is the body of uninstall route
+// swagger:model uninstallResponseBody
 type Response struct {
 	// Error error message, field is available only when status code is non 2xx
 	Error string `json:"error,omitempty"`

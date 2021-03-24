@@ -5,11 +5,14 @@ import "time"
 // GlobalFlags flags which give context about kubernetes cluster to connect to
 // swagger:model globalFlags
 type GlobalFlags struct {
-	// required: true
-	KubeContext   string `json:"kube_context,omitempty"`
-	KubeToken     string `json:"kube_token,omitempty"`
+	// example: minikube
+	KubeContext string `json:"kube_context,omitempty"`
+	// required: false
+	KubeToken string `json:"kube_token,omitempty"`
+	// required: false
 	KubeAPIServer string `json:"kube_apiserver,omitempty"`
 	// required: true
+	// example: default
 	Namespace string `json:"namespace"`
 }
 

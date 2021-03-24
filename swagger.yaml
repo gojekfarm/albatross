@@ -2,40 +2,244 @@ basePath: /
 consumes:
 - application/json
 definitions:
-  Request:
-    description: Request Uninstall request body
+  globalFlags:
+    description: GlobalFlags flags which give context about kubernetes cluster to
+      connect to
     properties:
-      disable_hooks:
-        type: boolean
-        x-go-name: DisableHooks
-      dry_run:
-        type: boolean
-        x-go-name: DryRun
-      keep_history:
-        type: boolean
-        x-go-name: KeepHistory
       kube_apiserver:
         type: string
         x-go-name: KubeAPIServer
       kube_context:
+        example: minikube
         type: string
         x-go-name: KubeContext
       kube_token:
         type: string
         x-go-name: KubeToken
       namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+    required:
+    - namespace
+    type: object
+    x-go-name: GlobalFlags
+    x-go-package: github.com/gojekfarm/albatross/pkg/helmcli/flags
+  listRelease:
+    description: Release wraps a helm release
+    properties:
+      app_version:
+        example: 5.7.30
+        type: string
+        x-go-name: AppVersion
+      chart:
+        example: mysql
+        type: string
+        x-go-name: Chart
+      name:
+        example: mysql-5.7
+        type: string
+        x-go-name: Name
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      status:
+        example: deployed
+        x-go-name: Status
+      updated_at:
+        example: "2021-03-24T12:24:18.450869+05:30"
+        x-go-name: Updated
+      version:
+        example: 1
+        format: int64
+        type: integer
+        x-go-name: Version
+    type: object
+    x-go-name: Release
+    x-go-package: github.com/gojekfarm/albatross/api/list
+  listReponseBody:
+    description: Response is the body of /list
+    properties:
+      error:
+        description: Error field is available only when the response status code is
+          non 2xx
+        type: string
+        x-go-name: Error
+      releases:
+        items:
+          $ref: '#/definitions/listRelease'
+        type: array
+        x-go-name: Releases
+    type: object
+    x-go-name: Response
+    x-go-package: github.com/gojekfarm/albatross/api/list
+  listRequestBody:
+    description: Request is body of List Route
+    properties:
+      all-namespaces:
+        example: false
+        type: boolean
+        x-go-name: AllNamespaces
+      deployed:
+        example: false
+        type: boolean
+        x-go-name: Deployed
+      failed:
+        example: false
+        type: boolean
+        x-go-name: Failed
+      kube_apiserver:
+        type: string
+        x-go-name: KubeAPIServer
+      kube_context:
+        example: minikube
+        type: string
+        x-go-name: KubeContext
+      kube_token:
+        type: string
+        x-go-name: KubeToken
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      pending:
+        example: false
+        type: boolean
+        x-go-name: Pending
+      uninstalled:
+        example: false
+        type: boolean
+        x-go-name: Uninstalled
+      uninstalling:
+        example: false
+        type: boolean
+        x-go-name: Uninstalling
+    required:
+    - namespace
+    type: object
+    x-go-name: Request
+    x-go-package: github.com/gojekfarm/albatross/api/list
+  listRequestFlags:
+    description: Flags contains all the params supported
+    properties:
+      all-namespaces:
+        example: false
+        type: boolean
+        x-go-name: AllNamespaces
+      deployed:
+        example: false
+        type: boolean
+        x-go-name: Deployed
+      failed:
+        example: false
+        type: boolean
+        x-go-name: Failed
+      kube_apiserver:
+        type: string
+        x-go-name: KubeAPIServer
+      kube_context:
+        example: minikube
+        type: string
+        x-go-name: KubeContext
+      kube_token:
+        type: string
+        x-go-name: KubeToken
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      pending:
+        example: false
+        type: boolean
+        x-go-name: Pending
+      uninstalled:
+        example: false
+        type: boolean
+        x-go-name: Uninstalled
+      uninstalling:
+        example: false
+        type: boolean
+        x-go-name: Uninstalling
+    required:
+    - namespace
+    type: object
+    x-go-name: Flags
+    x-go-package: github.com/gojekfarm/albatross/api/list
+  uninstallRelease:
+    description: Release contains metadata about a helm release object
+    properties:
+      app_version:
+        example: 5.7.30
+        type: string
+        x-go-name: AppVersion
+      chart:
+        example: mysql
+        type: string
+        x-go-name: Chart
+      name:
+        example: mysql-5.7
+        type: string
+        x-go-name: Name
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      status:
+        example: deployed
+        x-go-name: Status
+      updated_at:
+        example: "2021-03-24T12:24:18.450869+05:30"
+        x-go-name: Updated
+      version:
+        example: 1
+        format: int64
+        type: integer
+        x-go-name: Version
+    type: object
+    x-go-name: Release
+    x-go-package: github.com/gojekfarm/albatross/api/uninstall
+  uninstallRequestBody:
+    description: Request Uninstall request body
+    properties:
+      disable_hooks:
+        example: false
+        type: boolean
+        x-go-name: DisableHooks
+      dry_run:
+        example: false
+        type: boolean
+        x-go-name: DryRun
+      keep_history:
+        example: false
+        type: boolean
+        x-go-name: KeepHistory
+      kube_apiserver:
+        type: string
+        x-go-name: KubeAPIServer
+      kube_context:
+        example: minikube
+        type: string
+        x-go-name: KubeContext
+      kube_token:
+        type: string
+        x-go-name: KubeToken
+      namespace:
+        example: default
         type: string
         x-go-name: Namespace
       release_name:
+        example: mysql-5.7
         type: string
         x-go-name: ReleaseName
     required:
-    - kube_context
     - namespace
     - release_name
     type: object
+    x-go-name: Request
     x-go-package: github.com/gojekfarm/albatross/api/uninstall
-  Response:
+  uninstallResponseBody:
+    description: Response is the body of uninstall route
     properties:
       error:
         description: Error error message, field is available only when status code
@@ -50,63 +254,31 @@ definitions:
         type: string
         x-go-name: Status
     type: object
-    x-go-package: github.com/gojekfarm/albatross/api/uninstall
-  globalFlags:
-    description: GlobalFlags flags which give context about kubernetes cluster to
-      connect to
-    properties:
-      kube_apiserver:
-        type: string
-        x-go-name: KubeAPIServer
-      kube_context:
-        type: string
-        x-go-name: KubeContext
-      kube_token:
-        type: string
-        x-go-name: KubeToken
-      namespace:
-        type: string
-        x-go-name: Namespace
-    required:
-    - kube_context
-    - namespace
-    type: object
-    x-go-name: GlobalFlags
-    x-go-package: github.com/gojekfarm/albatross/pkg/helmcli/flags
-  uninstallRelease:
-    description: Release contains metadata about a helm release object
-    properties:
-      app_version:
-        type: string
-        x-go-name: AppVersion
-      chart:
-        type: string
-        x-go-name: Chart
-      name:
-        example: mysql
-        type: string
-        x-go-name: Name
-      namespace:
-        example: default
-        type: string
-        x-go-name: Namespace
-      status:
-        x-go-name: Status
-      updated_at:
-        x-go-name: Updated
-      version:
-        example: 1
-        format: int64
-        type: integer
-        x-go-name: Version
-    type: object
-    x-go-name: Release
+    x-go-name: Response
     x-go-package: github.com/gojekfarm/albatross/api/uninstall
 info:
   description: Documentation of our awesome API.
   title: Albatross API.
   version: 0.1.1
 paths:
+  /list:
+    get:
+      consumes:
+      - application/json
+      description: Uninstall a helm release as specified in the request
+      operationId: listRelease
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/listRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/listResponse'
+      schemes:
+      - http
   /uninstall:
     delete:
       consumes:
@@ -117,7 +289,7 @@ paths:
       - in: body
         name: Body
         schema:
-          $ref: '#/definitions/Request'
+          $ref: '#/definitions/uninstallRequestBody'
       produces:
       - application/json
       responses:
@@ -128,10 +300,14 @@ paths:
 produces:
 - application/json
 responses:
+  listResponse:
+    description: ListResponse stub for swagger route for List
+    schema:
+      $ref: '#/definitions/listReponseBody'
   uninstallResponse:
     description: UninstallResponse stub for swagger route for uninstall
     schema:
-      $ref: '#/definitions/Response'
+      $ref: '#/definitions/uninstallResponseBody'
 schemes:
 - http
 swagger: "2.0"
