@@ -30,6 +30,13 @@ make run
 
 Albatross is under development, and there will be breaking changes as part of it's evolution.
 
+## Contributing
+
+To setup local development environment, make sure you have [pre-commit](https://pre-commit.com/#install) framework installed.
+
+Install the precommit hooks using 
+```pre-commmit install```
+
 ## License
 
 ```
