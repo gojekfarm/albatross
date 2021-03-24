@@ -5,8 +5,6 @@ definitions:
   Request:
     description: Request Uninstall request body
     properties:
-      Namespace:
-        type: string
       disable_hooks:
         type: boolean
         x-go-name: DisableHooks
@@ -25,12 +23,15 @@ definitions:
       kube_token:
         type: string
         x-go-name: KubeToken
+      namespace:
+        type: string
+        x-go-name: Namespace
       release_name:
         type: string
         x-go-name: ReleaseName
     required:
     - kube_context
-    - Namespace
+    - namespace
     - release_name
     type: object
     x-go-package: github.com/gojekfarm/albatross/api/uninstall
@@ -54,8 +55,6 @@ definitions:
     description: GlobalFlags flags which give context about kubernetes cluster to
       connect to
     properties:
-      Namespace:
-        type: string
       kube_apiserver:
         type: string
         x-go-name: KubeAPIServer
@@ -65,9 +64,12 @@ definitions:
       kube_token:
         type: string
         x-go-name: KubeToken
+      namespace:
+        type: string
+        x-go-name: Namespace
     required:
     - kube_context
-    - Namespace
+    - namespace
     type: object
     x-go-name: GlobalFlags
     x-go-package: github.com/gojekfarm/albatross/pkg/helmcli/flags

@@ -10,7 +10,7 @@ type GlobalFlags struct {
 	KubeToken     string `json:"kube_token,omitempty"`
 	KubeAPIServer string `json:"kube_apiserver,omitempty"`
 	// required: true
-	Namespace string
+	Namespace string `json:"namespace"`
 }
 
 type UpgradeFlags struct {
