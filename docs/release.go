@@ -4,6 +4,7 @@ import (
 	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
 	"github.com/gojekfarm/albatross/api/uninstall"
+	"github.com/gojekfarm/albatross/api/upgrade"
 )
 
 // UninstallResponse stub for swagger route for uninstall
@@ -46,4 +47,18 @@ type InstallRequest struct {
 type InstallResponse struct {
 	//in: body
 	Body install.Response
+}
+
+// UpgradeRequest upgrading a request
+// swagger:parameters upgradeRelease
+type UpgradeRequest struct {
+	//in: body
+	Body upgrade.Request
+}
+
+// UpgradeResponse response from an upgrade request
+// swagger:response upgradeResponse
+type UpgradeResponse struct {
+	//in: body
+	Body upgrade.Response
 }

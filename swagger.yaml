@@ -1,7 +1,23 @@
-basePath: /
 consumes:
 - application/json
 definitions:
+  Response:
+    properties:
+      data:
+        type: string
+        x-go-name: Data
+      error:
+        description: Error field is available only when the response status code is
+          non 2xx
+        type: string
+        x-go-name: Error
+      status:
+        example: deployed
+        type: string
+        x-go-name: Status
+    title: Response represents the api response for upgrade request.
+    type: object
+    x-go-package: github.com/gojekfarm/albatross/api/upgrade
   globalFlags:
     description: GlobalFlags flags which give context about kubernetes cluster to
       connect to
@@ -360,6 +376,97 @@ definitions:
     type: object
     x-go-name: Response
     x-go-package: github.com/gojekfarm/albatross/api/uninstall
+  upgradeFlags:
+    description: Flags additional flags supported while upgrading a release
+    properties:
+      dry_run:
+        example: false
+        type: boolean
+        x-go-name: DryRun
+      install:
+        example: true
+        type: boolean
+        x-go-name: Install
+      kube_apiserver:
+        type: string
+        x-go-name: KubeAPIServer
+      kube_context:
+        example: minikube
+        type: string
+        x-go-name: KubeContext
+      kube_token:
+        type: string
+        x-go-name: KubeToken
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      version:
+        example: "2"
+        type: string
+        x-go-name: Version
+    required:
+    - namespace
+    type: object
+    x-go-name: Flags
+    x-go-package: github.com/gojekfarm/albatross/api/upgrade
+  upgradeReleaseBody:
+    description: Release wrapper for helm release
+    properties:
+      app_version:
+        example: 5.7.30
+        type: string
+        x-go-name: AppVersion
+      chart:
+        example: mysql
+        type: string
+        x-go-name: Chart
+      name:
+        example: mysql-5.7
+        type: string
+        x-go-name: Name
+      namespace:
+        example: default
+        type: string
+        x-go-name: Namespace
+      status:
+        example: deployed
+        x-go-name: Status
+      updated_at:
+        example: "2021-03-24T12:24:18.450869+05:30"
+        x-go-name: Updated
+      version:
+        example: 2
+        format: int64
+        type: integer
+        x-go-name: Version
+    type: object
+    x-go-name: Release
+    x-go-package: github.com/gojekfarm/albatross/api/upgrade
+  upgradeRequestBody:
+    description: Request is the body for upgrading a release
+    properties:
+      chart:
+        example: stable/mysql
+        type: string
+        x-go-name: Chart
+      flags:
+        $ref: '#/definitions/upgradeFlags'
+      name:
+        example: mysql
+        type: string
+        x-go-name: Name
+      values:
+        additionalProperties:
+          type: object
+        example:
+          replicaCount: 1
+        type: object
+        x-go-name: Values
+    type: object
+    x-go-name: Request
+    x-go-package: github.com/gojekfarm/albatross/api/upgrade
+host: "8080"
 info:
   description: Documentation of our awesome API.
   title: Albatross API.
@@ -419,6 +526,24 @@ paths:
           $ref: '#/responses/uninstallResponse'
       schemes:
       - http
+  /upgrade:
+    post:
+      consumes:
+      - application/json
+      description: Upgrades a helm release as specified in the request
+      operationId: upgradeRelease
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/upgradeRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/upgradeResponse'
+      schemes:
+      - http
 produces:
 - application/json
 responses:
@@ -434,6 +559,10 @@ responses:
     description: UninstallResponse stub for swagger route for uninstall
     schema:
       $ref: '#/definitions/uninstallResponseBody'
+  upgradeResponse:
+    description: UpgradeResponse response from an upgrade request
+    schema:
+      $ref: '#/definitions/Response'
 schemes:
 - http
 swagger: "2.0"

@@ -3,7 +3,7 @@
 // Documentation of our awesome API.
 //
 //     Schemes: http
-//     BasePath: /
+//     BasePath: localhost:8080
 //     Version: 0.1.1
 //
 //     Consumes:
