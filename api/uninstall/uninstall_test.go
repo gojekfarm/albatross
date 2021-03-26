@@ -48,10 +48,11 @@ func (s *UninstallTestSuite) SetupTest() {
 }
 
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
-	body := fmt.Sprintf(`{"release_name":"%v"}`, testReleaseName)
+	body := fmt.Sprintf(`{"release_name":"%v", "timeout":2}`, testReleaseName)
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/uninstall", s.server.URL), strings.NewReader(body))
 	requestSturct := Request{
 		ReleaseName: testReleaseName,
+		Timeout:     2,
 	}
 	releaseOptions := &release.MockReleaseOptions{
 		Name:      testReleaseName,
