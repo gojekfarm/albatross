@@ -11,7 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
-const defaultTimeout = 5 * time.Minute
+const defaultTimeout = 300 * time.Second
 
 type Service struct {
 	cli helmcli.Client
