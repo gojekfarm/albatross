@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
@@ -78,6 +79,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	}
 	uninstallFlags := flags.UninstallFlags{
 		Release: testReleaseName,
+		Timeout: defaultTimeout,
 	}
 	mockRelease := release.Mock(releaseOptions)
 	uiResponse := release.UninstallReleaseResponse{Release: mockRelease}
@@ -108,10 +110,11 @@ func TestShouldHandleNewUninstallerFailureWithError(t *testing.T) {
 	cli := new(mockHelmClient)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{ReleaseName: testReleaseName}
+	req := Request{ReleaseName: testReleaseName, Timeout: 2}
 	uninstallFlags := flags.UninstallFlags{
 		Release:     testReleaseName,
 		GlobalFlags: flags.GlobalFlags{},
+		Timeout:     time.Second * 2,
 	}
 	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(nil, errNewUninstallerError)
 
@@ -130,7 +133,7 @@ func TestShouldReturnResponseAndProperErrorWhenReleaseIsNotFound(t *testing.T) {
 	ctx := context.Background()
 	globalFlag := flags.GlobalFlags{KubeContext: "minikube"}
 	req := Request{ReleaseName: testReleaseName, GlobalFlags: globalFlag}
-	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, GlobalFlags: globalFlag}
+	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, GlobalFlags: globalFlag, Timeout: defaultTimeout}
 	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
 	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(nil, driver.ErrReleaseNotFound)
 
@@ -150,7 +153,7 @@ func TestShouldReturnResponseAndProperErrorWhenUninstallActionFails(t *testing.T
 	service := NewService(cli)
 	ctx := context.Background()
 	req := Request{ReleaseName: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
-	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
+	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true, Timeout: defaultTimeout}
 	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
 	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(&release.UninstallReleaseResponse{}, errUninstallActionError)
 

@@ -39,6 +39,10 @@ type Request struct {
 	// required: false
 	// example: false
 	DisableHooks bool `json:"disable_hooks"`
+
+	// required: false
+	//example: 300
+	Timeout int `json:"timeout"`
 	flags.GlobalFlags
 }
 

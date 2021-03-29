@@ -3,6 +3,7 @@ package uninstall
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
@@ -10,17 +11,26 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
+const defaultTimeout = 5 * time.Minute
+
 type Service struct {
 	cli helmcli.Client
 }
 
 // Uninstall a release according to the request provided and fails if req is incorrect.
 func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
+	var timeout time.Duration
+	if req.Timeout < 1 {
+		timeout = defaultTimeout
+	} else {
+		timeout = time.Second * time.Duration(req.Timeout)
+	}
 	unInstallFlags := flags.UninstallFlags{
 		Release:      req.ReleaseName,
 		KeepHistory:  req.KeepHistory,
 		DryRun:       req.DryRun,
 		DisableHooks: req.DisableHooks,
+		Timeout:      timeout,
 		GlobalFlags:  req.GlobalFlags,
 	}
 	u, err := s.cli.NewUninstaller(unInstallFlags)
