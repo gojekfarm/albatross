@@ -1,0 +1,764 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation of our awesome API.",
+    "title": "Albatross API.",
+    "version": "0.1.1"
+  },
+  "host": "8080",
+  "paths": {
+    "/install": {
+      "put": {
+        "description": "Installs a helm release as specified in the request",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "operationId": "installRelease",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/installRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/installResponse"
+          }
+        }
+      }
+    },
+    "/list": {
+      "get": {
+        "description": "List helm releases as specified in the request",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "operationId": "listRelease",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/listRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      }
+    },
+    "/uninstall": {
+      "delete": {
+        "description": "Uninstall a helm release as specified in the request",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "operationId": "uninstallRelease",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/uninstallRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/uninstallResponse"
+          }
+        }
+      }
+    },
+    "/upgrade": {
+      "post": {
+        "description": "Upgrades a helm release as specified in the request",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "operationId": "upgradeRelease",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/upgradeRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/upgradeResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Response": {
+      "type": "object",
+      "title": "Response represents the api response for upgrade request.",
+      "properties": {
+        "data": {
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "error": {
+          "description": "Error field is available only when the response status code is non 2xx",
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "deployed"
+        }
+      },
+      "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    },
+    "globalFlags": {
+      "description": "GlobalFlags flags which give context about kubernetes cluster to connect to",
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        }
+      },
+      "x-go-name": "GlobalFlags",
+      "x-go-package": "github.com/gojekfarm/albatross/pkg/helmcli/flags"
+    },
+    "installFlags": {
+      "description": "Flags additional flags for installing a release",
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "x-go-name": "DryRun",
+          "example": false
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "Version",
+          "example": "1"
+        }
+      },
+      "x-go-name": "Flags",
+      "x-go-package": "github.com/gojekfarm/albatross/api/install"
+    },
+    "installRelease": {
+      "description": "Release wrapper for helm release",
+      "type": "object",
+      "properties": {
+        "app_version": {
+          "type": "string",
+          "x-go-name": "AppVersion",
+          "example": "5.7.30"
+        },
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "mysql"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql-5.7"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "status": {
+          "x-go-name": "Status",
+          "example": "deployed"
+        },
+        "updated_at": {
+          "x-go-name": "Updated",
+          "example": "2021-03-24T12:24:18.450869+05:30"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Version",
+          "example": 1
+        }
+      },
+      "x-go-name": "Release",
+      "x-go-package": "github.com/gojekfarm/albatross/api/install"
+    },
+    "installRequestBody": {
+      "description": "Request is the body for insatlling a release",
+      "type": "object",
+      "properties": {
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "stable/mysql"
+        },
+        "flags": {
+          "$ref": "#/definitions/installFlags"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Values",
+          "example": {
+            "replicaCount": 1
+          }
+        }
+      },
+      "x-go-name": "Request",
+      "x-go-package": "github.com/gojekfarm/albatross/api/install"
+    },
+    "installResponseBody": {
+      "description": "Response body of install response",
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "error": {
+          "description": "Error error message, field is available only when status code is non 2xx",
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status",
+          "example": "deployed"
+        }
+      },
+      "x-go-name": "Response",
+      "x-go-package": "github.com/gojekfarm/albatross/api/install"
+    },
+    "listRelease": {
+      "description": "Release wraps a helm release",
+      "type": "object",
+      "properties": {
+        "app_version": {
+          "type": "string",
+          "x-go-name": "AppVersion",
+          "example": "5.7.30"
+        },
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "mysql"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql-5.7"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "status": {
+          "x-go-name": "Status",
+          "example": "deployed"
+        },
+        "updated_at": {
+          "x-go-name": "Updated",
+          "example": "2021-03-24T12:24:18.450869+05:30"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Version",
+          "example": 1
+        }
+      },
+      "x-go-name": "Release",
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "listReponseBody": {
+      "description": "Response is the body of /list",
+      "type": "object",
+      "properties": {
+        "error": {
+          "description": "Error field is available only when the response status code is non 2xx",
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "releases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/listRelease"
+          },
+          "x-go-name": "Releases"
+        }
+      },
+      "x-go-name": "Response",
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "listRequestBody": {
+      "description": "Request is body of List Route",
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "all-namespaces": {
+          "type": "boolean",
+          "x-go-name": "AllNamespaces",
+          "example": false
+        },
+        "deployed": {
+          "type": "boolean",
+          "x-go-name": "Deployed",
+          "example": false
+        },
+        "failed": {
+          "type": "boolean",
+          "x-go-name": "Failed",
+          "example": false
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "pending": {
+          "type": "boolean",
+          "x-go-name": "Pending",
+          "example": false
+        },
+        "uninstalled": {
+          "type": "boolean",
+          "x-go-name": "Uninstalled",
+          "example": false
+        },
+        "uninstalling": {
+          "type": "boolean",
+          "x-go-name": "Uninstalling",
+          "example": false
+        }
+      },
+      "x-go-name": "Request",
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "listRequestFlags": {
+      "description": "Flags contains all the params supported",
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "all-namespaces": {
+          "type": "boolean",
+          "x-go-name": "AllNamespaces",
+          "example": false
+        },
+        "deployed": {
+          "type": "boolean",
+          "x-go-name": "Deployed",
+          "example": false
+        },
+        "failed": {
+          "type": "boolean",
+          "x-go-name": "Failed",
+          "example": false
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "pending": {
+          "type": "boolean",
+          "x-go-name": "Pending",
+          "example": false
+        },
+        "uninstalled": {
+          "type": "boolean",
+          "x-go-name": "Uninstalled",
+          "example": false
+        },
+        "uninstalling": {
+          "type": "boolean",
+          "x-go-name": "Uninstalling",
+          "example": false
+        }
+      },
+      "x-go-name": "Flags",
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "uninstallRelease": {
+      "description": "Release contains metadata about a helm release object",
+      "type": "object",
+      "properties": {
+        "app_version": {
+          "type": "string",
+          "x-go-name": "AppVersion",
+          "example": "5.7.30"
+        },
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "mysql"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql-5.7"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "status": {
+          "x-go-name": "Status",
+          "example": "deployed"
+        },
+        "updated_at": {
+          "x-go-name": "Updated",
+          "example": "2021-03-24T12:24:18.450869+05:30"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Version",
+          "example": 1
+        }
+      },
+      "x-go-name": "Release",
+      "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
+    },
+    "uninstallRequestBody": {
+      "description": "Request Uninstall request body",
+      "type": "object",
+      "required": [
+        "namespace",
+        "release_name"
+      ],
+      "properties": {
+        "disable_hooks": {
+          "type": "boolean",
+          "x-go-name": "DisableHooks",
+          "example": false
+        },
+        "dry_run": {
+          "type": "boolean",
+          "x-go-name": "DryRun",
+          "example": false
+        },
+        "keep_history": {
+          "type": "boolean",
+          "x-go-name": "KeepHistory",
+          "example": false
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "release_name": {
+          "type": "string",
+          "x-go-name": "ReleaseName",
+          "example": "mysql-5.7"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timeout",
+          "example": 300
+        }
+      },
+      "x-go-name": "Request",
+      "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
+    },
+    "uninstallResponseBody": {
+      "description": "Response is the body of uninstall route",
+      "type": "object",
+      "properties": {
+        "error": {
+          "description": "Error error message, field is available only when status code is non 2xx",
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "release": {
+          "$ref": "#/definitions/uninstallRelease"
+        },
+        "status": {
+          "description": "Status status of the release, field is available only when status code is 2xx",
+          "type": "string",
+          "x-go-name": "Status"
+        }
+      },
+      "x-go-name": "Response",
+      "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
+    },
+    "upgradeFlags": {
+      "description": "Flags additional flags supported while upgrading a release",
+      "type": "object",
+      "required": [
+        "namespace"
+      ],
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "x-go-name": "DryRun",
+          "example": false
+        },
+        "install": {
+          "type": "boolean",
+          "x-go-name": "Install",
+          "example": true
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_context": {
+          "type": "string",
+          "x-go-name": "KubeContext",
+          "example": "minikube"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "Version",
+          "example": "2"
+        }
+      },
+      "x-go-name": "Flags",
+      "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    },
+    "upgradeReleaseBody": {
+      "description": "Release wrapper for helm release",
+      "type": "object",
+      "properties": {
+        "app_version": {
+          "type": "string",
+          "x-go-name": "AppVersion",
+          "example": "5.7.30"
+        },
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "mysql"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql-5.7"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "status": {
+          "x-go-name": "Status",
+          "example": "deployed"
+        },
+        "updated_at": {
+          "x-go-name": "Updated",
+          "example": "2021-03-24T12:24:18.450869+05:30"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Version",
+          "example": 2
+        }
+      },
+      "x-go-name": "Release",
+      "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    },
+    "upgradeRequestBody": {
+      "description": "Request is the body for upgrading a release",
+      "type": "object",
+      "properties": {
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "stable/mysql"
+        },
+        "flags": {
+          "$ref": "#/definitions/upgradeFlags"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Values",
+          "example": {
+            "replicaCount": 1
+          }
+        }
+      },
+      "x-go-name": "Request",
+      "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    }
+  },
+  "responses": {
+    "installResponse": {
+      "description": "InstallResponse response from an install request",
+      "schema": {
+        "$ref": "#/definitions/installResponseBody"
+      }
+    },
+    "listResponse": {
+      "description": "ListResponse stub for swagger route for List",
+      "schema": {
+        "$ref": "#/definitions/listReponseBody"
+      }
+    },
+    "uninstallResponse": {
+      "description": "UninstallResponse stub for swagger route for uninstall",
+      "schema": {
+        "$ref": "#/definitions/uninstallResponseBody"
+      }
+    },
+    "upgradeResponse": {
+      "description": "UpgradeResponse response from an upgrade request",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    }
+  }
+}

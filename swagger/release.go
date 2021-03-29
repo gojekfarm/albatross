@@ -1,4 +1,4 @@
-package docs
+package swagger
 
 import (
 	"github.com/gojekfarm/albatross/api/install"

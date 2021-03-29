@@ -60,4 +60,7 @@ update-doc:
 
 serve-api-doc:
 	GO111MODULE=off go get -v github.com/go-swagger/go-swagger/cmd/swagger
-	swagger serve swagger.yaml --flavor=swagger
+	swagger serve docs/swagger.json --flavor=swagger
+
+run-with-doc: build update-doc
+	DOCUMENTATION=true ./bin/albatross

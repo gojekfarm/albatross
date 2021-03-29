@@ -14,4 +14,4 @@
 //
 //
 // swagger:meta
-package docs
+package swagger
