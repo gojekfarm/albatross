@@ -1,6 +1,6 @@
-// Package docs Albatross API.
+// Package swagger Albatross API.
 //
-// Documentation of our awesome API.
+// Albatross is a helm cli wrapper and enables using helm via http calls
 //
 //     Schemes: http
 //     Host: localhost:8080

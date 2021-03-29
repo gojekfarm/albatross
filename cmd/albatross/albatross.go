@@ -13,9 +13,9 @@ import (
 	"github.com/gojekfarm/albatross/api/list"
 	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
-	_ "github.com/gojekfarm/albatross/swagger"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/logger"
+	_ "github.com/gojekfarm/albatross/swagger"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
