@@ -27,7 +27,7 @@ type Request struct {
 	DryRun       bool   `json:"dry_run"`
 	KeepHistory  bool   `json:"keep_history"`
 	DisableHooks bool   `json:"disable_hooks"`
-	Timeout      int64  `json:"timeout"`
+	Timeout      int    `json:"timeout"`
 	flags.GlobalFlags
 }
 

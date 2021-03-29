@@ -20,7 +20,7 @@ type Service struct {
 // Uninstall a release according to the request provided and fails if req is incorrect.
 func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 	var timeout time.Duration
-	if req.Timeout == 0 {
+	if req.Timeout < 1 {
 		timeout = defaultTimeout
 	} else {
 		timeout = time.Second * time.Duration(req.Timeout)
