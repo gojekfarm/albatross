@@ -31,7 +31,7 @@ type Request struct {
 type Flags struct {
 	// example: false
 	DryRun bool `json:"dry_run"`
-	// example: 2
+	// example: 1
 	Version string `json:"version"`
 	// example: true
 	Install bool `json:"install"`

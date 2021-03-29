@@ -655,7 +655,7 @@
         "version": {
           "type": "string",
           "x-go-name": "Version",
-          "example": "2"
+          "example": "1"
         }
       },
       "x-go-name": "Flags",
