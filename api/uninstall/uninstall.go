@@ -25,7 +25,7 @@ var (
 // swagger:model uninstallRequestBody
 type Request struct {
 	// required: true
-	// example: mysql-5.7
+	// example: mysql
 	ReleaseName string `json:"release_name"`
 
 	// required: false

@@ -14,7 +14,7 @@
     "title": "Albatross API.",
     "version": "0.1.1"
   },
-  "host": "8080",
+  "host": "localhost:8080",
   "paths": {
     "/install": {
       "put": {
@@ -584,7 +584,7 @@
         "release_name": {
           "type": "string",
           "x-go-name": "ReleaseName",
-          "example": "mysql-5.7"
+          "example": "mysql"
         },
         "timeout": {
           "type": "integer",

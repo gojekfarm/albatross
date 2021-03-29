@@ -58,7 +58,7 @@ func serveDocumentation(r *mux.Router) {
 	docEnv := os.Getenv("DOCUMENTATION")
 	serveDoc, err := strconv.ParseBool(docEnv)
 	if err == nil && serveDoc {
-		fs := http.FileServer(http.Dir("./swaggerui"))
-		r.PathPrefix("/swaggerui/").Handler(http.StripPrefix("/swaggerui/", fs))
+		fs := http.FileServer(http.Dir("./docs"))
+		r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", fs))
 	}
 }
