@@ -352,6 +352,11 @@ definitions:
         example: mysql-5.7
         type: string
         x-go-name: ReleaseName
+      timeout:
+        example: 300
+        format: int64
+        type: integer
+        x-go-name: Timeout
     required:
     - namespace
     - release_name
