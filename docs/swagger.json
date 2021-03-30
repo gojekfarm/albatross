@@ -10,7 +10,7 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Documentation of our awesome API.",
+    "description": "Albatross is a helm cli wrapper and enables using helm via http calls",
     "title": "Albatross API.",
     "version": "0.1.1"
   },

@@ -6,6 +6,7 @@ go:
   - 1.14.4
 
 stages:
+  - docs
   - lint
   - test
   - build
@@ -31,7 +32,11 @@ jobs:
     script:
       - make testcodecov
       - bash <(curl -s https://codecov.io/bash)
-
+  
+  - stage: docs
+    name: "Check whether latest docs are generated"
+    script: make check-doc
+    
   - stage: build
     name: "Build"
     script: make clean build
