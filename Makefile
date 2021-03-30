@@ -63,9 +63,8 @@ serve-api-doc:
 	swagger serve docs/swagger.json --flavor=swagger
 
 check-doc:
-	./scripts/swagger.sh create_doc
+	./scripts/swagger.sh check_doc_ci
 	./scripts/swagger.sh check_for_change
-	./scripts/swagger.sh validate_doc
 
 run-with-doc: build update-doc
 	DOCUMENTATION=true ./bin/albatross
