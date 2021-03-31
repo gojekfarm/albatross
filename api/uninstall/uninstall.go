@@ -93,7 +93,7 @@ type service interface {
 // schemes: http
 // responses:
 //   200: uninstallResponse
-// 	 400: uninstallResponse
+//   400: uninstallResponse
 //   500: uninstallResponse
 func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
