@@ -84,7 +84,7 @@ type service interface {
 // responses:
 //   200: upgradeResponse
 //   400: upgradeResponse
-//   500: upgradeResponse 			
+//   500: upgradeResponse
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
