@@ -71,6 +71,7 @@ type Response struct {
 	// Error error message, field is available only when status code is non 2xx
 	Error string `json:"error,omitempty"`
 	// Status status of the release, field is available only when status code is 2xx
+	// example: uninstalled
 	Status string `json:"status,omitempty"`
 	// Release release meta data, field is available only when status code is 2xx
 	Release *Release `json:"release,omitempty"`
@@ -92,6 +93,8 @@ type service interface {
 // schemes: http
 // responses:
 //   200: uninstallResponse
+// 	 400: uninstallResponse
+//   500: uninstallResponse
 func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()

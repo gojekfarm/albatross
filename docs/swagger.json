@@ -41,6 +41,12 @@
         "responses": {
           "200": {
             "$ref": "#/responses/installResponse"
+          },
+          "400": {
+            "$ref": "#/responses/installResponse"
+          },
+          "500": {
+            "$ref": "#/responses/installResponse"
           }
         }
       }
@@ -69,6 +75,12 @@
         ],
         "responses": {
           "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
             "$ref": "#/responses/listResponse"
           }
         }
@@ -99,6 +111,12 @@
         "responses": {
           "200": {
             "$ref": "#/responses/uninstallResponse"
+          },
+          "400": {
+            "$ref": "#/responses/uninstallResponse"
+          },
+          "500": {
+            "$ref": "#/responses/uninstallResponse"
           }
         }
       }
@@ -127,6 +145,12 @@
         ],
         "responses": {
           "200": {
+            "$ref": "#/responses/upgradeResponse"
+          },
+          "400": {
+            "$ref": "#/responses/upgradeResponse"
+          },
+          "500": {
             "$ref": "#/responses/upgradeResponse"
           }
         }
@@ -611,7 +635,8 @@
         "status": {
           "description": "Status status of the release, field is available only when status code is 2xx",
           "type": "string",
-          "x-go-name": "Status"
+          "x-go-name": "Status",
+          "example": "uninstalled"
         }
       },
       "x-go-name": "Response",

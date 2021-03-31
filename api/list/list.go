@@ -86,6 +86,8 @@ type service interface {
 // schemes: http
 // responses:
 //   200: listResponse
+//   400: listResponse
+//   500: listResponse
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
