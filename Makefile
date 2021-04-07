@@ -53,3 +53,18 @@ testcodecov:
 
 run: build
 	./bin/albatross
+
+update-doc:
+	./scripts/swagger.sh create_doc
+	./scripts/swagger.sh validate_doc
+
+serve-api-doc:
+	GO111MODULE=off go get -v github.com/go-swagger/go-swagger/cmd/swagger
+	swagger serve docs/swagger.json --flavor=swagger
+
+check-doc:
+	./scripts/swagger.sh check_doc_ci
+	./scripts/swagger.sh check_for_change
+
+run-with-doc: build update-doc
+	DOCUMENTATION=true ./bin/albatross

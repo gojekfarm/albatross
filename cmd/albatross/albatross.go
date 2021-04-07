@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/gojekfarm/albatross/api/upgrade"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/logger"
+	_ "github.com/gojekfarm/albatross/swagger"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
@@ -44,8 +47,18 @@ func startServer() {
 	router.Handle("/install", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
 	router.Handle("/upgrade", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
 
+	serveDocumentation(router)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)
 	if err != nil {
 		logger.Errorf("error starting server", err)
+	}
+}
+
+func serveDocumentation(r *mux.Router) {
+	docEnv := os.Getenv("DOCUMENTATION")
+	serveDoc, err := strconv.ParseBool(docEnv)
+	if err == nil && serveDoc {
+		fs := http.FileServer(http.Dir("./docs"))
+		r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", fs))
 	}
 }
