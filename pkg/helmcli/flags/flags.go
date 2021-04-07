@@ -13,7 +13,7 @@ type GlobalFlags struct {
 	KubeAPIServer string `json:"kube_apiserver,omitempty"`
 	// required: true
 	// example: default
-	Namespace string `json:"namespace"`
+	Namespace string `json:"namespace" schema:"namespace"`
 }
 
 type UpgradeFlags struct {

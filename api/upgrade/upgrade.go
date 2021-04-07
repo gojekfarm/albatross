@@ -11,6 +11,8 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
 )
 
 // Request is the body for upgrading a release
@@ -22,6 +24,7 @@ type Request struct {
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
 	Values map[string]interface{} `json:"values"`
+	// Deprecated field
 	// example: {"kube_context": "minikube", "namespace":"default"}
 	Flags Flags `json:"flags"`
 }
@@ -76,6 +79,8 @@ type service interface {
 //
 // Upgrades a helm release as specified in the request
 //
+// Deprecated: true
+//
 // consumes:
 //	- application/json
 // produces:
@@ -95,8 +100,76 @@ func Handler(service service) http.Handler {
 			logger.Errorf("[Upgrade] error decoding request: %v", err)
 			return
 		}
+
+		resp, err := service.Upgrade(r.Context(), req)
+		if err != nil {
+			respondUpgradeError(w, "error while upgrading release: %v", err)
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(&resp); err != nil {
+			respondUpgradeError(w, "error writing response: %v", err)
+			return
+		}
+	})
+}
+
+// RestHandler handles an upgrade request
+// swagger:operation POST /releases/{kube_context}/{namespace}/{release_name} release upgradeOperation
+//
+// Install helm release at the specified location
+//
+// ---
+// produces:
+// - application/json
+// parameters:
+// - name: kube_context
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+// - name: Body
+//   in: body
+//   required: true
+//   schema:
+//    "$ref": "#/definitions/upgradeRequestBody"
+// schemes:
+// - http
+// responses:
+//   '200':
+//    "$ref": "#/responses/listResponse"
+//   '400':
+//    "$ref": "#/responses/listResponse"
+//   '404':
+//    "$ref": "#/responses/listResponse"
+//   '500':
+//    "$ref": "#/responses/listResponse"
+func RestHandler(service service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
+		var req Request
+		if err := json.NewDecoder(r.Body).Decode(&req); err == io.EOF || err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			logger.Errorf("[Upgrade] error decoding request: %v", err)
+			return
+		}
+		values := mux.Vars(r)
+		req.Flags.KubeContext = values["kube_context"]
+		req.Flags.Namespace = values["namespace"]
+		req.Name = values["release_name"]
 		resp, err := service.Upgrade(r.Context(), req)
 		if err != nil {
 			respondUpgradeError(w, "error while upgrading release: %v", err)

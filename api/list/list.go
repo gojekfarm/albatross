@@ -11,7 +11,12 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
+
+var decoder *schema.Decoder = schema.NewDecoder()
 
 // Request is body of List Route
 // swagger:model listRequestBody
@@ -24,22 +29,22 @@ type Request struct {
 type Flags struct {
 	// example: false
 	// required: false
-	AllNamespaces bool `json:"all-namespaces,omitempty"`
+	AllNamespaces bool `json:"all-namespaces,omitempty" schema:"all_namespaces"`
 	// required: false
 	// example: false
-	Deployed bool `json:"deployed,omitempty"`
+	Deployed bool `json:"deployed,omitempty" schema:"deployed"`
 	// required: false
 	// example: false
-	Failed bool `json:"failed,omitempty"`
+	Failed bool `json:"failed,omitempty" schema:"failed"`
 	// required: false
 	// example: false
-	Pending bool `json:"pending,omitempty"`
+	Pending bool `json:"pending,omitempty" schema:"pending"`
 	// required: false
 	// example: false
-	Uninstalled bool `json:"uninstalled,omitempty"`
+	Uninstalled bool `json:"uninstalled,omitempty" schema:"uninstalled"`
 	// required: false
 	// example: false
-	Uninstalling bool `json:"uninstalling,omitempty"`
+	Uninstalling bool `json:"uninstalling,omitempty" schema:"uninstalling"`
 	flags.GlobalFlags
 }
 
@@ -79,6 +84,8 @@ type service interface {
 //
 // List helm releases as specified in the request
 //
+// Deprecated: true
+//
 // consumes:
 //	- application/json
 // produces:
@@ -98,7 +105,84 @@ func Handler(service service) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		resp, err := service.List(r.Context(), req)
+		if err != nil {
+			respondListError(w, "error while listing charts: %v", err)
+			return
+		}
 
+		if err = json.NewEncoder(w).Encode(resp); err != nil {
+			respondListError(w, "error writing response: %v", err)
+			return
+		}
+	})
+}
+
+// RestHandler handles an uninstall request
+// swagger:operation GET /releases/{kube_context} release listOperation
+//
+// List helm releases in the kubecontext as specified by query params
+//
+// ---
+// produces:
+// - application/json
+// parameters:
+// - name: kube_context
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: query
+//   required: false
+//   type: string
+//   format: string
+// - name: all_namespaces
+//   in: query
+//   type: boolean
+//   default: true
+// - name: deployed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalled
+//   in: query
+//   type: boolean
+//   default: false
+// - name: failed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: pending
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalling
+//   in: query
+//   type: boolean
+//   default: false
+// schemes:
+// - http
+// responses:
+//   '200':
+//    "$ref": "#/responses/listResponse"
+//   '400':
+//    "$ref": "#/responses/listResponse"
+//   '404':
+//    "$ref": "#/responses/listResponse"
+//   '500':
+//    "$ref": "#/responses/listResponse"
+func RestHandler(service service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req Request
+		if err := decoder.Decode(&req, r.URL.Query()); err != nil {
+			logger.Errorf("[List] error decoding request: %v", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		values := mux.Vars(r)
+		req.KubeContext = values["kube_context"]
 		resp, err := service.List(r.Context(), req)
 		if err != nil {
 			respondListError(w, "error while listing charts: %v", err)

@@ -11,6 +11,8 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
 
+	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -19,6 +21,7 @@ import (
 var (
 	errInvalidReleaseName    = errors.New("uninstall: invalid release name")
 	errUnableToDecodeRequest = errors.New("unable to decode the json payload")
+	decoder                  = schema.NewDecoder()
 )
 
 // Request Uninstall request body
@@ -26,23 +29,23 @@ var (
 type Request struct {
 	// required: true
 	// example: mysql
-	ReleaseName string `json:"release_name"`
+	ReleaseName string `json:"release_name" schema:"-"`
 
 	// required: false
 	// example: false
-	DryRun bool `json:"dry_run"`
+	DryRun bool `json:"dry_run" schema:"dry_run"`
 
 	// required: false
 	// example: false
-	KeepHistory bool `json:"keep_history"`
+	KeepHistory bool `json:"keep_history" schema:"keep_history"`
 
 	// required: false
 	// example: false
-	DisableHooks bool `json:"disable_hooks"`
+	DisableHooks bool `json:"disable_hooks" schema:"disable_hooks"`
 
 	// required: false
 	//example: 300
-	Timeout int `json:"timeout"`
+	Timeout int `json:"timeout" schema:"timeout"`
 	flags.GlobalFlags
 }
 
@@ -86,6 +89,8 @@ type service interface {
 //
 // Uninstall a helm release as specified in the request
 //
+// Deprecated: true
+//
 // consumes:
 //	- application/json
 // produces:
@@ -106,7 +111,106 @@ func Handler(s service) http.Handler {
 			respondWithUninstallError(w, "", errUnableToDecodeRequest)
 			return
 		}
+		if err := req.valid(); err != nil {
+			logger.Errorf("[Uninstall] error in request parameters: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			respondWithUninstallError(w, "", err)
+			return
+		}
 
+		resp, err := s.Uninstall(r.Context(), req)
+		if err != nil {
+			if errors.Is(err, driver.ErrReleaseNotFound) {
+				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
+				w.WriteHeader(http.StatusNotFound)
+			} else {
+				logger.Errorf("[Uninstall] unexpected error occurred: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			resp.Error = err.Error()
+			err := json.NewEncoder(w).Encode(&resp)
+			if err != nil {
+				logger.Errorf("[Uninstall] Error writing response", err)
+			}
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(&resp); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			respondWithUninstallError(w, "error writing response: %v", err)
+			return
+		}
+	})
+}
+
+// RestHandler handles an uninstall request
+// swagger:operation DELETE /releases/{kube_context}/{namespace}/{release_name} release uninstallOperation
+//
+// Uninstall a helm release as specified in the request
+//
+// ---
+// produces:
+// - application/json
+// parameters:
+// - name: kube_context
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+// - name: dry_run
+//   in: query
+//   type: boolean
+//   default: false
+// - name: keep_history
+//   in: query
+//   type: boolean
+//   default: false
+// - name: disable_hooks
+//   in: query
+//   type: boolean
+//   default: false
+// - name: timeout
+//   in: query
+//   type: integer
+//   default: 300
+// schemes:
+// - http
+// responses:
+//   '200':
+//    "$ref": "#/responses/uninstallResponse"
+//   '400':
+//    "$ref": "#/responses/uninstallResponse"
+//   '404':
+//    "$ref": "#/responses/uninstallResponse"
+//   '500':
+//    "$ref": "#/responses/uninstallResponse"
+func RestHandler(s service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		var req Request
+		if err := decoder.Decode(&req, r.URL.Query()); err != nil {
+			logger.Errorf("[Uninstall] error decoding request: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			respondWithUninstallError(w, "", errUnableToDecodeRequest)
+			return
+		}
+		values := mux.Vars(r)
+		req.ReleaseName = values["release_name"]
+		req.GlobalFlags.KubeContext = values["kube_context"]
+		req.GlobalFlags.Namespace = values["namespace"]
 		if err := req.valid(); err != nil {
 			logger.Errorf("[Uninstall] error in request parameters: %v", err)
 			w.WriteHeader(http.StatusBadRequest)

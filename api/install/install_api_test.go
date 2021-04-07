@@ -10,11 +10,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
 
 	"helm.sh/helm/v3/pkg/release"
@@ -31,9 +33,10 @@ func (s *mockService) Install(ctx context.Context, req Request) (Response, error
 
 type InstallerTestSuite struct {
 	suite.Suite
-	recorder    *httptest.ResponseRecorder
-	server      *httptest.Server
-	mockService *mockService
+	recorder      *httptest.ResponseRecorder
+	server        *httptest.Server
+	mockService   *mockService
+	restfulServer *httptest.Server
 }
 
 func (s *InstallerTestSuite) SetupSuite() {
@@ -45,6 +48,9 @@ func (s *InstallerTestSuite) SetupTest() {
 	s.mockService = new(mockService)
 	handler := Handler(s.mockService)
 	s.server = httptest.NewServer(handler)
+	router := mux.NewRouter()
+	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", RestHandler(s.mockService)).Methods(http.MethodPut)
+	s.restfulServer = httptest.NewServer(router)
 }
 
 func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstall() {
@@ -57,6 +63,38 @@ func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstall()
 	}
 
 	s.mockService.On("Install", mock.Anything, mock.AnythingOfType("Request")).Return(response, nil)
+
+	resp, err := http.DefaultClient.Do(req)
+	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
+	expectedResponse := `{"status":"deployed"}` + "\n"
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	assert.Equal(s.T(), expectedResponse, string(respBody))
+	require.NoError(s.T(), err)
+	s.mockService.AssertExpectations(s.T())
+}
+
+func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstallRestful() {
+	chartName := "stable/redis-ha"
+	body := fmt.Sprintf(`{"chart":"%s", "values": {"replicas": 2}, "flags": {}}`, chartName)
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/releases/minikube/albatross/redis-v5", s.restfulServer.URL), strings.NewReader(body))
+	response := Response{
+		Status: release.StatusDeployed.String(),
+	}
+	requestStruct := Request{
+		Chart: chartName,
+		Name:  "redis-v5",
+		Values: map[string]interface{}{
+			"replicas": float64(2),
+		},
+		Flags: Flags{
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "albatross",
+				KubeContext: "minikube",
+			},
+		},
+	}
+	s.mockService.On("Install", mock.Anything, requestStruct).Return(response, nil)
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
@@ -84,6 +122,33 @@ func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	s.mockService.AssertExpectations(s.T())
 }
 
+func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailureRestful() {
+	chartName := "stable/redis-ha"
+	body := fmt.Sprintf(`{"chart":"%s"}`, chartName)
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/releases/minikube/albatross/redis-v5", s.restfulServer.URL), strings.NewReader(body))
+	requestStruct := Request{
+		Chart: chartName,
+		Name:  "redis-v5",
+		Flags: Flags{
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "albatross",
+				KubeContext: "minikube",
+			},
+		},
+	}
+	s.mockService.On("Install", mock.Anything, requestStruct).Return(Response{}, errors.New("invalid chart"))
+
+	resp, err := http.DefaultClient.Do(req)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, resp.StatusCode)
+	expectedResponse := `{"error":"invalid chart"}` + "\n"
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	assert.Equal(s.T(), expectedResponse, string(respBody))
+	require.NoError(s.T(), err)
+	s.mockService.AssertExpectations(s.T())
+}
+
 func (s *InstallerTestSuite) TestReturnShouldBadRequestOnInvalidRequest() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{"chart":"%s", "name": "redis-v5}`, chartName)
@@ -95,6 +160,17 @@ func (s *InstallerTestSuite) TestReturnShouldBadRequestOnInvalidRequest() {
 	assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)
 	require.NoError(s.T(), err)
 	s.mockService.AssertNotCalled(s.T(), "Install")
+}
+
+func (s *InstallerTestSuite) TestReturnShouldBadRequestOnInvalidRequestRestful() {
+	chartName := "stable/redis-ha"
+	body := fmt.Sprintf(`{"chart":"%s}`, chartName)
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/releases/minikube/albatross/redis-v5", s.restfulServer.URL), strings.NewReader(body))
+
+	resp, err := http.DefaultClient.Do(req)
+	assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)
+	require.NoError(s.T(), err)
 }
 
 func (s *InstallerTestSuite) TearDownTest() {

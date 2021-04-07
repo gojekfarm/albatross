@@ -10,11 +10,14 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
 )
 
 // Request is the body for insatlling a release
 // swagger:model installRequestBody
 type Request struct {
+	// Name not required when using resourceful API
 	// example: mysql
 	Name string `json:"name"`
 	// example: stable/mysql
@@ -73,6 +76,8 @@ type service interface {
 //
 // Installs a helm release as specified in the request
 //
+// Deprecated: true
+//
 // consumes:
 //	- application/json
 // produces:
@@ -92,7 +97,76 @@ func Handler(service service) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		resp, err := service.Install(r.Context(), req)
+		if err != nil {
+			respondInstallError(w, "error while installing chart: %v", err)
+			return
+		}
 
+		if err := json.NewEncoder(w).Encode(&resp); err != nil {
+			respondInstallError(w, "error writing response: %v", err)
+			return
+		}
+	})
+}
+
+// RestHandler handles an install request
+// swagger:operation PUT /releases/{kube_context}/{namespace}/{release_name} release installOperation
+//
+// Install helm release at the specified location
+//
+// ---
+// produces:
+// - application/json
+// parameters:
+// - name: kube_context
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+// - name: Body
+//   in: body
+//   required: true
+//   schema:
+//    "$ref": "#/definitions/installRequestBody"
+// schemes:
+// - http
+// responses:
+//   '200':
+//    "$ref": "#/responses/listResponse"
+//   '400':
+//    "$ref": "#/responses/listResponse"
+//   '404':
+//    "$ref": "#/responses/listResponse"
+//   '500':
+//    "$ref": "#/responses/listResponse"
+
+func RestHandler(service service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		var req Request
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			logger.Errorf("[Install] error decoding request: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		values := mux.Vars(r)
+		req.Flags.KubeContext = values["kube_context"]
+		req.Flags.Namespace = values["namespace"]
+		req.Name = values["release_name"]
 		resp, err := service.Install(r.Context(), req)
 		if err != nil {
 			respondInstallError(w, "error while installing chart: %v", err)

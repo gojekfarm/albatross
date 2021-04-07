@@ -29,6 +29,7 @@
           "http"
         ],
         "operationId": "installRelease",
+        "deprecated": true,
         "parameters": [
           {
             "name": "Body",
@@ -64,6 +65,7 @@
           "http"
         ],
         "operationId": "listRelease",
+        "deprecated": true,
         "parameters": [
           {
             "name": "Body",
@@ -86,6 +88,285 @@
         }
       }
     },
+    "/releases/{kube_context}": {
+      "get": {
+        "description": "List helm releases in the kubecontext as specified by query params",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "operationId": "listOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "kube_context",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "name": "namespace",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "name": "all_namespaces",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "deployed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalled",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "failed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "pending",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalling",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "404": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      }
+    },
+    "/releases/{kube_context}/{namespace}/{release_name}": {
+      "put": {
+        "description": "Install helm release at the specified location",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "operationId": "installOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "kube_context",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/installRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "404": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      },
+      "post": {
+        "description": "Install helm release at the specified location",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "operationId": "upgradeOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "kube_context",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/upgradeRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "404": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Uninstall a helm release as specified in the request",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "operationId": "uninstallOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "kube_context",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "dry_run",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "keep_history",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "disable_hooks",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 300,
+            "name": "timeout",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/uninstallResponse"
+          },
+          "400": {
+            "$ref": "#/responses/uninstallResponse"
+          },
+          "404": {
+            "$ref": "#/responses/uninstallResponse"
+          },
+          "500": {
+            "$ref": "#/responses/uninstallResponse"
+          }
+        }
+      }
+    },
     "/uninstall": {
       "delete": {
         "description": "Uninstall a helm release as specified in the request",
@@ -99,6 +380,7 @@
           "http"
         ],
         "operationId": "uninstallRelease",
+        "deprecated": true,
         "parameters": [
           {
             "name": "Body",
@@ -134,6 +416,7 @@
           "http"
         ],
         "operationId": "upgradeRelease",
+        "deprecated": true,
         "parameters": [
           {
             "name": "Body",
@@ -302,6 +585,7 @@
           "$ref": "#/definitions/installFlags"
         },
         "name": {
+          "description": "Name not required when using resourceful API",
           "type": "string",
           "x-go-name": "Name",
           "example": "mysql"
