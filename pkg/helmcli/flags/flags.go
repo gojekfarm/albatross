@@ -47,3 +47,20 @@ type UninstallFlags struct {
 	Timeout      time.Duration
 	GlobalFlags
 }
+
+type AddFlags struct {
+	Name                 string
+	URL                  string
+	Username             string
+	Password             string
+	ForceUpdate          bool
+	AllowDeprecatedRepos bool
+
+	CertFile              string
+	KeyFile               string
+	CaFile                string
+	InsecureSkipTLSverify bool
+
+	RepoFile  string
+	RepoCache string
+}

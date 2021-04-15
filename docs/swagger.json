@@ -383,6 +383,58 @@
           }
         }
       }
+    },
+    "/repository/{repository_name}": {
+      "put": {
+        "description": "Add a chart repository to the server",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "operationId": "addOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "name": "repository_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/addRepoRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The repository was added successfully",
+            "schema": {
+              "$ref": "#/definitions/addRepoOkResponseBody"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/addRepoErrorResponseBody"
+            }
+          },
+          "500": {
+            "description": "Something went with the server",
+            "schema": {
+              "$ref": "#/definitions/addRepoErrorResponseBody"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -438,6 +490,65 @@
         }
       },
       "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    },
+    "addRepoErrorResponseBody": {
+      "description": "AddErrorResponse body of non 2xx response",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "AddErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
+    "addRepoOkResponseBody": {
+      "description": "AddOkResponse body of 2xx response",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        }
+      },
+      "x-go-name": "AddOkResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
+    "addRepoRequestBody": {
+      "description": "AddRequest is the body for PUT request to repository",
+      "type": "object",
+      "properties": {
+        "allow_deprecated_repos": {
+          "type": "boolean",
+          "x-go-name": "AllowDeprecatedRepos",
+          "example": false
+        },
+        "force_update": {
+          "type": "boolean",
+          "x-go-name": "ForceUpdate",
+          "example": false
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "skip_tls_verify": {
+          "description": "CertFile              string\nKeyFile               string\nCaFile                string",
+          "type": "boolean",
+          "x-go-name": "InsecureSkipTLSverify"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-name": "AddRequest",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
     },
     "globalFlags": {
       "description": "GlobalFlags flags which give context about kubernetes cluster to connect to",

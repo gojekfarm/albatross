@@ -11,6 +11,7 @@ import (
 	"github.com/gojekfarm/albatross/api"
 	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
+	"github.com/gojekfarm/albatross/api/repository"
 	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
@@ -48,6 +49,9 @@ func startServer() {
 	router.Handle("/clusters/{cluster}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 
+	repositorySubrouter := router.PathPrefix("/repository").Subrouter()
+	handleRepositoryRoutes(repositorySubrouter)
+
 	serveDocumentation(router)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)
 	if err != nil {
@@ -62,4 +66,10 @@ func serveDocumentation(r *mux.Router) {
 		fs := http.FileServer(http.Dir("./docs"))
 		r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", fs))
 	}
+}
+
+func handleRepositoryRoutes(router *mux.Router) {
+	repoClient := helmcli.NewRepoClient()
+	repoService := repository.NewService(repoClient)
+	router.Handle(fmt.Sprintf("/{%s}", repository.NAME), ContentTypeMiddle(repository.AddHandler(repoService))).Methods(http.MethodPut)
 }
