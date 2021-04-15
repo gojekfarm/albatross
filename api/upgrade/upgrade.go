@@ -18,8 +18,7 @@ import (
 // Request is the body for upgrading a release
 // swagger:model upgradeRequestBody
 type Request struct {
-	// example: mysql
-	Name string `json:"name"`
+	Name string `json:"-"`
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
@@ -75,51 +74,13 @@ type service interface {
 }
 
 // Handler handles an upgrade request
-// swagger:route POST /upgrade upgradeRelease
-//
-// Upgrades a helm release as specified in the request
-//
-// Deprecated: true
-//
-// consumes:
-//	- application/json
-// produces:
-// 	- application/json
-// schemes: http
-// responses:
-//   200: upgradeResponse
-//   400: upgradeResponse
-//   500: upgradeResponse
-func Handler(service service) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err == io.EOF || err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			logger.Errorf("[Upgrade] error decoding request: %v", err)
-			return
-		}
-
-		resp, err := service.Upgrade(r.Context(), req)
-		if err != nil {
-			respondUpgradeError(w, "error while upgrading release: %v", err)
-			return
-		}
-
-		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			respondUpgradeError(w, "error writing response: %v", err)
-			return
-		}
-	})
-}
-
-// RestHandler handles an upgrade request
 // swagger:operation POST /releases/{kube_context}/{namespace}/{release_name} release upgradeOperation
 //
 // Install helm release at the specified location
 //
 // ---
+// consumes:
+// - application/json
 // produces:
 // - application/json
 // parameters:
@@ -140,6 +101,7 @@ func Handler(service service) http.Handler {
 //   required: true
 //   type: string
 //   format: string
+//   default: mysql-final
 // - name: Body
 //   in: body
 //   required: true
@@ -156,7 +118,7 @@ func Handler(service service) http.Handler {
 //    "$ref": "#/responses/listResponse"
 //   '500':
 //    "$ref": "#/responses/listResponse"
-func RestHandler(service service) http.Handler {
+func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 

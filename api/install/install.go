@@ -17,9 +17,7 @@ import (
 // Request is the body for insatlling a release
 // swagger:model installRequestBody
 type Request struct {
-	// Name not required when using resourceful API
-	// example: mysql
-	Name string `json:"name"`
+	Name string `json:"-"`
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
@@ -72,50 +70,13 @@ type service interface {
 }
 
 // Handler handles an install request
-// swagger:route PUT /install installRelease
-//
-// Installs a helm release as specified in the request
-//
-// Deprecated: true
-//
-// consumes:
-//	- application/json
-// produces:
-// 	- application/json
-// schemes: http
-// responses:
-//   200: installResponse
-//   400: installResponse
-//   500: installResponse
-func Handler(service service) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			logger.Errorf("[Install] error decoding request: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		resp, err := service.Install(r.Context(), req)
-		if err != nil {
-			respondInstallError(w, "error while installing chart: %v", err)
-			return
-		}
-
-		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			respondInstallError(w, "error writing response: %v", err)
-			return
-		}
-	})
-}
-
-// RestHandler handles an install request
 // swagger:operation PUT /releases/{kube_context}/{namespace}/{release_name} release installOperation
 //
 // Install helm release at the specified location
 //
 // ---
+// consumes:
+// - application/json
 // produces:
 // - application/json
 // parameters:
@@ -136,6 +97,7 @@ func Handler(service service) http.Handler {
 //   required: true
 //   type: string
 //   format: string
+//   default: mysql-final
 // - name: Body
 //   in: body
 //   required: true
@@ -145,15 +107,15 @@ func Handler(service service) http.Handler {
 // - http
 // responses:
 //   '200':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/installResponse"
 //   '400':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/installResponse"
 //   '404':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/installResponse"
 //   '500':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/installResponse"
 
-func RestHandler(service service) http.Handler {
+func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 

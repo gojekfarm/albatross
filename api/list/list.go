@@ -3,7 +3,6 @@ package list
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
@@ -18,33 +17,17 @@ import (
 
 var decoder *schema.Decoder = schema.NewDecoder()
 
-// Request is body of List Route
-// swagger:model listRequestBody
 type Request struct {
 	Flags
 }
 
-// Flags contains all the params supported
-// swagger:model listRequestFlags
 type Flags struct {
-	// example: false
-	// required: false
-	AllNamespaces bool `json:"all-namespaces,omitempty" schema:"all_namespaces"`
-	// required: false
-	// example: false
-	Deployed bool `json:"deployed,omitempty" schema:"deployed"`
-	// required: false
-	// example: false
-	Failed bool `json:"failed,omitempty" schema:"failed"`
-	// required: false
-	// example: false
-	Pending bool `json:"pending,omitempty" schema:"pending"`
-	// required: false
-	// example: false
-	Uninstalled bool `json:"uninstalled,omitempty" schema:"uninstalled"`
-	// required: false
-	// example: false
-	Uninstalling bool `json:"uninstalling,omitempty" schema:"uninstalling"`
+	AllNamespaces bool `schema:"all_namespaces"`
+	Deployed      bool `schema:"deployed"`
+	Failed        bool `schema:"failed"`
+	Pending       bool `schema:"pending"`
+	Uninstalled   bool `schema:"uninstalled"`
+	Uninstalling  bool `schema:"uninstalling"`
 	flags.GlobalFlags
 }
 
@@ -80,45 +63,6 @@ type service interface {
 }
 
 // Handler handles a list request
-// swagger:route GET /list listRelease
-//
-// List helm releases as specified in the request
-//
-// Deprecated: true
-//
-// consumes:
-//	- application/json
-// produces:
-// 	- application/json
-// schemes: http
-// responses:
-//   200: listResponse
-//   400: listResponse
-//   500: listResponse
-func Handler(service service) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err == io.EOF || err != nil {
-			logger.Errorf("[List] error decoding request: %v", err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		resp, err := service.List(r.Context(), req)
-		if err != nil {
-			respondListError(w, "error while listing charts: %v", err)
-			return
-		}
-
-		if err = json.NewEncoder(w).Encode(resp); err != nil {
-			respondListError(w, "error writing response: %v", err)
-			return
-		}
-	})
-}
-
-// RestHandler handles an uninstall request
 // swagger:operation GET /releases/{kube_context} release listOperation
 //
 // List helm releases in the kubecontext as specified by query params
@@ -173,8 +117,9 @@ func Handler(service service) http.Handler {
 //    "$ref": "#/responses/listResponse"
 //   '500':
 //    "$ref": "#/responses/listResponse"
-func RestHandler(service service) http.Handler {
+func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
 		var req Request
 		if err := decoder.Decode(&req, r.URL.Query()); err != nil {
 			logger.Errorf("[List] error decoding request: %v", err.Error())

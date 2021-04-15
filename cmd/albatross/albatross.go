@@ -36,31 +36,16 @@ func startServer() {
 	logger.Setup("debug")
 	cli := helmcli.New()
 
-	uninstallService := uninstall.NewService(cli)
-	listService := list.NewService(cli)
-	installService := install.NewService(cli)
-	upgradeService := upgrade.NewService(cli)
-
 	installHandler := install.Handler(install.NewService(cli))
 	upgradeHandler := upgrade.Handler(upgrade.NewService(cli))
-	listHandler := list.Handler(listService)
-	uninstallHandler := uninstall.Handler(uninstallService)
+	listHandler := list.Handler(list.NewService(cli))
+	uninstallHandler := uninstall.Handler(uninstall.NewService(cli))
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
-	router.Handle("/list", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
-	router.Handle("/uninstall", ContentTypeMiddle(uninstallHandler)).Methods(http.MethodDelete)
-	router.Handle("/install", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
-	router.Handle("/upgrade", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
-
-	restfulUninstallHandler := uninstall.RestHandler(uninstallService)
-	restfulListHandler := list.RestHandler(listService)
-	restfulInstallHandler := install.RestHandler(installService)
-	restfulUpgradeHandler := upgrade.RestHandler(upgradeService)
-
-	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(restfulUninstallHandler)).Methods(http.MethodDelete)
-	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(restfulInstallHandler)).Methods(http.MethodPut)
-	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(restfulUpgradeHandler)).Methods(http.MethodPost)
-	router.Handle("/releases/{kube_context}", ContentTypeMiddle(restfulListHandler)).Methods(http.MethodGet)
+	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(uninstallHandler)).Methods(http.MethodDelete)
+	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
+	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
+	router.Handle("/releases/{kube_context}", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 
 	serveDocumentation(router)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)

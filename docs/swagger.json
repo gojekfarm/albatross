@@ -16,78 +16,6 @@
   },
   "host": "localhost:8080",
   "paths": {
-    "/install": {
-      "put": {
-        "description": "Installs a helm release as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "installRelease",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/installRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/installResponse"
-          },
-          "400": {
-            "$ref": "#/responses/installResponse"
-          },
-          "500": {
-            "$ref": "#/responses/installResponse"
-          }
-        }
-      }
-    },
-    "/list": {
-      "get": {
-        "description": "List helm releases as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "listRelease",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/listRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/listResponse"
-          },
-          "400": {
-            "$ref": "#/responses/listResponse"
-          },
-          "500": {
-            "$ref": "#/responses/listResponse"
-          }
-        }
-      }
-    },
     "/releases/{kube_context}": {
       "get": {
         "description": "List helm releases in the kubecontext as specified by query params",
@@ -172,6 +100,9 @@
     "/releases/{kube_context}/{namespace}/{release_name}": {
       "put": {
         "description": "Install helm release at the specified location",
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -202,6 +133,7 @@
           {
             "type": "string",
             "format": "string",
+            "default": "mysql-final",
             "name": "release_name",
             "in": "path",
             "required": true
@@ -217,21 +149,24 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/listResponse"
+            "$ref": "#/responses/installResponse"
           },
           "400": {
-            "$ref": "#/responses/listResponse"
+            "$ref": "#/responses/installResponse"
           },
           "404": {
-            "$ref": "#/responses/listResponse"
+            "$ref": "#/responses/installResponse"
           },
           "500": {
-            "$ref": "#/responses/listResponse"
+            "$ref": "#/responses/installResponse"
           }
         }
       },
       "post": {
         "description": "Install helm release at the specified location",
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -262,6 +197,7 @@
           {
             "type": "string",
             "format": "string",
+            "default": "mysql-final",
             "name": "release_name",
             "in": "path",
             "required": true
@@ -322,6 +258,7 @@
           {
             "type": "string",
             "format": "string",
+            "default": "mysql-final",
             "name": "release_name",
             "in": "path",
             "required": true
@@ -366,81 +303,41 @@
           }
         }
       }
-    },
-    "/uninstall": {
-      "delete": {
-        "description": "Uninstall a helm release as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "uninstallRelease",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/uninstallRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/uninstallResponse"
-          },
-          "400": {
-            "$ref": "#/responses/uninstallResponse"
-          },
-          "500": {
-            "$ref": "#/responses/uninstallResponse"
-          }
-        }
-      }
-    },
-    "/upgrade": {
-      "post": {
-        "description": "Upgrades a helm release as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "upgradeRelease",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/upgradeRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/upgradeResponse"
-          },
-          "400": {
-            "$ref": "#/responses/upgradeResponse"
-          },
-          "500": {
-            "$ref": "#/responses/upgradeResponse"
-          }
-        }
-      }
     }
   },
   "definitions": {
+    "Request": {
+      "type": "object",
+      "properties": {
+        "AllNamespaces": {
+          "type": "boolean"
+        },
+        "Deployed": {
+          "type": "boolean"
+        },
+        "Failed": {
+          "type": "boolean"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Uninstalled": {
+          "type": "boolean"
+        },
+        "Uninstalling": {
+          "type": "boolean"
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        }
+      },
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
     "Response": {
       "type": "object",
       "title": "Response represents the api response for upgrade request.",
@@ -465,27 +362,14 @@
     "globalFlags": {
       "description": "GlobalFlags flags which give context about kubernetes cluster to connect to",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "kube_apiserver": {
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         }
       },
       "x-go-name": "GlobalFlags",
@@ -494,9 +378,6 @@
     "installFlags": {
       "description": "Flags additional flags for installing a release",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "dry_run": {
           "type": "boolean",
@@ -507,19 +388,9 @@
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         },
         "version": {
           "type": "string",
@@ -583,12 +454,6 @@
         },
         "flags": {
           "$ref": "#/definitions/installFlags"
-        },
-        "name": {
-          "description": "Name not required when using resourceful API",
-          "type": "string",
-          "x-go-name": "Name",
-          "example": "mysql"
         },
         "values": {
           "type": "object",
@@ -688,124 +553,6 @@
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/list"
     },
-    "listRequestBody": {
-      "description": "Request is body of List Route",
-      "type": "object",
-      "required": [
-        "namespace"
-      ],
-      "properties": {
-        "all-namespaces": {
-          "type": "boolean",
-          "x-go-name": "AllNamespaces",
-          "example": false
-        },
-        "deployed": {
-          "type": "boolean",
-          "x-go-name": "Deployed",
-          "example": false
-        },
-        "failed": {
-          "type": "boolean",
-          "x-go-name": "Failed",
-          "example": false
-        },
-        "kube_apiserver": {
-          "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "pending": {
-          "type": "boolean",
-          "x-go-name": "Pending",
-          "example": false
-        },
-        "uninstalled": {
-          "type": "boolean",
-          "x-go-name": "Uninstalled",
-          "example": false
-        },
-        "uninstalling": {
-          "type": "boolean",
-          "x-go-name": "Uninstalling",
-          "example": false
-        }
-      },
-      "x-go-name": "Request",
-      "x-go-package": "github.com/gojekfarm/albatross/api/list"
-    },
-    "listRequestFlags": {
-      "description": "Flags contains all the params supported",
-      "type": "object",
-      "required": [
-        "namespace"
-      ],
-      "properties": {
-        "all-namespaces": {
-          "type": "boolean",
-          "x-go-name": "AllNamespaces",
-          "example": false
-        },
-        "deployed": {
-          "type": "boolean",
-          "x-go-name": "Deployed",
-          "example": false
-        },
-        "failed": {
-          "type": "boolean",
-          "x-go-name": "Failed",
-          "example": false
-        },
-        "kube_apiserver": {
-          "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "pending": {
-          "type": "boolean",
-          "x-go-name": "Pending",
-          "example": false
-        },
-        "uninstalled": {
-          "type": "boolean",
-          "x-go-name": "Uninstalled",
-          "example": false
-        },
-        "uninstalling": {
-          "type": "boolean",
-          "x-go-name": "Uninstalling",
-          "example": false
-        }
-      },
-      "x-go-name": "Flags",
-      "x-go-package": "github.com/gojekfarm/albatross/api/list"
-    },
     "uninstallRelease": {
       "description": "Release contains metadata about a helm release object",
       "type": "object",
@@ -848,62 +595,6 @@
       "x-go-name": "Release",
       "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
     },
-    "uninstallRequestBody": {
-      "description": "Request Uninstall request body",
-      "type": "object",
-      "required": [
-        "namespace",
-        "release_name"
-      ],
-      "properties": {
-        "disable_hooks": {
-          "type": "boolean",
-          "x-go-name": "DisableHooks",
-          "example": false
-        },
-        "dry_run": {
-          "type": "boolean",
-          "x-go-name": "DryRun",
-          "example": false
-        },
-        "keep_history": {
-          "type": "boolean",
-          "x-go-name": "KeepHistory",
-          "example": false
-        },
-        "kube_apiserver": {
-          "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "release_name": {
-          "type": "string",
-          "x-go-name": "ReleaseName",
-          "example": "mysql"
-        },
-        "timeout": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Timeout",
-          "example": 300
-        }
-      },
-      "x-go-name": "Request",
-      "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
-    },
     "uninstallResponseBody": {
       "description": "Response is the body of uninstall route",
       "type": "object",
@@ -929,9 +620,6 @@
     "upgradeFlags": {
       "description": "Flags additional flags supported while upgrading a release",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "dry_run": {
           "type": "boolean",
@@ -947,19 +635,9 @@
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         },
         "version": {
           "type": "string",
@@ -1023,11 +701,6 @@
         },
         "flags": {
           "$ref": "#/definitions/upgradeFlags"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name",
-          "example": "mysql"
         },
         "values": {
           "type": "object",

@@ -24,28 +24,12 @@ var (
 	decoder                  = schema.NewDecoder()
 )
 
-// Request Uninstall request body
-// swagger:model uninstallRequestBody
 type Request struct {
-	// required: true
-	// example: mysql
-	ReleaseName string `json:"release_name" schema:"-"`
-
-	// required: false
-	// example: false
-	DryRun bool `json:"dry_run" schema:"dry_run"`
-
-	// required: false
-	// example: false
-	KeepHistory bool `json:"keep_history" schema:"keep_history"`
-
-	// required: false
-	// example: false
-	DisableHooks bool `json:"disable_hooks" schema:"disable_hooks"`
-
-	// required: false
-	//example: 300
-	Timeout int `json:"timeout" schema:"timeout"`
+	ReleaseName  string `json:"-" schema:"-"`
+	DryRun       bool   `json:"dry_run" schema:"dry_run"`
+	KeepHistory  bool   `json:"keep_history" schema:"keep_history"`
+	DisableHooks bool   `json:"disable_hooks" schema:"disable_hooks"`
+	Timeout      int    `json:"timeout" schema:"timeout"`
 	flags.GlobalFlags
 }
 
@@ -85,65 +69,6 @@ type service interface {
 }
 
 // Handler handles an uninstall request
-// swagger:route DELETE /uninstall uninstallRelease
-//
-// Uninstall a helm release as specified in the request
-//
-// Deprecated: true
-//
-// consumes:
-//	- application/json
-// produces:
-// 	- application/json
-// schemes: http
-// responses:
-//   200: uninstallResponse
-//   400: uninstallResponse
-//   500: uninstallResponse
-func Handler(s service) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			logger.Errorf("[Uninstall] error decoding request: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
-			respondWithUninstallError(w, "", errUnableToDecodeRequest)
-			return
-		}
-		if err := req.valid(); err != nil {
-			logger.Errorf("[Uninstall] error in request parameters: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
-			respondWithUninstallError(w, "", err)
-			return
-		}
-
-		resp, err := s.Uninstall(r.Context(), req)
-		if err != nil {
-			if errors.Is(err, driver.ErrReleaseNotFound) {
-				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
-				w.WriteHeader(http.StatusNotFound)
-			} else {
-				logger.Errorf("[Uninstall] unexpected error occurred: %v", err)
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			resp.Error = err.Error()
-			err := json.NewEncoder(w).Encode(&resp)
-			if err != nil {
-				logger.Errorf("[Uninstall] Error writing response", err)
-			}
-			return
-		}
-
-		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			respondWithUninstallError(w, "error writing response: %v", err)
-			return
-		}
-	})
-}
-
-// RestHandler handles an uninstall request
 // swagger:operation DELETE /releases/{kube_context}/{namespace}/{release_name} release uninstallOperation
 //
 // Uninstall a helm release as specified in the request
@@ -169,6 +94,7 @@ func Handler(s service) http.Handler {
 //   required: true
 //   type: string
 //   format: string
+//   default: mysql-final
 // - name: dry_run
 //   in: query
 //   type: boolean
@@ -196,7 +122,7 @@ func Handler(s service) http.Handler {
 //    "$ref": "#/responses/uninstallResponse"
 //   '500':
 //    "$ref": "#/responses/uninstallResponse"
-func RestHandler(s service) http.Handler {
+func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
