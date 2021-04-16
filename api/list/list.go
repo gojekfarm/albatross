@@ -63,15 +63,15 @@ type service interface {
 }
 
 // Handler handles a list request
-// swagger:operation GET /releases/{kube_context} release listOperation
+// swagger:operation GET /releases/{cluster} release listOperation
 //
-// List helm releases in the kubecontext as specified by query params
 //
 // ---
+// summary: List the helm release for the cluster
 // produces:
 // - application/json
 // parameters:
-// - name: kube_context
+// - name: cluster
 //   in: path
 //   required: true
 //   default: minikube
@@ -127,7 +127,7 @@ func Handler(service service) http.Handler {
 			return
 		}
 		values := mux.Vars(r)
-		req.KubeContext = values["kube_context"]
+		req.KubeContext = values["cluster"]
 		resp, err := service.List(r.Context(), req)
 		if err != nil {
 			respondListError(w, "error while listing charts: %v", err)

@@ -16,9 +16,8 @@
   },
   "host": "localhost:8080",
   "paths": {
-    "/releases/{kube_context}": {
+    "/releases/{cluster}": {
       "get": {
-        "description": "List helm releases in the kubecontext as specified by query params",
         "produces": [
           "application/json"
         ],
@@ -28,13 +27,14 @@
         "tags": [
           "release"
         ],
+        "summary": "List the helm release for the cluster",
         "operationId": "listOperation",
         "parameters": [
           {
             "type": "string",
             "format": "string",
             "default": "minikube",
-            "name": "kube_context",
+            "name": "cluster",
             "in": "path",
             "required": true
           },
@@ -97,9 +97,8 @@
         }
       }
     },
-    "/releases/{kube_context}/{namespace}/{release_name}": {
+    "/releases/{cluster}/{namespace}/{release_name}": {
       "put": {
-        "description": "Install helm release at the specified location",
         "consumes": [
           "application/json"
         ],
@@ -112,13 +111,14 @@
         "tags": [
           "release"
         ],
+        "summary": "Install helm release at the specified cluster and namespace",
         "operationId": "installOperation",
         "parameters": [
           {
             "type": "string",
             "format": "string",
             "default": "minikube",
-            "name": "kube_context",
+            "name": "cluster",
             "in": "path",
             "required": true
           },
@@ -163,7 +163,6 @@
         }
       },
       "post": {
-        "description": "Install helm release at the specified location",
         "consumes": [
           "application/json"
         ],
@@ -176,13 +175,14 @@
         "tags": [
           "release"
         ],
+        "summary": "Upgrade a helm release deployed at the specified cluster and namespace",
         "operationId": "upgradeOperation",
         "parameters": [
           {
             "type": "string",
             "format": "string",
             "default": "minikube",
-            "name": "kube_context",
+            "name": "cluster",
             "in": "path",
             "required": true
           },
@@ -227,7 +227,6 @@
         }
       },
       "delete": {
-        "description": "Uninstall a helm release as specified in the request",
         "produces": [
           "application/json"
         ],
@@ -237,13 +236,14 @@
         "tags": [
           "release"
         ],
+        "summary": "Uninstall a helm release",
         "operationId": "uninstallOperation",
         "parameters": [
           {
             "type": "string",
             "format": "string",
             "default": "minikube",
-            "name": "kube_context",
+            "name": "cluster",
             "in": "path",
             "required": true
           },

@@ -45,7 +45,7 @@ func (s *ListTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/releases/{kube_context}", Handler(s.mockService)).Methods(http.MethodGet)
+	router.Handle("/releases/{cluster}", Handler(s.mockService)).Methods(http.MethodGet)
 	s.server = httptest.NewServer(router)
 }
 

@@ -24,7 +24,7 @@ type Request struct {
 	// example: {"replicaCount": 1}
 	Values map[string]interface{} `json:"values"`
 	// Deprecated field
-	// example: {"kube_context": "minikube", "namespace":"default"}
+	// example: {"cluster": "minikube", "namespace":"default"}
 	Flags Flags `json:"flags"`
 }
 
@@ -74,17 +74,17 @@ type service interface {
 }
 
 // Handler handles an upgrade request
-// swagger:operation POST /releases/{kube_context}/{namespace}/{release_name} release upgradeOperation
+// swagger:operation POST /releases/{cluster}/{namespace}/{release_name} release upgradeOperation
 //
-// Install helm release at the specified location
 //
 // ---
+// summary: Upgrade a helm release deployed at the specified cluster and namespace
 // consumes:
 // - application/json
 // produces:
 // - application/json
 // parameters:
-// - name: kube_context
+// - name: cluster
 //   in: path
 //   required: true
 //   default: minikube
@@ -129,7 +129,7 @@ func Handler(service service) http.Handler {
 			return
 		}
 		values := mux.Vars(r)
-		req.Flags.KubeContext = values["kube_context"]
+		req.Flags.KubeContext = values["cluster"]
 		req.Flags.Namespace = values["namespace"]
 		req.Name = values["release_name"]
 		resp, err := service.Upgrade(r.Context(), req)

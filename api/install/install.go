@@ -14,6 +14,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	CLUSTER   string = "cluster"
+	NAMESPACE string = "namespace"
+	RELEASE   string = "release_name"
+)
+
 // Request is the body for insatlling a release
 // swagger:model installRequestBody
 type Request struct {
@@ -70,17 +76,17 @@ type service interface {
 }
 
 // Handler handles an install request
-// swagger:operation PUT /releases/{kube_context}/{namespace}/{release_name} release installOperation
+// swagger:operation PUT /releases/{cluster}/{namespace}/{release_name} release installOperation
 //
-// Install helm release at the specified location
 //
 // ---
+// summary: Install helm release at the specified cluster and namespace
 // consumes:
 // - application/json
 // produces:
 // - application/json
 // parameters:
-// - name: kube_context
+// - name: cluster
 //   in: path
 //   required: true
 //   default: minikube
@@ -126,7 +132,7 @@ func Handler(service service) http.Handler {
 			return
 		}
 		values := mux.Vars(r)
-		req.Flags.KubeContext = values["kube_context"]
+		req.Flags.KubeContext = values["cluster"]
 		req.Flags.Namespace = values["namespace"]
 		req.Name = values["release_name"]
 		resp, err := service.Install(r.Context(), req)

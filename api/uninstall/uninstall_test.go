@@ -45,7 +45,7 @@ func (s *UninstallTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/releases/{kube_context}/{namespace}/{release_name}", Handler(s.mockService)).Methods(http.MethodDelete)
+	router.Handle("/releases/{cluster}/{namespace}/{release_name}", Handler(s.mockService)).Methods(http.MethodDelete)
 	s.server = httptest.NewServer(router)
 }
 

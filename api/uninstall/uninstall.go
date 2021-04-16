@@ -69,15 +69,15 @@ type service interface {
 }
 
 // Handler handles an uninstall request
-// swagger:operation DELETE /releases/{kube_context}/{namespace}/{release_name} release uninstallOperation
+// swagger:operation DELETE /releases/{cluster}/{namespace}/{release_name} release uninstallOperation
 //
-// Uninstall a helm release as specified in the request
 //
 // ---
+// summary: Uninstall a helm release
 // produces:
 // - application/json
 // parameters:
-// - name: kube_context
+// - name: cluster
 //   in: path
 //   required: true
 //   default: minikube
@@ -135,7 +135,7 @@ func Handler(s service) http.Handler {
 		}
 		values := mux.Vars(r)
 		req.ReleaseName = values["release_name"]
-		req.GlobalFlags.KubeContext = values["kube_context"]
+		req.GlobalFlags.KubeContext = values["cluster"]
 		req.GlobalFlags.Namespace = values["namespace"]
 		if err := req.valid(); err != nil {
 			logger.Errorf("[Uninstall] error in request parameters: %v", err)
