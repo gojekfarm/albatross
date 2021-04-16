@@ -47,11 +47,11 @@ type AddOkResponse struct {
 
 const NAME string = "repository-name"
 
-// AddHandler handles an repo add request
+// AddHandler handles a repo add/update request
 // swagger:operation PUT /repository/{repository_name} repository addOperation
 //
-// Add a chart repository to the server
-//
+// Add/Update a chart repository to the server.
+// The endpoint is idempotent and a repository can be updated by using the force_update parameter to true
 // ---
 // produces:
 // - application/json

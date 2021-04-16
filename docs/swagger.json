@@ -386,7 +386,7 @@
     },
     "/repository/{repository_name}": {
       "put": {
-        "description": "Add a chart repository to the server",
+        "description": "The endpoint is idempotent and a repository can be updated by using the force_update parameter to true",
         "produces": [
           "application/json"
         ],
@@ -396,6 +396,7 @@
         "tags": [
           "repository"
         ],
+        "summary": "Add/Update a chart repository to the server.",
         "operationId": "addOperation",
         "parameters": [
           {
