@@ -57,7 +57,7 @@ func (ac *ActionConfig) setFlags(envconfig *EnvConfig, flg *flags.GlobalFlags) e
 
 	return ac.Configuration.Init(
 		kubeClientConfig(envconfig, actionNamespace),
-		actionNamespace,
+		flg.Namespace,
 		os.Getenv("HELM_DRIVER"),
 		logger.Debugf,
 	)

@@ -27,8 +27,77 @@
         "tags": [
           "release"
         ],
-        "summary": "List the helm release for the cluster",
+        "summary": "List the helm releases for the cluster",
         "operationId": "listOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "deployed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalled",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "failed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "pending",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalling",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "404": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      }
+    },
+    "/releases/{cluster}/{namespace}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "List the helm releases for the cluster and namespace",
+        "operationId": "listOperationWithNamespace",
         "parameters": [
           {
             "type": "string",
@@ -41,14 +110,10 @@
           {
             "type": "string",
             "format": "string",
+            "default": "default",
             "name": "namespace",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "default": true,
-            "name": "all_namespaces",
-            "in": "query"
+            "in": "path",
+            "required": true
           },
           {
             "type": "boolean",

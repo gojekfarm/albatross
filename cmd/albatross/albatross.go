@@ -46,6 +46,7 @@ func startServer() {
 	router.Handle("/releases/{cluster}/{namespace}/{release_name}", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
 	router.Handle("/releases/{cluster}/{namespace}/{release_name}", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
 	router.Handle("/releases/{cluster}", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
+	router.Handle("/releases/{cluster}/{namespace}", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 
 	serveDocumentation(router)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)

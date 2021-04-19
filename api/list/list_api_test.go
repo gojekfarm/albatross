@@ -46,6 +46,7 @@ func (s *ListTestSuite) SetupTest() {
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
 	router.Handle("/releases/{cluster}", Handler(s.mockService)).Methods(http.MethodGet)
+	router.Handle("/releases/{cluster}/{namespace}", Handler(s.mockService)).Methods(http.MethodGet)
 	s.server = httptest.NewServer(router)
 }
 
@@ -53,11 +54,55 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	layout := "2006-01-02T15:04:05.000Z"
 	str := "2014-11-12T11:45:26.371Z"
 	timeFromStr, _ := time.Parse(layout, str)
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?all_namespaces=false&deployed=true&namespace=test", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?deployed=true", s.server.URL), nil)
 	expectedRequestStruct := Request{
 		Flags: Flags{
-			AllNamespaces: false,
+			AllNamespaces: true,
 			Deployed:      true,
+			GlobalFlags: flags.GlobalFlags{
+				KubeContext: "staging",
+			},
+		},
+	}
+	response := Response{
+		Releases: []Release{
+			{
+				Name:       "test-release",
+				Namespace:  "test",
+				Version:    1,
+				Updated:    timeFromStr,
+				Status:     release.StatusDeployed,
+				AppVersion: "0.1",
+			},
+		},
+	}
+	s.mockService.On("List", mock.Anything, expectedRequestStruct).Return(response, nil)
+
+	res, err := http.DefaultClient.Do(req)
+	assert.Equal(s.T(), 200, res.StatusCode)
+	require.NoError(s.T(), err)
+
+	var actualResponse Response
+	err = json.NewDecoder(res.Body).Decode(&actualResponse)
+
+	expectedResponse := Response{
+		Error:    "",
+		Releases: response.Releases,
+	}
+
+	assert.Equal(s.T(), expectedResponse.Releases[0], actualResponse.Releases[0])
+	require.NoError(s.T(), err)
+	s.mockService.AssertExpectations(s.T())
+}
+
+func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICallNamespace() {
+	layout := "2006-01-02T15:04:05.000Z"
+	str := "2014-11-12T11:45:26.371Z"
+	timeFromStr, _ := time.Parse(layout, str)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	expectedRequestStruct := Request{
+		Flags: Flags{
+			Deployed: true,
 			GlobalFlags: flags.GlobalFlags{
 				Namespace:   "test",
 				KubeContext: "staging",
@@ -96,7 +141,7 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 }
 
 func (s *ListTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter() {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?namespce=test", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?deply=test", s.server.URL), nil)
 
 	res, err := http.DefaultClient.Do(req)
 	require.NoError(s.T(), err)
