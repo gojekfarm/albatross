@@ -111,13 +111,13 @@ type service interface {
 // - http
 // responses:
 //   '200':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/upgradeResponse"
 //   '400':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/upgradeResponse"
 //   '404':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/upgradeResponse"
 //   '500':
-//    "$ref": "#/responses/listResponse"
+//    "$ref": "#/responses/upgradeResponse"
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
