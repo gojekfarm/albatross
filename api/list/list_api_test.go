@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -140,6 +141,28 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICallNamespace()
 	s.mockService.AssertExpectations(s.T())
 }
 
+func (s *ListTestSuite) TestShouldReturnNoContentWhenNoReleasesAreAvailable() {
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	expectedRequestStruct := Request{
+		Flags: Flags{
+			Deployed: true,
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "test",
+				KubeContext: "staging",
+			},
+		},
+	}
+	response := Response{
+		Releases: []Release{},
+	}
+	s.mockService.On("List", mock.Anything, expectedRequestStruct).Return(response, nil).Once()
+
+	res, err := http.DefaultClient.Do(req)
+	assert.Equal(s.T(), 204, res.StatusCode)
+	require.NoError(s.T(), err)
+
+	s.mockService.AssertExpectations(s.T())
+}
 func (s *ListTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter() {
 	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?deply=test", s.server.URL), nil)
 
@@ -148,6 +171,35 @@ func (s *ListTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter()
 
 	assert.Equal(s.T(), 400, res.StatusCode)
 	require.NoError(s.T(), err)
+}
+
+func (s *ListTestSuite) TestShouldReturnInternalServerErrorIfListServiceReturnsError() {
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	expectedRequestStruct := Request{
+		Flags: Flags{
+			Deployed: true,
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "test",
+				KubeContext: "staging",
+			},
+		},
+	}
+	response := Response{}
+	errorMsg := "test error"
+	listError := errors.New(errorMsg)
+	s.mockService.On("List", mock.Anything, expectedRequestStruct).Return(response, listError).Once()
+
+	res, err := http.DefaultClient.Do(req)
+	assert.Equal(s.T(), 500, res.StatusCode)
+	require.NoError(s.T(), err)
+	var actualResponse Response
+	err = json.NewDecoder(res.Body).Decode(&actualResponse)
+	require.NoError(s.T(), err)
+	expectedResponse := Response{
+		Error: errorMsg,
+	}
+	assert.Equal(s.T(), expectedResponse.Error, actualResponse.Error)
+	s.mockService.AssertExpectations(s.T())
 }
 
 func (s *ListTestSuite) TearDownTest() {

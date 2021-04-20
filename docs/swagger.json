@@ -73,6 +73,9 @@
           "200": {
             "$ref": "#/responses/listResponse"
           },
+          "204": {
+            "description": "No releases found"
+          },
           "400": {
             "$ref": "#/responses/listResponse"
           },
@@ -149,6 +152,9 @@
         "responses": {
           "200": {
             "$ref": "#/responses/listResponse"
+          },
+          "204": {
+            "description": "No releases found"
           },
           "400": {
             "$ref": "#/responses/listResponse"

@@ -102,6 +102,8 @@ type service interface {
 // responses:
 //   '200':
 //    "$ref": "#/responses/listResponse"
+//   '204':
+//    description: No releases found
 //   '400':
 //    "$ref": "#/responses/listResponse"
 //   '404':
@@ -123,6 +125,11 @@ func Handler(service service) http.Handler {
 		resp, err := service.List(r.Context(), req)
 		if err != nil {
 			respondListError(w, "error while listing charts: %v", err)
+			return
+		}
+
+		if resp.Releases == nil || len(resp.Releases) == 0 {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
@@ -179,6 +186,8 @@ func Handler(service service) http.Handler {
 // responses:
 //   '200':
 //    "$ref": "#/responses/listResponse"
+//   '204':
+//    description: No releases found
 //   '400':
 //    "$ref": "#/responses/listResponse"
 //   '404':
