@@ -69,7 +69,7 @@ type service interface {
 }
 
 // Handler handles an uninstall request
-// swagger:operation DELETE /releases/{cluster}/{namespace}/{release_name} release uninstallOperation
+// swagger:operation DELETE /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release uninstallOperation
 //
 //
 // ---
@@ -117,9 +117,11 @@ type service interface {
 //   '200':
 //    "$ref": "#/responses/uninstallResponse"
 //   '400':
-//    "$ref": "#/responses/uninstallResponse"
+//    schema:
+//     $ref: "#/definitions/uninstallErrorResponse"
 //   '404':
-//    "$ref": "#/responses/uninstallResponse"
+//    schema:
+//     $ref: "#/definitions/uninstallErrorResponse"
 //   '500':
 //    "$ref": "#/responses/uninstallResponse"
 func Handler(s service) http.Handler {

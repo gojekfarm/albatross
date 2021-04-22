@@ -63,7 +63,7 @@ type service interface {
 }
 
 // Handler handles a list request
-// swagger:operation GET /releases/{cluster} release listOperation
+// swagger:operation GET /clusters/{cluster}/releases release listOperation
 //
 //
 // ---
@@ -105,11 +105,11 @@ type service interface {
 //   '204':
 //    description: No releases found
 //   '400':
-//    "$ref": "#/responses/listResponse"
-//   '404':
-//    "$ref": "#/responses/listResponse"
+//    schema:
+//     $ref: "#/definitions/listErrorResponse"
 //   '500':
-//    "$ref": "#/responses/listResponse"
+//    schema:
+//     $ref: "#/definitions/listErrorResponse"
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -141,7 +141,7 @@ func Handler(service service) http.Handler {
 }
 
 // Handler handles a list request
-// swagger:operation GET /releases/{cluster}/{namespace} release listOperationWithNamespace
+// swagger:operation GET /clusters/{cluster}/namespaces/{namespace}/releases release listOperationWithNamespace
 //
 //
 // ---

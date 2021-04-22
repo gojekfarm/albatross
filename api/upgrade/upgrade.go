@@ -74,7 +74,7 @@ type service interface {
 }
 
 // Handler handles an upgrade request
-// swagger:operation POST /releases/{cluster}/{namespace}/{release_name} release upgradeOperation
+// swagger:operation POST /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release upgradeOperation
 //
 //
 // ---
@@ -113,9 +113,7 @@ type service interface {
 //   '200':
 //    "$ref": "#/responses/upgradeResponse"
 //   '400':
-//    "$ref": "#/responses/upgradeResponse"
-//   '404':
-//    "$ref": "#/responses/upgradeResponse"
+//    description: "Invalid request"
 //   '500':
 //    "$ref": "#/responses/upgradeResponse"
 func Handler(service service) http.Handler {

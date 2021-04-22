@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	CLUSTER   string = "cluster"
-	NAMESPACE string = "namespace"
-	RELEASE   string = "release_name"
+	CLUSTER        string = "cluster"
+	NAMESPACE      string = "namespace"
+	RELEASE        string = "release_name"
+	alreadyPresent string = "cannot re-use a name that is still in use"
 )
 
 // Request is the body for insatlling a release
@@ -76,7 +77,7 @@ type service interface {
 }
 
 // Handler handles an install request
-// swagger:operation PUT /releases/{cluster}/{namespace}/{release_name} release installOperation
+// swagger:operation PUT /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release installOperation
 //
 //
 // ---
@@ -115,9 +116,10 @@ type service interface {
 //   '200':
 //    "$ref": "#/responses/installResponse"
 //   '400':
-//    "$ref": "#/responses/installResponse"
-//   '404':
-//    "$ref": "#/responses/installResponse"
+//    description: Invalid request
+//   '409':
+//    schema:
+//     $ref: "#/definitions/installResponseErrorBody"
 //   '500':
 //    "$ref": "#/responses/installResponse"
 
@@ -137,21 +139,27 @@ func Handler(service service) http.Handler {
 		req.Name = values["release_name"]
 		resp, err := service.Install(r.Context(), req)
 		if err != nil {
-			respondInstallError(w, "error while installing chart: %v", err)
+			code := http.StatusInternalServerError
+			if err.Error() == alreadyPresent {
+				code = http.StatusConflict
+			}
+			respondInstallError(w, "error while installing chart: %v", err, code)
 			return
 		}
 
 		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			respondInstallError(w, "error writing response: %v", err)
+			respondInstallError(w, "error writing response: %v", err, http.StatusInternalServerError)
 			return
 		}
 	})
 }
 
 // TODO: This does not handle different status codes.
-func respondInstallError(w http.ResponseWriter, logprefix string, err error) {
+func respondInstallError(w http.ResponseWriter, logprefix string, err error, statusCode int) {
 	response := Response{Error: err.Error()}
-	w.WriteHeader(http.StatusInternalServerError)
+	if statusCode > 0 {
+		w.WriteHeader(statusCode)
+	}
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		logger.Errorf("[Install] %s %v", logprefix, err)
 		w.WriteHeader(http.StatusInternalServerError)

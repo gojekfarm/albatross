@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gotest.tools/assert"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
@@ -45,7 +45,7 @@ func (s *UpgradeTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/releases/{cluster}/{namespace}/{release_name}", Handler(s.mockService)).Methods(http.MethodPost)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", Handler(s.mockService)).Methods(http.MethodPost)
 	s.server = httptest.NewServer(router)
 }
 
@@ -59,7 +59,7 @@ func (s *UpgradeTestSuite) TestShouldReturnDeployedStatusOnSuccessfulUpgrade() {
 		"values": {
 			"usePassword": false
 		}}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/releases/staging/something/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
 	requestStruct := Request{
 		Name:  "redis-v5",
 		Chart: chartName,
@@ -93,7 +93,7 @@ func (s *UpgradeTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	"flags": {
 	    "install": true, "namespace": "something2", "version": "7.5.4"
 	}}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/releases/staging-context/something/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging-context/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
 	requestStruct := Request{
 		Name:  "redis-v5",
 		Chart: chartName,
@@ -122,7 +122,7 @@ func (s *UpgradeTestSuite) TestShouldBadRequestOnInvalidRequest() {
 	"flags": {
 	    "install": true, "namespace": true, "version": 7.5.4
 	}}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/releases/staging-context/something/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging-context/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
 
 	resp, err := http.DefaultClient.Do(req)
 

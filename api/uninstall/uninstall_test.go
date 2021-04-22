@@ -45,12 +45,12 @@ func (s *UninstallTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/releases/{cluster}/{namespace}/{release_name}", Handler(s.mockService)).Methods(http.MethodDelete)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", Handler(s.mockService)).Methods(http.MethodDelete)
 	s.server = httptest.NewServer(router)
 }
 
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/releases/minikube/default/%s?timeout=2", s.server.URL, testReleaseName), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s?timeout=2", s.server.URL, testReleaseName), nil)
 	requestSturct := Request{
 		ReleaseName: testReleaseName,
 		Timeout:     2,
@@ -90,7 +90,7 @@ func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 
 func (s *UninstallTestSuite) TestShouldReturnNotFoundErrorIfItHasUnavailableReleaseName() {
 	unavailableReleaseName := "unknown_release"
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/releases/minikube/default/%s", s.server.URL, unavailableReleaseName), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s", s.server.URL, unavailableReleaseName), nil)
 	requestStruct := Request{
 		ReleaseName: unavailableReleaseName,
 		GlobalFlags: flags.GlobalFlags{
@@ -110,7 +110,7 @@ func (s *UninstallTestSuite) TestShouldReturnNotFoundErrorIfItHasUnavailableRele
 
 func (s *UninstallTestSuite) TestShouldReturnInternalServerErrorIfUninstallThrowsUnknownError() {
 	errMsg := "Test error Message"
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/releases/minikube/default/%s", s.server.URL, testReleaseName), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s", s.server.URL, testReleaseName), nil)
 	requestSturct := Request{
 		ReleaseName: testReleaseName,
 		GlobalFlags: flags.GlobalFlags{
@@ -145,7 +145,7 @@ func (s *UninstallTestSuite) TestShouldReturnInternalServerErrorIfUninstallThrow
 
 func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidReleaseName() {
 	invalidReleaseName := "a very long release name which is invalid plus some more gibberish"
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/releases/minikube/default/%s", s.server.URL, invalidReleaseName), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s", s.server.URL, invalidReleaseName), nil)
 
 	res, err := http.DefaultClient.Do(req)
 
@@ -162,7 +162,7 @@ func (s *UninstallTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidReleas
 
 func (s *UninstallTestSuite) TestAllQueryParam() {
 	req, _ := http.NewRequest(http.MethodDelete,
-		fmt.Sprintf("%s/releases/minikube/default/%s?timeout=2&dry_run=true&disable_hooks=true&keep_history=true", s.server.URL, testReleaseName),
+		fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s?timeout=2&dry_run=true&disable_hooks=true&keep_history=true", s.server.URL, testReleaseName),
 		nil)
 	requestSturct := Request{
 		ReleaseName:  testReleaseName,

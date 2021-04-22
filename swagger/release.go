@@ -14,6 +14,12 @@ type UninstallResponse struct {
 	Body uninstall.Response
 }
 
+// UninstallErrorResponse error body for uninstall action
+// swagger:model uninstallErrorResponse
+type UninstallErrorResponse struct {
+	Error string `json:"error"`
+}
+
 // UninstallRequest stub for swagger route for uninstall
 // swagger:parameters uninstallRelease
 type UninstallRequest struct {
@@ -31,6 +37,13 @@ type ListRequest struct {
 // ListResponse stub for swagger route for List
 // swagger:response listResponse
 type ListResponse struct {
+	//in: body
+	Body list.Response
+}
+
+// ListErrorResponse stub for swagger route for List
+// swagger:model listErrorResponse
+type ListErrorResponse struct {
 	//in: body
 	Body list.Response
 }
@@ -61,4 +74,10 @@ type UpgradeRequest struct {
 type UpgradeResponse struct {
 	//in: body
 	Body upgrade.Response
+}
+
+// InstallErrorResponse body of install response
+// swagger:model installResponseErrorBody
+type InstallErrorResponse struct {
+	Error string `json:"error"`
 }

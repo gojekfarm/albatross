@@ -46,8 +46,8 @@ func (s *ListTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/releases/{cluster}", Handler(s.mockService)).Methods(http.MethodGet)
-	router.Handle("/releases/{cluster}/{namespace}", Handler(s.mockService)).Methods(http.MethodGet)
+	router.Handle("/clusters/{cluster}/releases", Handler(s.mockService)).Methods(http.MethodGet)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", Handler(s.mockService)).Methods(http.MethodGet)
 	s.server = httptest.NewServer(router)
 }
 
@@ -55,7 +55,7 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	layout := "2006-01-02T15:04:05.000Z"
 	str := "2014-11-12T11:45:26.371Z"
 	timeFromStr, _ := time.Parse(layout, str)
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?deployed=true", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/releases?deployed=true", s.server.URL), nil)
 	expectedRequestStruct := Request{
 		Flags: Flags{
 			AllNamespaces: true,
@@ -100,7 +100,7 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICallNamespace()
 	layout := "2006-01-02T15:04:05.000Z"
 	str := "2014-11-12T11:45:26.371Z"
 	timeFromStr, _ := time.Parse(layout, str)
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/namespaces/test/releases?deployed=true", s.server.URL), nil)
 	expectedRequestStruct := Request{
 		Flags: Flags{
 			Deployed: true,
@@ -142,7 +142,7 @@ func (s *ListTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICallNamespace()
 }
 
 func (s *ListTestSuite) TestShouldReturnNoContentWhenNoReleasesAreAvailable() {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/namespaces/test/releases?deployed=true", s.server.URL), nil)
 	expectedRequestStruct := Request{
 		Flags: Flags{
 			Deployed: true,
@@ -164,7 +164,7 @@ func (s *ListTestSuite) TestShouldReturnNoContentWhenNoReleasesAreAvailable() {
 	s.mockService.AssertExpectations(s.T())
 }
 func (s *ListTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter() {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging?deply=test", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/releases?deply=test", s.server.URL), nil)
 
 	res, err := http.DefaultClient.Do(req)
 	require.NoError(s.T(), err)
@@ -174,7 +174,7 @@ func (s *ListTestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter()
 }
 
 func (s *ListTestSuite) TestShouldReturnInternalServerErrorIfListServiceReturnsError() {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/releases/staging/test?deployed=true", s.server.URL), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/namespaces/test/releases?deployed=true", s.server.URL), nil)
 	expectedRequestStruct := Request{
 		Flags: Flags{
 			Deployed: true,

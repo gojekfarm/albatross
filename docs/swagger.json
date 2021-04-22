@@ -16,79 +16,7 @@
   },
   "host": "localhost:8080",
   "paths": {
-    "/releases/{cluster}": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "tags": [
-          "release"
-        ],
-        "summary": "List the helm releases for the cluster",
-        "operationId": "listOperation",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "string",
-            "default": "minikube",
-            "name": "cluster",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "deployed",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "uninstalled",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "failed",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "pending",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "uninstalling",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/listResponse"
-          },
-          "204": {
-            "description": "No releases found"
-          },
-          "400": {
-            "$ref": "#/responses/listResponse"
-          },
-          "404": {
-            "$ref": "#/responses/listResponse"
-          },
-          "500": {
-            "$ref": "#/responses/listResponse"
-          }
-        }
-      }
-    },
-    "/releases/{cluster}/{namespace}": {
+    "/clusters/{cluster}/namespaces/{namespace}/releases": {
       "get": {
         "produces": [
           "application/json"
@@ -168,7 +96,7 @@
         }
       }
     },
-    "/releases/{cluster}/{namespace}/{release_name}": {
+    "/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}": {
       "put": {
         "consumes": [
           "application/json"
@@ -223,10 +151,13 @@
             "$ref": "#/responses/installResponse"
           },
           "400": {
-            "$ref": "#/responses/installResponse"
+            "description": "Invalid request"
           },
-          "404": {
-            "$ref": "#/responses/installResponse"
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/installResponseErrorBody"
+            }
           },
           "500": {
             "$ref": "#/responses/installResponse"
@@ -287,10 +218,7 @@
             "$ref": "#/responses/upgradeResponse"
           },
           "400": {
-            "$ref": "#/responses/upgradeResponse"
-          },
-          "404": {
-            "$ref": "#/responses/upgradeResponse"
+            "description": "Invalid request"
           },
           "500": {
             "$ref": "#/responses/upgradeResponse"
@@ -364,13 +292,94 @@
             "$ref": "#/responses/uninstallResponse"
           },
           "400": {
-            "$ref": "#/responses/uninstallResponse"
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/uninstallErrorResponse"
+            }
           },
           "404": {
-            "$ref": "#/responses/uninstallResponse"
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/uninstallErrorResponse"
+            }
           },
           "500": {
             "$ref": "#/responses/uninstallResponse"
+          }
+        }
+      }
+    },
+    "/clusters/{cluster}/releases": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "List the helm releases for the cluster",
+        "operationId": "listOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "deployed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalled",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "failed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "pending",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalling",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "204": {
+            "description": "No releases found"
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/listErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/listErrorResponse"
+            }
           }
         }
       }
@@ -562,6 +571,29 @@
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/install"
     },
+    "installResponseErrorBody": {
+      "description": "InstallErrorResponse body of install response",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "InstallErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
+    },
+    "listErrorResponse": {
+      "description": "ListErrorResponse stub for swagger route for List",
+      "type": "object",
+      "properties": {
+        "Body": {
+          "$ref": "#/definitions/listReponseBody"
+        }
+      },
+      "x-go-name": "ListErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
+    },
     "listRelease": {
       "description": "Release wraps a helm release",
       "type": "object",
@@ -623,6 +655,18 @@
       },
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "uninstallErrorResponse": {
+      "description": "UninstallErrorResponse error body for uninstall action",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "UninstallErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
     },
     "uninstallRelease": {
       "description": "Release contains metadata about a helm release object",
