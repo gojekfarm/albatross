@@ -55,8 +55,18 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	lic := new(mockLister)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{Flags: Flags{Deployed: true}}
-	cli.On("NewLister", mock.AnythingOfType("flags.ListFlags")).Return(lic, nil)
+	req := Request{Flags: Flags{Deployed: true, Uninstalled: true, Pending: true, GlobalFlags: flags.GlobalFlags{
+		KubeContext: "abc", Namespace: "test",
+	}}}
+	listFlags := flags.ListFlags{
+		Deployed:    true,
+		Uninstalled: true,
+		Pending:     true,
+		GlobalFlags: flags.GlobalFlags{
+			KubeContext: "abc", Namespace: "test",
+		},
+	}
+	cli.On("NewLister", listFlags).Return(lic, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
 		panic("Could not load chart")

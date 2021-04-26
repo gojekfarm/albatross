@@ -10,13 +10,21 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
+)
+
+const (
+	CLUSTER        string = "cluster"
+	NAMESPACE      string = "namespace"
+	RELEASE        string = "release_name"
+	alreadyPresent string = "cannot re-use a name that is still in use"
 )
 
 // Request is the body for insatlling a release
 // swagger:model installRequestBody
 type Request struct {
-	// example: mysql
-	Name string `json:"name"`
+	Name string `json:"-"`
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
@@ -69,19 +77,52 @@ type service interface {
 }
 
 // Handler handles an install request
-// swagger:route PUT /install installRelease
+// swagger:operation PUT /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release installOperation
 //
-// Installs a helm release as specified in the request
 //
+// ---
+// summary: Install helm release at the specified cluster and namespace
 // consumes:
-//	- application/json
+// - application/json
 // produces:
-// 	- application/json
-// schemes: http
+// - application/json
+// parameters:
+// - name: cluster
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+//   default: mysql-final
+// - name: Body
+//   in: body
+//   required: true
+//   schema:
+//    "$ref": "#/definitions/installRequestBody"
+// schemes:
+// - http
 // responses:
-//   200: installResponse
-//   400: installResponse
-//   500: installResponse
+//   '200':
+//    "$ref": "#/responses/installResponse"
+//   '400':
+//    description: Invalid request
+//   '409':
+//    schema:
+//     $ref: "#/definitions/installResponseErrorBody"
+//   '500':
+//    "$ref": "#/responses/installResponse"
+
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -92,24 +133,33 @@ func Handler(service service) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
+		values := mux.Vars(r)
+		req.Flags.KubeContext = values["cluster"]
+		req.Flags.Namespace = values["namespace"]
+		req.Name = values["release_name"]
 		resp, err := service.Install(r.Context(), req)
 		if err != nil {
-			respondInstallError(w, "error while installing chart: %v", err)
+			code := http.StatusInternalServerError
+			if err.Error() == alreadyPresent {
+				code = http.StatusConflict
+			}
+			respondInstallError(w, "error while installing chart: %v", err, code)
 			return
 		}
 
 		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			respondInstallError(w, "error writing response: %v", err)
+			respondInstallError(w, "error writing response: %v", err, http.StatusInternalServerError)
 			return
 		}
 	})
 }
 
 // TODO: This does not handle different status codes.
-func respondInstallError(w http.ResponseWriter, logprefix string, err error) {
+func respondInstallError(w http.ResponseWriter, logprefix string, err error, statusCode int) {
 	response := Response{Error: err.Error()}
-	w.WriteHeader(http.StatusInternalServerError)
+	if statusCode > 0 {
+		w.WriteHeader(statusCode)
+	}
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		logger.Errorf("[Install] %s %v", logprefix, err)
 		w.WriteHeader(http.StatusInternalServerError)

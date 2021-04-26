@@ -1,4 +1,4 @@
-all: clean check-quality build test golangci
+all: clean check-quality build test golangci update-doc
 
 ALL_PACKAGES=$(shell go list ./...)
 SOURCE_DIRS=$(shell go list ./... | cut -d "/" -f4 | uniq)

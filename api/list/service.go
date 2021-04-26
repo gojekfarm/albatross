@@ -16,7 +16,13 @@ type Service struct {
 
 func (s Service) List(ctx context.Context, req Request) (Response, error) {
 	listflags := flags.ListFlags{
-		GlobalFlags: req.Flags.GlobalFlags,
+		GlobalFlags:   req.Flags.GlobalFlags,
+		AllNamespaces: req.AllNamespaces,
+		Deployed:      req.Deployed,
+		Failed:        req.Failed,
+		Uninstalled:   req.Uninstalled,
+		Uninstalling:  req.Uninstalling,
+		Pending:       req.Pending,
 	}
 	lcli, err := s.cli.NewLister(listflags)
 	if err != nil {

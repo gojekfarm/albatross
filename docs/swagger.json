@@ -16,9 +16,88 @@
   },
   "host": "localhost:8080",
   "paths": {
-    "/install": {
+    "/clusters/{cluster}/namespaces/{namespace}/releases": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "List the helm releases for the cluster and namespace",
+        "operationId": "listOperationWithNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "deployed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalled",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "failed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "pending",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalling",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "204": {
+            "description": "No releases found"
+          },
+          "400": {
+            "$ref": "#/responses/listResponse"
+          },
+          "404": {
+            "$ref": "#/responses/listResponse"
+          },
+          "500": {
+            "$ref": "#/responses/listResponse"
+          }
+        }
+      }
+    },
+    "/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}": {
       "put": {
-        "description": "Installs a helm release as specified in the request",
         "consumes": [
           "application/json"
         ],
@@ -28,11 +107,40 @@
         "schemes": [
           "http"
         ],
-        "operationId": "installRelease",
+        "tags": [
+          "release"
+        ],
+        "summary": "Install helm release at the specified cluster and namespace",
+        "operationId": "installOperation",
         "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "mysql-final",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
           {
             "name": "Body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/installRequestBody"
             }
@@ -43,87 +151,20 @@
             "$ref": "#/responses/installResponse"
           },
           "400": {
-            "$ref": "#/responses/installResponse"
+            "description": "Invalid request"
           },
-          "500": {
-            "$ref": "#/responses/installResponse"
-          }
-        }
-      }
-    },
-    "/list": {
-      "get": {
-        "description": "List helm releases as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "listRelease",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
+          "409": {
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/listRequestBody"
+              "$ref": "#/definitions/installResponseErrorBody"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/listResponse"
-          },
-          "400": {
-            "$ref": "#/responses/listResponse"
           },
           "500": {
-            "$ref": "#/responses/listResponse"
+            "$ref": "#/responses/installResponse"
           }
         }
-      }
-    },
-    "/uninstall": {
-      "delete": {
-        "description": "Uninstall a helm release as specified in the request",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "operationId": "uninstallRelease",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/uninstallRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/uninstallResponse"
-          },
-          "400": {
-            "$ref": "#/responses/uninstallResponse"
-          },
-          "500": {
-            "$ref": "#/responses/uninstallResponse"
-          }
-        }
-      }
-    },
-    "/upgrade": {
+      },
       "post": {
-        "description": "Upgrades a helm release as specified in the request",
         "consumes": [
           "application/json"
         ],
@@ -133,11 +174,40 @@
         "schemes": [
           "http"
         ],
-        "operationId": "upgradeRelease",
+        "tags": [
+          "release"
+        ],
+        "summary": "Upgrade a helm release deployed at the specified cluster and namespace",
+        "operationId": "upgradeOperation",
         "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "mysql-final",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
           {
             "name": "Body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/upgradeRequestBody"
             }
@@ -148,16 +218,206 @@
             "$ref": "#/responses/upgradeResponse"
           },
           "400": {
-            "$ref": "#/responses/upgradeResponse"
+            "description": "Invalid request"
           },
           "500": {
             "$ref": "#/responses/upgradeResponse"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "Uninstall a helm release",
+        "operationId": "uninstallOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "mysql-final",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "dry_run",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "keep_history",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "disable_hooks",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 300,
+            "name": "timeout",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/uninstallResponse"
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/uninstallErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/uninstallErrorResponse"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/uninstallResponse"
+          }
+        }
+      }
+    },
+    "/clusters/{cluster}/releases": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "List the helm releases for the cluster",
+        "operationId": "listOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "deployed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalled",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "failed",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "pending",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "uninstalling",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listResponse"
+          },
+          "204": {
+            "description": "No releases found"
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/listErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/listErrorResponse"
+            }
           }
         }
       }
     }
   },
   "definitions": {
+    "Request": {
+      "type": "object",
+      "properties": {
+        "AllNamespaces": {
+          "type": "boolean"
+        },
+        "Deployed": {
+          "type": "boolean"
+        },
+        "Failed": {
+          "type": "boolean"
+        },
+        "Pending": {
+          "type": "boolean"
+        },
+        "Uninstalled": {
+          "type": "boolean"
+        },
+        "Uninstalling": {
+          "type": "boolean"
+        },
+        "kube_apiserver": {
+          "type": "string",
+          "x-go-name": "KubeAPIServer"
+        },
+        "kube_token": {
+          "type": "string",
+          "x-go-name": "KubeToken"
+        }
+      },
+      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
     "Response": {
       "type": "object",
       "title": "Response represents the api response for upgrade request.",
@@ -182,27 +442,14 @@
     "globalFlags": {
       "description": "GlobalFlags flags which give context about kubernetes cluster to connect to",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "kube_apiserver": {
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         }
       },
       "x-go-name": "GlobalFlags",
@@ -211,9 +458,6 @@
     "installFlags": {
       "description": "Flags additional flags for installing a release",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "dry_run": {
           "type": "boolean",
@@ -224,19 +468,9 @@
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         },
         "version": {
           "type": "string",
@@ -301,11 +535,6 @@
         "flags": {
           "$ref": "#/definitions/installFlags"
         },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name",
-          "example": "mysql"
-        },
         "values": {
           "type": "object",
           "additionalProperties": {
@@ -341,6 +570,29 @@
       },
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/install"
+    },
+    "installResponseErrorBody": {
+      "description": "InstallErrorResponse body of install response",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "InstallErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
+    },
+    "listErrorResponse": {
+      "description": "ListErrorResponse stub for swagger route for List",
+      "type": "object",
+      "properties": {
+        "Body": {
+          "$ref": "#/definitions/listReponseBody"
+        }
+      },
+      "x-go-name": "ListErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
     },
     "listRelease": {
       "description": "Release wraps a helm release",
@@ -404,123 +656,17 @@
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/list"
     },
-    "listRequestBody": {
-      "description": "Request is body of List Route",
+    "uninstallErrorResponse": {
+      "description": "UninstallErrorResponse error body for uninstall action",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
-        "all-namespaces": {
-          "type": "boolean",
-          "x-go-name": "AllNamespaces",
-          "example": false
-        },
-        "deployed": {
-          "type": "boolean",
-          "x-go-name": "Deployed",
-          "example": false
-        },
-        "failed": {
-          "type": "boolean",
-          "x-go-name": "Failed",
-          "example": false
-        },
-        "kube_apiserver": {
+        "error": {
           "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "pending": {
-          "type": "boolean",
-          "x-go-name": "Pending",
-          "example": false
-        },
-        "uninstalled": {
-          "type": "boolean",
-          "x-go-name": "Uninstalled",
-          "example": false
-        },
-        "uninstalling": {
-          "type": "boolean",
-          "x-go-name": "Uninstalling",
-          "example": false
+          "x-go-name": "Error"
         }
       },
-      "x-go-name": "Request",
-      "x-go-package": "github.com/gojekfarm/albatross/api/list"
-    },
-    "listRequestFlags": {
-      "description": "Flags contains all the params supported",
-      "type": "object",
-      "required": [
-        "namespace"
-      ],
-      "properties": {
-        "all-namespaces": {
-          "type": "boolean",
-          "x-go-name": "AllNamespaces",
-          "example": false
-        },
-        "deployed": {
-          "type": "boolean",
-          "x-go-name": "Deployed",
-          "example": false
-        },
-        "failed": {
-          "type": "boolean",
-          "x-go-name": "Failed",
-          "example": false
-        },
-        "kube_apiserver": {
-          "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "pending": {
-          "type": "boolean",
-          "x-go-name": "Pending",
-          "example": false
-        },
-        "uninstalled": {
-          "type": "boolean",
-          "x-go-name": "Uninstalled",
-          "example": false
-        },
-        "uninstalling": {
-          "type": "boolean",
-          "x-go-name": "Uninstalling",
-          "example": false
-        }
-      },
-      "x-go-name": "Flags",
-      "x-go-package": "github.com/gojekfarm/albatross/api/list"
+      "x-go-name": "UninstallErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
     },
     "uninstallRelease": {
       "description": "Release contains metadata about a helm release object",
@@ -564,62 +710,6 @@
       "x-go-name": "Release",
       "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
     },
-    "uninstallRequestBody": {
-      "description": "Request Uninstall request body",
-      "type": "object",
-      "required": [
-        "namespace",
-        "release_name"
-      ],
-      "properties": {
-        "disable_hooks": {
-          "type": "boolean",
-          "x-go-name": "DisableHooks",
-          "example": false
-        },
-        "dry_run": {
-          "type": "boolean",
-          "x-go-name": "DryRun",
-          "example": false
-        },
-        "keep_history": {
-          "type": "boolean",
-          "x-go-name": "KeepHistory",
-          "example": false
-        },
-        "kube_apiserver": {
-          "type": "string",
-          "x-go-name": "KubeAPIServer"
-        },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
-        "kube_token": {
-          "type": "string",
-          "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
-        },
-        "release_name": {
-          "type": "string",
-          "x-go-name": "ReleaseName",
-          "example": "mysql"
-        },
-        "timeout": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Timeout",
-          "example": 300
-        }
-      },
-      "x-go-name": "Request",
-      "x-go-package": "github.com/gojekfarm/albatross/api/uninstall"
-    },
     "uninstallResponseBody": {
       "description": "Response is the body of uninstall route",
       "type": "object",
@@ -645,9 +735,6 @@
     "upgradeFlags": {
       "description": "Flags additional flags supported while upgrading a release",
       "type": "object",
-      "required": [
-        "namespace"
-      ],
       "properties": {
         "dry_run": {
           "type": "boolean",
@@ -663,19 +750,9 @@
           "type": "string",
           "x-go-name": "KubeAPIServer"
         },
-        "kube_context": {
-          "type": "string",
-          "x-go-name": "KubeContext",
-          "example": "minikube"
-        },
         "kube_token": {
           "type": "string",
           "x-go-name": "KubeToken"
-        },
-        "namespace": {
-          "type": "string",
-          "x-go-name": "Namespace",
-          "example": "default"
         },
         "version": {
           "type": "string",
@@ -739,11 +816,6 @@
         },
         "flags": {
           "$ref": "#/definitions/upgradeFlags"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name",
-          "example": "mysql"
         },
         "values": {
           "type": "object",

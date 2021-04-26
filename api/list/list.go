@@ -3,7 +3,6 @@ package list
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
@@ -11,35 +10,24 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
 
-// Request is body of List Route
-// swagger:model listRequestBody
+var decoder *schema.Decoder = schema.NewDecoder()
+
 type Request struct {
 	Flags
 }
 
-// Flags contains all the params supported
-// swagger:model listRequestFlags
 type Flags struct {
-	// example: false
-	// required: false
-	AllNamespaces bool `json:"all-namespaces,omitempty"`
-	// required: false
-	// example: false
-	Deployed bool `json:"deployed,omitempty"`
-	// required: false
-	// example: false
-	Failed bool `json:"failed,omitempty"`
-	// required: false
-	// example: false
-	Pending bool `json:"pending,omitempty"`
-	// required: false
-	// example: false
-	Uninstalled bool `json:"uninstalled,omitempty"`
-	// required: false
-	// example: false
-	Uninstalling bool `json:"uninstalling,omitempty"`
+	AllNamespaces bool `schema:"-"`
+	Deployed      bool `schema:"deployed"`
+	Failed        bool `schema:"failed"`
+	Pending       bool `schema:"pending"`
+	Uninstalled   bool `schema:"uninstalled"`
+	Uninstalling  bool `schema:"uninstalling"`
 	flags.GlobalFlags
 }
 
@@ -75,33 +63,73 @@ type service interface {
 }
 
 // Handler handles a list request
-// swagger:route GET /list listRelease
+// swagger:operation GET /clusters/{cluster}/releases release listOperation
 //
-// List helm releases as specified in the request
 //
-// consumes:
-//	- application/json
+// ---
+// summary: List the helm releases for the cluster
 // produces:
-// 	- application/json
-// schemes: http
+// - application/json
+// parameters:
+// - name: cluster
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: deployed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalled
+//   in: query
+//   type: boolean
+//   default: false
+// - name: failed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: pending
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalling
+//   in: query
+//   type: boolean
+//   default: false
+// schemes:
+// - http
 // responses:
-//   200: listResponse
-//   400: listResponse
-//   500: listResponse
+//   '200':
+//    "$ref": "#/responses/listResponse"
+//   '204':
+//    description: No releases found
+//   '400':
+//    schema:
+//     $ref: "#/definitions/listErrorResponse"
+//   '500':
+//    schema:
+//     $ref: "#/definitions/listErrorResponse"
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
-
 		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err == io.EOF || err != nil {
+		if err := decoder.Decode(&req, r.URL.Query()); err != nil {
 			logger.Errorf("[List] error decoding request: %v", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
+		values := mux.Vars(r)
+		req.KubeContext = values["cluster"]
+		populateRequestFlags(&req, values)
 		resp, err := service.List(r.Context(), req)
 		if err != nil {
 			respondListError(w, "error while listing charts: %v", err)
+			return
+		}
+
+		if resp.Releases == nil || len(resp.Releases) == 0 {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
@@ -112,6 +140,61 @@ func Handler(service service) http.Handler {
 	})
 }
 
+// Handler handles a list request
+// swagger:operation GET /clusters/{cluster}/namespaces/{namespace}/releases release listOperationWithNamespace
+//
+//
+// ---
+// summary: List the helm releases for the cluster and namespace
+// produces:
+// - application/json
+// parameters:
+// - name: cluster
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+//   default: default
+// - name: deployed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalled
+//   in: query
+//   type: boolean
+//   default: false
+// - name: failed
+//   in: query
+//   type: boolean
+//   default: false
+// - name: pending
+//   in: query
+//   type: boolean
+//   default: false
+// - name: uninstalling
+//   in: query
+//   type: boolean
+//   default: false
+// schemes:
+// - http
+// responses:
+//   '200':
+//    "$ref": "#/responses/listResponse"
+//   '204':
+//    description: No releases found
+//   '400':
+//    "$ref": "#/responses/listResponse"
+//   '404':
+//    "$ref": "#/responses/listResponse"
+//   '500':
+//    "$ref": "#/responses/listResponse"
+
 func respondListError(w http.ResponseWriter, logprefix string, err error) {
 	response := Response{Error: err.Error()}
 	w.WriteHeader(http.StatusInternalServerError)
@@ -119,5 +202,13 @@ func respondListError(w http.ResponseWriter, logprefix string, err error) {
 		logger.Errorf("[List] %s %v", logprefix, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+}
+
+func populateRequestFlags(req *Request, values map[string]string) {
+	if values["namespace"] == "" {
+		req.AllNamespaces = true
+	} else {
+		req.Namespace = values["namespace"]
 	}
 }

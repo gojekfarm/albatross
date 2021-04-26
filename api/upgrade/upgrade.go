@@ -11,18 +11,20 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
+
+	"github.com/gorilla/mux"
 )
 
 // Request is the body for upgrading a release
 // swagger:model upgradeRequestBody
 type Request struct {
-	// example: mysql
-	Name string `json:"name"`
+	Name string `json:"-"`
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
 	Values map[string]interface{} `json:"values"`
-	// example: {"kube_context": "minikube", "namespace":"default"}
+	// Deprecated field
+	// example: {"cluster": "minikube", "namespace":"default"}
 	Flags Flags `json:"flags"`
 }
 
@@ -72,19 +74,48 @@ type service interface {
 }
 
 // Handler handles an upgrade request
-// swagger:route POST /upgrade upgradeRelease
+// swagger:operation POST /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release upgradeOperation
 //
-// Upgrades a helm release as specified in the request
 //
+// ---
+// summary: Upgrade a helm release deployed at the specified cluster and namespace
 // consumes:
-//	- application/json
+// - application/json
 // produces:
-// 	- application/json
-// schemes: http
+// - application/json
+// parameters:
+// - name: cluster
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+//   default: mysql-final
+// - name: Body
+//   in: body
+//   required: true
+//   schema:
+//    "$ref": "#/definitions/upgradeRequestBody"
+// schemes:
+// - http
 // responses:
-//   200: upgradeResponse
-//   400: upgradeResponse
-//   500: upgradeResponse
+//   '200':
+//    "$ref": "#/responses/upgradeResponse"
+//   '400':
+//    description: "Invalid request"
+//   '500':
+//    "$ref": "#/responses/upgradeResponse"
 func Handler(service service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -95,8 +126,10 @@ func Handler(service service) http.Handler {
 			logger.Errorf("[Upgrade] error decoding request: %v", err)
 			return
 		}
-		defer r.Body.Close()
-
+		values := mux.Vars(r)
+		req.Flags.KubeContext = values["cluster"]
+		req.Flags.Namespace = values["namespace"]
+		req.Name = values["release_name"]
 		resp, err := service.Upgrade(r.Context(), req)
 		if err != nil {
 			respondUpgradeError(w, "error while upgrading release: %v", err)

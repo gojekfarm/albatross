@@ -11,6 +11,8 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
 
+	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -19,30 +21,15 @@ import (
 var (
 	errInvalidReleaseName    = errors.New("uninstall: invalid release name")
 	errUnableToDecodeRequest = errors.New("unable to decode the json payload")
+	decoder                  = schema.NewDecoder()
 )
 
-// Request Uninstall request body
-// swagger:model uninstallRequestBody
 type Request struct {
-	// required: true
-	// example: mysql
-	ReleaseName string `json:"release_name"`
-
-	// required: false
-	// example: false
-	DryRun bool `json:"dry_run"`
-
-	// required: false
-	// example: false
-	KeepHistory bool `json:"keep_history"`
-
-	// required: false
-	// example: false
-	DisableHooks bool `json:"disable_hooks"`
-
-	// required: false
-	//example: 300
-	Timeout int `json:"timeout"`
+	ReleaseName  string `json:"-" schema:"-"`
+	DryRun       bool   `json:"dry_run" schema:"dry_run"`
+	KeepHistory  bool   `json:"keep_history" schema:"keep_history"`
+	DisableHooks bool   `json:"disable_hooks" schema:"disable_hooks"`
+	Timeout      int    `json:"timeout" schema:"timeout"`
 	flags.GlobalFlags
 }
 
@@ -82,31 +69,76 @@ type service interface {
 }
 
 // Handler handles an uninstall request
-// swagger:route DELETE /uninstall uninstallRelease
+// swagger:operation DELETE /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release uninstallOperation
 //
-// Uninstall a helm release as specified in the request
 //
-// consumes:
-//	- application/json
+// ---
+// summary: Uninstall a helm release
 // produces:
-// 	- application/json
-// schemes: http
+// - application/json
+// parameters:
+// - name: cluster
+//   in: path
+//   required: true
+//   default: minikube
+//   type: string
+//   format: string
+// - name: namespace
+//   in: path
+//   required: true
+//   default: default
+//   type: string
+//   format: string
+// - name: release_name
+//   in: path
+//   required: true
+//   type: string
+//   format: string
+//   default: mysql-final
+// - name: dry_run
+//   in: query
+//   type: boolean
+//   default: false
+// - name: keep_history
+//   in: query
+//   type: boolean
+//   default: false
+// - name: disable_hooks
+//   in: query
+//   type: boolean
+//   default: false
+// - name: timeout
+//   in: query
+//   type: integer
+//   default: 300
+// schemes:
+// - http
 // responses:
-//   200: uninstallResponse
-//   400: uninstallResponse
-//   500: uninstallResponse
+//   '200':
+//    "$ref": "#/responses/uninstallResponse"
+//   '400':
+//    schema:
+//     $ref: "#/definitions/uninstallErrorResponse"
+//   '404':
+//    schema:
+//     $ref: "#/definitions/uninstallErrorResponse"
+//   '500':
+//    "$ref": "#/responses/uninstallResponse"
 func Handler(s service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
 		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := decoder.Decode(&req, r.URL.Query()); err != nil {
 			logger.Errorf("[Uninstall] error decoding request: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			respondWithUninstallError(w, "", errUnableToDecodeRequest)
 			return
 		}
-
+		values := mux.Vars(r)
+		req.ReleaseName = values["release_name"]
+		req.GlobalFlags.KubeContext = values["cluster"]
+		req.GlobalFlags.Namespace = values["namespace"]
 		if err := req.valid(); err != nil {
 			logger.Errorf("[Uninstall] error in request parameters: %v", err)
 			w.WriteHeader(http.StatusBadRequest)

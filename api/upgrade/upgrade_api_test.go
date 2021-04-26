@@ -9,11 +9,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gotest.tools/assert"
 
+	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/logger"
 
 	"helm.sh/helm/v3/pkg/release"
@@ -42,28 +44,40 @@ func (s *UpgradeTestSuite) SetupSuite() {
 func (s *UpgradeTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
-	handler := Handler(s.mockService)
-	s.server = httptest.NewServer(handler)
+	router := mux.NewRouter()
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", Handler(s.mockService)).Methods(http.MethodPost)
+	s.server = httptest.NewServer(router)
 }
 
 func (s *UpgradeTestSuite) TestShouldReturnDeployedStatusOnSuccessfulUpgrade() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{
 		"chart":"%s",
-		"name": "redis-v5",
 		"flags": {
-			"install": false,
-			"namespace": "something"
+			"install": true
 		},
 		"values": {
 			"usePassword": false
 		}}`, chartName)
-
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/upgrade", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
+	requestStruct := Request{
+		Name:  "redis-v5",
+		Chart: chartName,
+		Flags: Flags{
+			Install: true,
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "something",
+				KubeContext: "staging",
+			},
+		},
+		Values: map[string]interface{}{
+			"usePassword": false,
+		},
+	}
 	response := Response{
 		Status: release.StatusDeployed.String(),
 	}
-	s.mockService.On("Upgrade", mock.Anything, mock.AnythingOfType("Request")).Return(response, nil)
+	s.mockService.On("Upgrade", mock.Anything, requestStruct).Return(response, nil)
 
 	resp, err := http.DefaultClient.Do(req)
 
@@ -76,12 +90,23 @@ func (s *UpgradeTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{
     "chart":"%s",
-	"name": "redis-v5",
 	"flags": {
-	    "install": true, "namespace": "something", "version": "7.5.4"
+	    "install": true, "namespace": "something2", "version": "7.5.4"
 	}}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/install", s.server.URL), strings.NewReader(body))
-	s.mockService.On("Upgrade", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, errors.New("invalid chart"))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging-context/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
+	requestStruct := Request{
+		Name:  "redis-v5",
+		Chart: chartName,
+		Flags: Flags{
+			Install: true,
+			Version: "7.5.4",
+			GlobalFlags: flags.GlobalFlags{
+				Namespace:   "something",
+				KubeContext: "staging-context",
+			},
+		},
+	}
+	s.mockService.On("Upgrade", mock.Anything, requestStruct).Return(Response{}, errors.New("invalid chart"))
 
 	resp, err := http.DefaultClient.Do(req)
 
@@ -97,8 +122,7 @@ func (s *UpgradeTestSuite) TestShouldBadRequestOnInvalidRequest() {
 	"flags": {
 	    "install": true, "namespace": true, "version": 7.5.4
 	}}`, chartName)
-	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/install", s.server.URL), strings.NewReader(body))
-	s.mockService.On("Upgrade", mock.Anything, mock.AnythingOfType("Request")).Return(Response{}, nil)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/clusters/staging-context/namespaces/something/releases/redis-v5", s.server.URL), strings.NewReader(body))
 
 	resp, err := http.DefaultClient.Do(req)
 
