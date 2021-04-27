@@ -11,6 +11,7 @@ import (
 	"github.com/gojekfarm/albatross/api"
 	"github.com/gojekfarm/albatross/api/install"
 	"github.com/gojekfarm/albatross/api/list"
+	"github.com/gojekfarm/albatross/api/status"
 	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
@@ -40,11 +41,13 @@ func startServer() {
 	upgradeHandler := upgrade.Handler(upgrade.NewService(cli))
 	listHandler := list.Handler(list.NewService(cli))
 	uninstallHandler := uninstall.Handler(uninstall.NewService(cli))
+	statusHandler := status.Handler(status.NewService(cli))
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(uninstallHandler)).Methods(http.MethodDelete)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(statusHandler)).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 

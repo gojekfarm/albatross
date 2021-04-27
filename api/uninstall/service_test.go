@@ -51,6 +51,11 @@ func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninst
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }
 
+func (m *mockHelmClient) NewStatusGiver(fl flags.StatusFlags) (helmcli.StatusGiver, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.StatusGiver), args.Error(1)
+}
+
 type mockUninstaller struct{ mock.Mock }
 
 func (m *mockUninstaller) Uninstall(ctx context.Context, releaseName string) (*release.UninstallReleaseResponse, error) {

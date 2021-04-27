@@ -47,3 +47,8 @@ type UninstallFlags struct {
 	Timeout      time.Duration
 	GlobalFlags
 }
+
+type StatusFlags struct {
+	Version int
+	GlobalFlags
+}
