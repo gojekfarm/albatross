@@ -74,7 +74,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	uic := new(mockUninstaller)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{ReleaseName: testReleaseName}
+	req := Request{releaseName: testReleaseName}
 	releaseOptions := &release.MockReleaseOptions{
 		Name:      testReleaseName,
 		Version:   1,
@@ -115,7 +115,7 @@ func TestShouldHandleNewUninstallerFailureWithError(t *testing.T) {
 	cli := new(mockHelmClient)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{ReleaseName: testReleaseName, Timeout: 2}
+	req := Request{releaseName: testReleaseName, Timeout: 2}
 	uninstallFlags := flags.UninstallFlags{
 		Release:     testReleaseName,
 		GlobalFlags: flags.GlobalFlags{},
@@ -137,7 +137,7 @@ func TestShouldReturnResponseAndProperErrorWhenReleaseIsNotFound(t *testing.T) {
 	service := NewService(cli)
 	ctx := context.Background()
 	globalFlag := flags.GlobalFlags{KubeContext: "minikube"}
-	req := Request{ReleaseName: testReleaseName, GlobalFlags: globalFlag}
+	req := Request{releaseName: testReleaseName, GlobalFlags: globalFlag}
 	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, GlobalFlags: globalFlag, Timeout: defaultTimeout}
 	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
 	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(nil, driver.ErrReleaseNotFound)
@@ -157,7 +157,7 @@ func TestShouldReturnResponseAndProperErrorWhenUninstallActionFails(t *testing.T
 	uic := new(mockUninstaller)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{ReleaseName: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
+	req := Request{releaseName: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true}
 	uninstallFlags := flags.UninstallFlags{Release: testReleaseName, KeepHistory: true, DryRun: true, DisableHooks: true, Timeout: defaultTimeout}
 	cli.On("NewUninstaller", uninstallFlags).Times(1).Return(uic, nil)
 	uic.On("Uninstall", ctx, testReleaseName).Times(1).Return(&release.UninstallReleaseResponse{}, errUninstallActionError)

@@ -45,11 +45,11 @@ func startServer() {
 
 	router.Handle("/ping", ContentTypeMiddle(api.Ping())).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(uninstallHandler)).Methods(http.MethodDelete)
-	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(installHandler)).Methods(http.MethodPut)
-	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPost)
-	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(statusHandler)).Methods(http.MethodGet)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", ContentTypeMiddle(installHandler)).Methods(http.MethodPost)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(upgradeHandler)).Methods(http.MethodPut)
 	router.Handle("/clusters/{cluster}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", ContentTypeMiddle(statusHandler)).Methods(http.MethodGet)
 
 	serveDocumentation(router)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", 8080), router)

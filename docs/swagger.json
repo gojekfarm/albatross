@@ -94,6 +94,65 @@
             "$ref": "#/responses/listResponse"
           }
         }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "Install helm release at the specified cluster and namespace",
+        "operationId": "installOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/installRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/installResponse"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/installResponseErrorBody"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/installResponse"
+          }
+        }
       }
     },
     "/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}": {
@@ -165,73 +224,6 @@
         }
       },
       "put": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http"
-        ],
-        "tags": [
-          "release"
-        ],
-        "summary": "Install helm release at the specified cluster and namespace",
-        "operationId": "installOperation",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "string",
-            "default": "minikube",
-            "name": "cluster",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "string",
-            "default": "default",
-            "name": "namespace",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "string",
-            "default": "mysql-final",
-            "name": "release_name",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "Body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/installRequestBody"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/installResponse"
-          },
-          "400": {
-            "description": "Invalid request"
-          },
-          "409": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/installResponseErrorBody"
-            }
-          },
-          "500": {
-            "$ref": "#/responses/installResponse"
-          }
-        }
-      },
-      "post": {
         "consumes": [
           "application/json"
         ],
@@ -601,6 +593,10 @@
         },
         "flags": {
           "$ref": "#/definitions/installFlags"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
         },
         "values": {
           "type": "object",
