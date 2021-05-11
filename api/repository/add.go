@@ -20,8 +20,6 @@ type AddRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	// example: false
-	AllowDeprecatedRepos bool `json:"allow_deprecated_repos"`
-	// example: false
 	ForceUpdate bool `json:"force_update"`
 	// CertFile              string
 	// KeyFile               string
@@ -48,7 +46,7 @@ type AddOkResponse struct {
 const NAME string = "repository-name"
 
 // AddHandler handles a repo add/update request
-// swagger:operation PUT /repository/{repository_name} repository addOperation
+// swagger:operation PUT /repositories/{repository_name} repository addOperation
 //
 // Add/Update a chart repository to the server.
 // The endpoint is idempotent and a repository can be updated by using the force_update parameter to true

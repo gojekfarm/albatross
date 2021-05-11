@@ -384,7 +384,7 @@
         }
       }
     },
-    "/repository/{repository_name}": {
+    "/repositories/{repository_name}": {
       "put": {
         "description": "The endpoint is idempotent and a repository can be updated by using the force_update parameter to true",
         "produces": [
@@ -520,11 +520,6 @@
       "description": "AddRequest is the body for PUT request to repository",
       "type": "object",
       "properties": {
-        "allow_deprecated_repos": {
-          "type": "boolean",
-          "x-go-name": "AllowDeprecatedRepos",
-          "example": false
-        },
         "force_update": {
           "type": "boolean",
           "x-go-name": "ForceUpdate",

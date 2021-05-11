@@ -19,11 +19,6 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 )
 
-var deprecatedRepos = map[string]string{
-	"//kubernetes-charts.storage.googleapis.com":           "https://charts.helm.sh/stable",
-	"//kubernetes-charts-incubator.storage.googleapis.com": "https://charts.helm.sh/incubator",
-}
-
 const timeout time.Duration = 30 * time.Second
 
 type adder struct {
@@ -80,15 +75,6 @@ func (o *adder) Add(ctx context.Context) error {
 }
 
 func (o *adder) checkPrerequisite() error {
-	// Block deprecated repos
-	if !o.AllowDeprecatedRepos {
-		for oldURL, newURL := range deprecatedRepos {
-			if strings.Contains(o.URL, oldURL) {
-				return fmt.Errorf("repo %q is no longer available; try %q instead", o.URL, newURL)
-			}
-		}
-	}
-
 	// Ensure the file directory exists as it is required for file locking
 	err := os.MkdirAll(filepath.Dir(o.RepoFile), os.ModePerm)
 	if err != nil && !os.IsExist(err) {

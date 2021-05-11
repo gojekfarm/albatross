@@ -43,7 +43,7 @@ func (s *RepoAddTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	path := fmt.Sprintf("/repository/{%s}", NAME)
+	path := fmt.Sprintf("/repositories/{%s}", NAME)
 	router.Handle(path, AddHandler(s.mockService)).Methods(http.MethodPut)
 	s.server = httptest.NewServer(router)
 }
@@ -54,13 +54,12 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 	body := fmt.Sprintf(`{"url":"%s", "username":"admin", "password":"123", 
 	"allow_deprecated_repos":true, "force_update": true, "skip_tls_verify": true}`, urlName)
 
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repository/%s", s.server.URL, repoName), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
 	request := AddRequest{
 		Name:                  repoName,
 		URL:                   urlName,
 		Username:              "admin",
 		Password:              "123",
-		AllowDeprecatedRepos:  true,
 		ForceUpdate:           true,
 		InsecureSkipTLSverify: true,
 	}
@@ -80,7 +79,7 @@ func (s *RepoAddTestSuite) TestRepoAddInvalidRequest() {
 	repoName := "gojek-incubator"
 	body := `{"username":"admin", "password":"123"}`
 
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repository/%s", s.server.URL, repoName), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)
@@ -96,7 +95,7 @@ func (s *RepoAddTestSuite) TestRepoAddFailure() {
 	urlName := "https://charts.gojek.tech/incubator/"
 	body := fmt.Sprintf(`{"url":"%s", "username":"admin", "password":"123"}`, urlName)
 
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repository/%s", s.server.URL, repoName), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
 	request := AddRequest{
 		Name:     repoName,
 		URL:      urlName,

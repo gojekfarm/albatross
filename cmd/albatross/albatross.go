@@ -49,7 +49,7 @@ func startServer() {
 	router.Handle("/clusters/{cluster}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", ContentTypeMiddle(listHandler)).Methods(http.MethodGet)
 
-	repositorySubrouter := router.PathPrefix("/repository").Subrouter()
+	repositorySubrouter := router.PathPrefix("/repositories").Subrouter()
 	handleRepositoryRoutes(repositorySubrouter)
 
 	serveDocumentation(router)

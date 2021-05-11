@@ -49,12 +49,11 @@ type UninstallFlags struct {
 }
 
 type AddFlags struct {
-	Name                 string
-	URL                  string
-	Username             string
-	Password             string
-	ForceUpdate          bool
-	AllowDeprecatedRepos bool
+	Name        string
+	URL         string
+	Username    string
+	Password    string
+	ForceUpdate bool
 
 	CertFile              string
 	KeyFile               string
