@@ -99,6 +99,23 @@ func (s *TestSuite) TestShouldReturnBadRequestErrorIfItHasInvalidCharacter() {
 	require.NoError(s.T(), err)
 }
 
+func (s *TestSuite) TestShouldReturnNotFoundIfReleaseDoesNotExist() {
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/namespaces/test/releases/not-available", s.server.URL), nil)
+	expectedRequestStruct := Request{
+		name: "not-available",
+		GlobalFlags: flags.GlobalFlags{
+			KubeContext: "staging",
+			Namespace:   "test",
+		},
+	}
+	s.mockService.On("Status", mock.Anything, expectedRequestStruct).Return(nil, errors.New(releaseNotFound))
+	res, err := http.DefaultClient.Do(req)
+	require.NoError(s.T(), err)
+
+	assert.Equal(s.T(), 404, res.StatusCode)
+	require.NoError(s.T(), err)
+}
+
 func (s *TestSuite) TestShouldReturnInternalServerErrorIfListServiceReturnsError() {
 	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/clusters/staging/namespaces/test/releases/mysql-test?revision=2", s.server.URL), nil)
 	expectedRequestStruct := Request{

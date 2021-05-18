@@ -89,11 +89,11 @@ type service interface {
 //   '200':
 //    schema:
 //     $ref: "#/definitions/statusOkResponse"
-//   '204':
-//    description: Release not found
 //   '400':
 //    schema:
 //     $ref: "#/definitions/statusErrorResponse"
+//   '404':
+//    description: Release not found
 //   '500':
 //    schema:
 //     $ref: "#/definitions/statusErrorResponse"
@@ -113,7 +113,7 @@ func Handler(s service) http.Handler {
 		rel, err := s.Status(r.Context(), req)
 		if err != nil {
 			if err.Error() == releaseNotFound {
-				w.WriteHeader(http.StatusNoContent)
+				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 			respondStatusError(w, "error while listing charts: %v", err, http.StatusInternalServerError)

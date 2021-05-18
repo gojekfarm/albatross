@@ -206,14 +206,14 @@
               "$ref": "#/definitions/statusOkResponse"
             }
           },
-          "204": {
-            "description": "Release not found"
-          },
           "400": {
             "description": "",
             "schema": {
               "$ref": "#/definitions/statusErrorResponse"
             }
+          },
+          "404": {
+            "description": "Release not found"
           },
           "500": {
             "description": "",
