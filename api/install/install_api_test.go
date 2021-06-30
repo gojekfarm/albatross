@@ -46,15 +46,15 @@ func (s *InstallerTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}", Handler(s.mockService)).Methods(http.MethodPut)
+	router.Handle("/clusters/{cluster}/namespaces/{namespace}/releases", Handler(s.mockService)).Methods(http.MethodPost)
 	s.server = httptest.NewServer(router)
 }
 
 func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstall() {
 	chartName := "stable/redis-ha"
-	body := fmt.Sprintf(`{"chart":"%s", "values": {"replicas": 2}, "flags": {}}`, chartName)
+	body := fmt.Sprintf(`{"name":"redis-v5","chart":"%s", "values": {"replicas": 2}, "flags": {}}`, chartName)
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases", s.server.URL), strings.NewReader(body))
 	response := Response{
 		Status: release.StatusDeployed.String(),
 	}
@@ -84,9 +84,9 @@ func (s *InstallerTestSuite) TestShouldReturnDeployedStatusOnSuccessfulInstall()
 
 func (s *InstallerTestSuite) TestShouldReturnInternalServerErrorOnFailure() {
 	chartName := "stable/redis-ha"
-	body := fmt.Sprintf(`{"chart":"%s"}`, chartName)
+	body := fmt.Sprintf(`{"chart":"%s", "name":"redis-v5"}`, chartName)
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases", s.server.URL), strings.NewReader(body))
 	requestStruct := Request{
 		Chart: chartName,
 		Name:  "redis-v5",
@@ -113,7 +113,7 @@ func (s *InstallerTestSuite) TestReturnShouldBadRequestOnInvalidRequest() {
 	chartName := "stable/redis-ha"
 	body := fmt.Sprintf(`{"chart":"%s}`, chartName)
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases/redis-v5", s.server.URL), strings.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases", s.server.URL), strings.NewReader(body))
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)

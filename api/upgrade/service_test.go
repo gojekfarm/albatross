@@ -41,6 +41,11 @@ func (m *mockHelmClient) NewUninstaller(fl flags.UninstallFlags) (helmcli.Uninst
 	return args.Get(0).(helmcli.Uninstaller), args.Error(1)
 }
 
+func (m *mockHelmClient) NewStatusGiver(fl flags.StatusFlags) (helmcli.StatusGiver, error) {
+	args := m.Called(fl)
+	return args.Get(0).(helmcli.StatusGiver), args.Error(1)
+}
+
 type mockUpgrader struct{ mock.Mock }
 
 func (m *mockUpgrader) Upgrade(ctx context.Context, relName, chart string, values map[string]interface{}) (*release.Release, error) {
@@ -56,10 +61,10 @@ func TestShouldReturnErrorOnInvalidChart(t *testing.T) {
 	upgc := new(mockUpgrader)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
+	req := Request{name: "invalid_release", Chart: "stable/invalid_chart"}
 	cli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
 	rel := &release.Release{Info: &release.Info{Status: release.StatusFailed}}
-	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(rel, errors.New("failed to download invalid-chart"))
+	upgc.On("Upgrade", ctx, req.name, req.Chart, req.Values).Return(rel, errors.New("failed to download invalid-chart"))
 
 	resp, err := service.Upgrade(ctx, req)
 
@@ -76,7 +81,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 	upgc := new(mockUpgrader)
 	service := NewService(cli)
 	ctx := context.Background()
-	req := Request{Name: "invalid_release", Chart: "stable/invalid_chart"}
+	req := Request{name: "invalid_release", Chart: "stable/invalid_chart"}
 	cli.On("NewUpgrader", mock.AnythingOfType("flags.UpgradeFlags")).Return(upgc, nil)
 	chartloader, err := loader.Loader("../testdata/albatross")
 	if err != nil {
@@ -99,7 +104,7 @@ func TestShouldReturnValidResponseOnSuccess(t *testing.T) {
 		Chart: chart,
 	}
 
-	upgc.On("Upgrade", ctx, req.Name, req.Chart, req.Values).Return(rel, nil)
+	upgc.On("Upgrade", ctx, req.name, req.Chart, req.Values).Return(rel, nil)
 
 	resp, err := service.Upgrade(ctx, req)
 

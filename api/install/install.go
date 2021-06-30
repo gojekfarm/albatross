@@ -3,9 +3,11 @@ package install
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
@@ -15,16 +17,15 @@ import (
 )
 
 const (
-	CLUSTER        string = "cluster"
-	NAMESPACE      string = "namespace"
-	RELEASE        string = "release_name"
-	alreadyPresent string = "cannot re-use a name that is still in use"
+	alreadyPresent = "cannot re-use a name that is still in use"
 )
 
-// Request is the body for insatlling a release
+var errInvalidReleaseName = errors.New("uninstall: invalid release name")
+
+// Request is the body for installing a release
 // swagger:model installRequestBody
 type Request struct {
-	Name string `json:"-"`
+	Name string `json:"name"`
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
@@ -77,7 +78,7 @@ type service interface {
 }
 
 // Handler handles an install request
-// swagger:operation PUT /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release installOperation
+// swagger:operation POST /clusters/{cluster}/namespaces/{namespace}/releases release installOperation
 //
 //
 // ---
@@ -99,12 +100,6 @@ type service interface {
 //   default: default
 //   type: string
 //   format: string
-// - name: release_name
-//   in: path
-//   required: true
-//   type: string
-//   format: string
-//   default: mysql-final
 // - name: Body
 //   in: body
 //   required: true
@@ -136,7 +131,13 @@ func Handler(service service) http.Handler {
 		values := mux.Vars(r)
 		req.Flags.KubeContext = values["cluster"]
 		req.Flags.Namespace = values["namespace"]
-		req.Name = values["release_name"]
+		if err := req.valid(); err != nil {
+			logger.Errorf("[Uninstall] error in request parameters: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			respondInstallError(w, "", err, http.StatusBadRequest)
+			return
+		}
+
 		resp, err := service.Install(r.Context(), req)
 		if err != nil {
 			code := http.StatusInternalServerError
@@ -165,4 +166,12 @@ func respondInstallError(w http.ResponseWriter, logprefix string, err error, sta
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func (req Request) valid() error {
+	releaseName := req.Name
+	if releaseName == "" || !action.ValidName.MatchString(releaseName) || len(releaseName) > 53 {
+		return errInvalidReleaseName
+	}
+	return nil
 }

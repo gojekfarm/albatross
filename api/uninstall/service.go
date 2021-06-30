@@ -26,7 +26,7 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 		timeout = time.Second * time.Duration(req.Timeout)
 	}
 	unInstallFlags := flags.UninstallFlags{
-		Release:      req.ReleaseName,
+		Release:      req.releaseName,
 		KeepHistory:  req.KeepHistory,
 		DryRun:       req.DryRun,
 		DisableHooks: req.DisableHooks,
@@ -37,7 +37,7 @@ func (s Service) Uninstall(ctx context.Context, req Request) (Response, error) {
 	if err != nil {
 		return Response{}, fmt.Errorf("error while initializing uninstaller: %w", err)
 	}
-	resp, err := u.Uninstall(ctx, req.ReleaseName)
+	resp, err := u.Uninstall(ctx, req.releaseName)
 	if err != nil {
 		if resp != nil {
 			return responseWithStatus(resp.Release), err

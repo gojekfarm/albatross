@@ -25,11 +25,11 @@ var (
 )
 
 type Request struct {
-	ReleaseName  string `json:"-" schema:"-"`
-	DryRun       bool   `json:"dry_run" schema:"dry_run"`
-	KeepHistory  bool   `json:"keep_history" schema:"keep_history"`
-	DisableHooks bool   `json:"disable_hooks" schema:"disable_hooks"`
-	Timeout      int    `json:"timeout" schema:"timeout"`
+	releaseName  string
+	DryRun       bool `json:"dry_run" schema:"dry_run"`
+	KeepHistory  bool `json:"keep_history" schema:"keep_history"`
+	DisableHooks bool `json:"disable_hooks" schema:"disable_hooks"`
+	Timeout      int  `json:"timeout" schema:"timeout"`
 	flags.GlobalFlags
 }
 
@@ -136,7 +136,7 @@ func Handler(s service) http.Handler {
 			return
 		}
 		values := mux.Vars(r)
-		req.ReleaseName = values["release_name"]
+		req.releaseName = values["release_name"]
 		req.GlobalFlags.KubeContext = values["cluster"]
 		req.GlobalFlags.Namespace = values["namespace"]
 		if err := req.valid(); err != nil {
@@ -149,7 +149,7 @@ func Handler(s service) http.Handler {
 		resp, err := s.Uninstall(r.Context(), req)
 		if err != nil {
 			if errors.Is(err, driver.ErrReleaseNotFound) {
-				logger.Errorf("[Uninstall] no release found for %v", req.ReleaseName)
+				logger.Errorf("[Uninstall] no release found for %v", req.releaseName)
 				w.WriteHeader(http.StatusNotFound)
 			} else {
 				logger.Errorf("[Uninstall] unexpected error occurred: %v", err)
@@ -174,7 +174,7 @@ func Handler(s service) http.Handler {
 // preemptive checking of params to ensure correct request params, is duplicated in action.Uninstall.Run,
 // but cannot fetch the type of error that's being returned since it's privately scoped.
 func (req Request) valid() error {
-	releaseName := req.ReleaseName
+	releaseName := req.releaseName
 	if releaseName == "" || !action.ValidName.MatchString(releaseName) || len(releaseName) > 53 {
 		return errInvalidReleaseName
 	}
