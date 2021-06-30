@@ -17,15 +17,12 @@ import (
 )
 
 const (
-	CLUSTER        string = "cluster"
-	NAMESPACE      string = "namespace"
-	RELEASE        string = "release_name"
-	alreadyPresent string = "cannot re-use a name that is still in use"
+	alreadyPresent = "cannot re-use a name that is still in use"
 )
 
 var errInvalidReleaseName = errors.New("uninstall: invalid release name")
 
-// Request is the body for insatlling a release
+// Request is the body for installing a release
 // swagger:model installRequestBody
 type Request struct {
 	Name string `json:"name"`
