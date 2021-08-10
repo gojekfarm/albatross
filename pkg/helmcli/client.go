@@ -15,6 +15,7 @@ type Client interface {
 	NewInstaller(flags.InstallFlags) (Installer, error)
 	NewLister(flags.ListFlags) (Lister, error)
 	NewUninstaller(flags.UninstallFlags) (Uninstaller, error)
+	NewStatusGiver(flags.StatusFlags) (StatusGiver, error)
 }
 
 type Upgrader interface {
@@ -31,6 +32,10 @@ type Lister interface {
 
 type Uninstaller interface {
 	Uninstall(ctx context.Context, releaseName string) (*release.UninstallReleaseResponse, error)
+}
+
+type StatusGiver interface {
+	Status(ctx context.Context, releaseName string) (*release.Release, error)
 }
 
 func New() Client {
@@ -129,4 +134,24 @@ func (c helmClient) NewUninstaller(flg flags.UninstallFlags) (Uninstaller, error
 		action:      uninstall,
 		envSettings: envconfig.EnvSettings,
 	}, nil
+}
+
+func (c helmClient) NewStatusGiver(flg flags.StatusFlags) (StatusGiver, error) {
+	envconfig := config.NewEnvConfig(&flg.GlobalFlags)
+	actionconfig, err := config.NewActionConfig(envconfig, &flg.GlobalFlags)
+	if err != nil {
+		return nil, err
+	}
+
+	status := action.NewStatus(actionconfig.Configuration)
+	if err != nil {
+		return nil, err
+	}
+
+	status.Version = flg.Version
+
+	return &statusGiver{
+		action:      status,
+		envSettings: envconfig.EnvSettings,
+	}, err
 }

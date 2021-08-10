@@ -103,6 +103,7 @@ issues:
         - noctx
         - goconst
         - bodyclose
+        - dupl
 
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
