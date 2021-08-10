@@ -583,7 +583,7 @@
       "x-go-package": "github.com/gojekfarm/albatross/api/install"
     },
     "installRequestBody": {
-      "description": "Request is the body for insatlling a release",
+      "description": "Request is the body for installing a release",
       "type": "object",
       "properties": {
         "chart": {
