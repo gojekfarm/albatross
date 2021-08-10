@@ -10,3 +10,4 @@ bin/
 vendor/
 *.swp
 cmd/albatross/__debug_bin
+coverage.txt
