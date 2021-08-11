@@ -1,0 +1,66 @@
+name: master
+on:
+  push:
+    branches:
+      - "master"
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup-go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.1'
+      - name: setup-project
+        run: make setup
+      - name: build
+        run: |
+          env GO111MODULE=on go mod verify
+          env GO111MODULE=on make clean build
+  test: 
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup-go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.1'
+      - name: setup-project
+        run: make setup
+      - name: Generate Coverage Report
+        run: make testcodecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.txt
+          fail_ci_if_error: true
+          verbose: true
+  golangci:
+    name: golangci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup-go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.1'
+      - name: setup-project
+        run: make setup
+      - name: lint
+        run: make golangci
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup-go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.1'
+      - name: setup-project
+        run: make setup
+      - name: create-doc
+        run: make check-doc
