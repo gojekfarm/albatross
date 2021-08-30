@@ -4,7 +4,7 @@
 //
 //     Schemes: http
 //     Host: localhost:8080
-//     Version: 0.1.1
+//     Version: v1.0.1
 //
 //     Consumes:
 //     - application/json
