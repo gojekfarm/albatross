@@ -21,6 +21,7 @@ archives:
 
 dockers:
   - 
+    dockerfile: goreleaser.Dockerfile
     image_templates:
       - "gojektech/albatross:latest"
       - "gojektech/albatross:{{ .Tag }}"
