@@ -12,9 +12,8 @@
   "info": {
     "description": "Albatross is a helm cli wrapper and enables using helm via http calls",
     "title": "Albatross API.",
-    "version": "v1.0.1"
+    "version": "v1.0.3"
   },
-  "host": "localhost:8080",
   "paths": {
     "/clusters/{cluster}/namespaces/{namespace}/releases": {
       "get": {
