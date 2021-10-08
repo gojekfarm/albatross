@@ -20,9 +20,13 @@ archives:
       amd64: x86_64
 
 dockers:
-  - image_templates:
+  - 
+    dockerfile: goreleaser.Dockerfile
+    image_templates:
       - "gojektech/albatross:latest"
       - "gojektech/albatross:{{ .Tag }}"
+    extra_files:
+      - docs
 
 checksum:
   name_template: 'checksums.txt'

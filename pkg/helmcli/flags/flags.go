@@ -48,6 +48,11 @@ type UninstallFlags struct {
 	GlobalFlags
 }
 
+type StatusFlags struct {
+	Version int
+	GlobalFlags
+}
+
 type AddFlags struct {
 	Name        string
 	URL         string

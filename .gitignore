@@ -10,3 +10,4 @@ bin/
 vendor/
 cmd/albatross/__debug_bin
 pkg/helmcli/testdata/config.lock
+coverage.txt

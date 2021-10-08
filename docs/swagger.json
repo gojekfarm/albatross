@@ -12,9 +12,8 @@
   "info": {
     "description": "Albatross is a helm cli wrapper and enables using helm via http calls",
     "title": "Albatross API.",
-    "version": "0.1.1"
+    "version": "v1.0.3"
   },
-  "host": "localhost:8080",
   "paths": {
     "/clusters/{cluster}/namespaces/{namespace}/releases": {
       "get": {
@@ -94,10 +93,8 @@
             "$ref": "#/responses/listResponse"
           }
         }
-      }
-    },
-    "/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}": {
-      "put": {
+      },
+      "post": {
         "consumes": [
           "application/json"
         ],
@@ -130,14 +127,6 @@
             "required": true
           },
           {
-            "type": "string",
-            "format": "string",
-            "default": "mysql-final",
-            "name": "release_name",
-            "in": "path",
-            "required": true
-          },
-          {
             "name": "Body",
             "in": "body",
             "required": true,
@@ -163,8 +152,77 @@
             "$ref": "#/responses/installResponse"
           }
         }
+      }
+    },
+    "/clusters/{cluster}/namespaces/{namespace}/releases/{release_name}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "release"
+        ],
+        "summary": "List the helm releases for the cluster",
+        "operationId": "statusOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "default": "minikube",
+            "name": "cluster",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "default",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "string",
+            "default": "mysql",
+            "name": "release_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "number",
+            "name": "revision",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/statusOkResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/statusErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Release not found"
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/statusErrorResponse"
+            }
+          }
+        }
       },
-      "post": {
+      "put": {
         "consumes": [
           "application/json"
         ],
@@ -631,7 +689,7 @@
       "x-go-package": "github.com/gojekfarm/albatross/api/install"
     },
     "installRequestBody": {
-      "description": "Request is the body for insatlling a release",
+      "description": "Request is the body for installing a release",
       "type": "object",
       "properties": {
         "chart": {
@@ -641,6 +699,10 @@
         },
         "flags": {
           "$ref": "#/definitions/installFlags"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
         },
         "values": {
           "type": "object",
@@ -762,6 +824,60 @@
       },
       "x-go-name": "Response",
       "x-go-package": "github.com/gojekfarm/albatross/api/list"
+    },
+    "statusErrorResponse": {
+      "description": "ErrorResponse is the body of /list",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "ErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/api/status"
+    },
+    "statusOkResponse": {
+      "description": "Release is the response of a successful status request",
+      "type": "object",
+      "properties": {
+        "app_version": {
+          "type": "string",
+          "x-go-name": "AppVersion",
+          "example": "5.7.30"
+        },
+        "chart": {
+          "type": "string",
+          "x-go-name": "Chart",
+          "example": "mysql"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "mysql-5.7"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace",
+          "example": "default"
+        },
+        "status": {
+          "x-go-name": "Status",
+          "example": "deployed"
+        },
+        "updated_at": {
+          "x-go-name": "Updated",
+          "example": "2021-03-24T12:24:18.450869+05:30"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Version",
+          "example": 1
+        }
+      },
+      "x-go-name": "Release",
+      "x-go-package": "github.com/gojekfarm/albatross/api/status"
     },
     "uninstallErrorResponse": {
       "description": "UninstallErrorResponse error body for uninstall action",

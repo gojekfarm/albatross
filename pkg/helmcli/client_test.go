@@ -90,6 +90,26 @@ func (s *TestSuite) TestNewUninstallerUsingFlagValues() {
 	assert.Equal(t, globalFlags.KubeContext, newUninstaller.envSettings.KubeContext)
 }
 
+func (s *TestSuite) TestNewStatusGiverUsingFlagValues() {
+	t := s.T()
+	globalFlags := flags.GlobalFlags{
+		Namespace:   "minikube",
+		KubeContext: "staging",
+	}
+	uiFlags := flags.StatusFlags{
+		GlobalFlags: globalFlags,
+		Version:     1,
+	}
+
+	u, err := s.c.NewStatusGiver(uiFlags)
+
+	newStatusGiver, ok := u.(*statusGiver)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Equal(t, 1, newStatusGiver.action.Version)
+	assert.Equal(t, globalFlags.KubeContext, newStatusGiver.envSettings.KubeContext)
+}
+
 func TestHandler(t *testing.T) {
 	suite.Run(t, new(TestSuite))
 }

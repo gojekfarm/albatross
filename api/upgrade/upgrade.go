@@ -18,7 +18,7 @@ import (
 // Request is the body for upgrading a release
 // swagger:model upgradeRequestBody
 type Request struct {
-	Name string `json:"-"`
+	name string
 	// example: stable/mysql
 	Chart string `json:"chart"`
 	// example: {"replicaCount": 1}
@@ -74,7 +74,7 @@ type service interface {
 }
 
 // Handler handles an upgrade request
-// swagger:operation POST /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release upgradeOperation
+// swagger:operation PUT /clusters/{cluster}/namespaces/{namespace}/releases/{release_name} release upgradeOperation
 //
 //
 // ---
@@ -129,7 +129,7 @@ func Handler(service service) http.Handler {
 		values := mux.Vars(r)
 		req.Flags.KubeContext = values["cluster"]
 		req.Flags.Namespace = values["namespace"]
-		req.Name = values["release_name"]
+		req.name = values["release_name"]
 		resp, err := service.Upgrade(r.Context(), req)
 		if err != nil {
 			respondUpgradeError(w, "error while upgrading release: %v", err)

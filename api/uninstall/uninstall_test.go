@@ -52,7 +52,7 @@ func (s *UninstallTestSuite) SetupTest() {
 func (s *UninstallTestSuite) TestShouldReturnReleasesWhenSuccessfulAPICall() {
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s?timeout=2", s.server.URL, testReleaseName), nil)
 	requestSturct := Request{
-		ReleaseName: testReleaseName,
+		releaseName: testReleaseName,
 		Timeout:     2,
 		GlobalFlags: flags.GlobalFlags{
 			KubeContext: "minikube",
@@ -92,7 +92,7 @@ func (s *UninstallTestSuite) TestShouldReturnNotFoundErrorIfItHasUnavailableRele
 	unavailableReleaseName := "unknown_release"
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s", s.server.URL, unavailableReleaseName), nil)
 	requestStruct := Request{
-		ReleaseName: unavailableReleaseName,
+		releaseName: unavailableReleaseName,
 		GlobalFlags: flags.GlobalFlags{
 			KubeContext: "minikube",
 			Namespace:   "default",
@@ -112,7 +112,7 @@ func (s *UninstallTestSuite) TestShouldReturnInternalServerErrorIfUninstallThrow
 	errMsg := "Test error Message"
 	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s", s.server.URL, testReleaseName), nil)
 	requestSturct := Request{
-		ReleaseName: testReleaseName,
+		releaseName: testReleaseName,
 		GlobalFlags: flags.GlobalFlags{
 			KubeContext: "minikube",
 			Namespace:   "default",
@@ -165,7 +165,7 @@ func (s *UninstallTestSuite) TestAllQueryParam() {
 		fmt.Sprintf("%s/clusters/minikube/namespaces/default/releases/%s?timeout=2&dry_run=true&disable_hooks=true&keep_history=true", s.server.URL, testReleaseName),
 		nil)
 	requestSturct := Request{
-		ReleaseName:  testReleaseName,
+		releaseName:  testReleaseName,
 		Timeout:      2,
 		DryRun:       true,
 		DisableHooks: true,

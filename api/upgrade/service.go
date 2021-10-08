@@ -27,7 +27,7 @@ func (s Service) Upgrade(ctx context.Context, req Request) (Response, error) {
 		return Response{}, fmt.Errorf("error while initializing upgrader: %s", err)
 	}
 
-	rel, err := ucli.Upgrade(ctx, req.Name, req.Chart, req.Values)
+	rel, err := ucli.Upgrade(ctx, req.name, req.Chart, req.Values)
 	if err != nil {
 		return responseWithStatus(rel), err
 	}
