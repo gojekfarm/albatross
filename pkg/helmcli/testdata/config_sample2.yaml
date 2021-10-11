@@ -15,5 +15,5 @@ repositories:
   keyFile: ""
   name: gojektech-incubator
   password: ""
-  url: https://charts.gojek.tech/incubator/
+  url: https://gojek.github.io/charts/incubator/
   username: ""

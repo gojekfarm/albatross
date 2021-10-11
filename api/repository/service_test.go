@@ -35,13 +35,13 @@ func TestServiceAddSuccessful(t *testing.T) {
 	s := NewService(mockCli)
 	req := AddRequest{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}
 	addFlags := flags.AddFlags{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}
@@ -58,13 +58,13 @@ func TestServiceNewAdderError(t *testing.T) {
 	s := NewService(mockCli)
 	req := AddRequest{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}
 	addFlags := flags.AddFlags{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}
@@ -82,13 +82,13 @@ func TestServiceAddError(t *testing.T) {
 	s := NewService(mockCli)
 	req := AddRequest{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}
 	addFlags := flags.AddFlags{
 		Name:     "repoName",
-		URL:      "https://charts.gojek.tech/incubator/",
+		URL:      "https://gojek.github.io/charts/incubator/",
 		Username: "user",
 		Password: "password",
 	}

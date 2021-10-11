@@ -50,7 +50,7 @@ func (s *RepoAddTestSuite) SetupTest() {
 
 func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 	repoName := "gojek-incubator"
-	urlName := "https://charts.gojek.tech/incubator/"
+	urlName := "https://gojek.github.io/charts/incubator/"
 	body := fmt.Sprintf(`{"url":"%s", "username":"admin", "password":"123", 
 	"allow_deprecated_repos":true, "force_update": true, "skip_tls_verify": true}`, urlName)
 
@@ -68,7 +68,7 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
-	expectedResponse := `{"message":"Repo gojek-incubator added successfully with url: https://charts.gojek.tech/incubator/"}` + "\n"
+	expectedResponse := `{"message":"Repo gojek-incubator added successfully with url: https://gojek.github.io/charts/incubator/"}` + "\n"
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)
@@ -92,7 +92,7 @@ func (s *RepoAddTestSuite) TestRepoAddInvalidRequest() {
 
 func (s *RepoAddTestSuite) TestRepoAddFailure() {
 	repoName := "gojek-incubator"
-	urlName := "https://charts.gojek.tech/incubator/"
+	urlName := "https://gojek.github.io/charts/incubator/"
 	body := fmt.Sprintf(`{"url":"%s", "username":"admin", "password":"123"}`, urlName)
 
 	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
