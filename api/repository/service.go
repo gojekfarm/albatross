@@ -15,8 +15,6 @@ func (s Service) Add(ctx context.Context, req AddRequest) error {
 	addFlags := flags.AddFlags{
 		Name:        req.Name,
 		URL:         req.URL,
-		Username:    req.Username,
-		Password:    req.Password,
 		ForceUpdate: req.ForceUpdate,
 	}
 

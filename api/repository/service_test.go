@@ -34,16 +34,12 @@ func TestServiceAddSuccessful(t *testing.T) {
 	adder := new(mockAdder)
 	s := NewService(mockCli)
 	req := AddRequest{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
 	}
 	addFlags := flags.AddFlags{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
 	}
 	mockCli.On("NewAdder", addFlags).Return(adder, nil).Once()
 	adder.On("Add", mock.Anything).Return(nil).Once()
@@ -57,16 +53,14 @@ func TestServiceNewAdderError(t *testing.T) {
 	mockCli := new(mockRepositoryClient)
 	s := NewService(mockCli)
 	req := AddRequest{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
 	}
 	addFlags := flags.AddFlags{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
+		// Username: "user",
+		// Password: "password",
 	}
 	adderError := errors.New("failed creating adder")
 	mockCli.On("NewAdder", addFlags).Return(nil, adderError)
@@ -81,16 +75,14 @@ func TestServiceAddError(t *testing.T) {
 	adder := new(mockAdder)
 	s := NewService(mockCli)
 	req := AddRequest{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
 	}
 	addFlags := flags.AddFlags{
-		Name:     "repoName",
-		URL:      "https://gojek.github.io/charts/incubator/",
-		Username: "user",
-		Password: "password",
+		Name: "repoName",
+		URL:  "https://gojek.github.io/charts/incubator/",
+		// Username: "user",
+		// Password: "password",
 	}
 	addError := errors.New("error while adding repo")
 	mockCli.On("NewAdder", addFlags).Return(adder, nil).Once()

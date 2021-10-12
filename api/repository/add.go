@@ -15,15 +15,18 @@ import (
 // AddRequest is the body for PUT request to repository
 // swagger:model addRepoRequestBody
 type AddRequest struct {
-	Name     string `json:"-"`
-	URL      string `json:"url"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Name string `json:"-"`
+	URL  string `json:"url"`
+	// Username string `json:"username"`
+	// Password string `json:"password"`
+
 	// example: false
 	ForceUpdate bool `json:"force_update"`
 	// CertFile              string
 	// KeyFile               string
 	// CaFile                string
+
+	// example: false
 	InsecureSkipTLSverify bool `json:"skip_tls_verify"`
 }
 

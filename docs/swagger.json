@@ -583,22 +583,14 @@
           "x-go-name": "ForceUpdate",
           "example": false
         },
-        "password": {
-          "type": "string",
-          "x-go-name": "Password"
-        },
         "skip_tls_verify": {
-          "description": "CertFile              string\nKeyFile               string\nCaFile                string",
           "type": "boolean",
-          "x-go-name": "InsecureSkipTLSverify"
+          "x-go-name": "InsecureSkipTLSverify",
+          "example": false
         },
         "url": {
           "type": "string",
           "x-go-name": "URL"
-        },
-        "username": {
-          "type": "string",
-          "x-go-name": "Username"
         }
       },
       "x-go-name": "AddRequest",

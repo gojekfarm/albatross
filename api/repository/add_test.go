@@ -58,8 +58,6 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 	request := AddRequest{
 		Name:                  repoName,
 		URL:                   urlName,
-		Username:              "admin",
-		Password:              "123",
 		ForceUpdate:           true,
 		InsecureSkipTLSverify: true,
 	}
@@ -97,10 +95,8 @@ func (s *RepoAddTestSuite) TestRepoAddFailure() {
 
 	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
 	request := AddRequest{
-		Name:     repoName,
-		URL:      urlName,
-		Username: "admin",
-		Password: "123",
+		Name: repoName,
+		URL:  urlName,
 	}
 
 	s.mockService.On("Add", mock.Anything, request).Return(errors.New("error adding repository"))
