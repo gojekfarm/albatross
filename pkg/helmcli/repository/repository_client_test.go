@@ -1,4 +1,4 @@
-package helmcli
+package repository
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 
 type RepositoryClientTestSuite struct {
 	suite.Suite
-	c RepositoryClient
+	c Client
 }
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 func (s *RepositoryClientTestSuite) SetupTest() {
-	s.c = NewRepoClient()
+	s.c = NewClient()
 	os.Setenv("HELM_REPOSITORY_CONFIG", configPath)
 	os.Setenv("HELM_REPOSITORY_CACHE", cachePath)
 }

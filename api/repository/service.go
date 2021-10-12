@@ -3,12 +3,12 @@ package repository
 import (
 	"context"
 
-	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
+	"github.com/gojekfarm/albatross/pkg/helmcli/repository"
 )
 
 type Service struct {
-	cli helmcli.RepositoryClient
+	cli repository.Client
 }
 
 func (s Service) Add(ctx context.Context, req AddRequest) error {
@@ -32,6 +32,6 @@ func (s Service) Add(ctx context.Context, req AddRequest) error {
 	return nil
 }
 
-func NewService(cli helmcli.RepositoryClient) Service {
+func NewService(cli repository.Client) Service {
 	return Service{cli}
 }

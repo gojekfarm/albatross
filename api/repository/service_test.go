@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gojekfarm/albatross/pkg/helmcli"
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
+	"github.com/gojekfarm/albatross/pkg/helmcli/repository"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -14,12 +14,12 @@ import (
 
 type mockRepositoryClient struct{ mock.Mock }
 
-func (m *mockRepositoryClient) NewAdder(addFlags flags.AddFlags) (helmcli.Adder, error) {
+func (m *mockRepositoryClient) NewAdder(addFlags flags.AddFlags) (repository.Adder, error) {
 	args := m.Called(addFlags)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(helmcli.Adder), args.Error(1)
+	return args.Get(0).(repository.Adder), args.Error(1)
 }
 
 type mockAdder struct{ mock.Mock }

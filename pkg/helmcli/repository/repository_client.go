@@ -1,4 +1,4 @@
-package helmcli
+package repository
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-type RepositoryClient interface {
+type Client interface {
 	NewAdder(flags.AddFlags) (Adder, error)
 }
 
@@ -26,6 +26,6 @@ func (c repoClient) NewAdder(addFlags flags.AddFlags) (Adder, error) {
 	return &newAdder, nil
 }
 
-func NewRepoClient() RepositoryClient {
+func NewClient() Client {
 	return repoClient{}
 }

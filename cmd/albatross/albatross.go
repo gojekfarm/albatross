@@ -16,6 +16,7 @@ import (
 	"github.com/gojekfarm/albatross/api/uninstall"
 	"github.com/gojekfarm/albatross/api/upgrade"
 	"github.com/gojekfarm/albatross/pkg/helmcli"
+	helmRepository "github.com/gojekfarm/albatross/pkg/helmcli/repository"
 	"github.com/gojekfarm/albatross/pkg/logger"
 	_ "github.com/gojekfarm/albatross/swagger"
 
@@ -72,7 +73,7 @@ func serveDocumentation(r *mux.Router) {
 }
 
 func handleRepositoryRoutes(router *mux.Router) {
-	repoClient := helmcli.NewRepoClient()
+	repoClient := helmRepository.NewClient()
 	repoService := repository.NewService(repoClient)
 	router.Handle(fmt.Sprintf("/{%s}", repository.NAME), ContentTypeMiddle(repository.AddHandler(repoService))).Methods(http.MethodPut)
 }

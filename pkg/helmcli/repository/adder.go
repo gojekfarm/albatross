@@ -1,4 +1,4 @@
-package helmcli
+package repository
 
 import (
 	"context"
