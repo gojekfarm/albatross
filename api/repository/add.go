@@ -47,7 +47,7 @@ type Entry struct {
 	Password string `json:"password"`
 }
 
-const NAME string = "repository-name"
+const NAME string = "repository_name"
 
 // AddHandler handles a repo add/update request
 // swagger:operation PUT /repositories/{repository_name} repository addOperation
