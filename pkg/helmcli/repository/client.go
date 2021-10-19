@@ -6,6 +6,7 @@ import (
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/repo"
 )
 
 type Client interface {
@@ -13,7 +14,7 @@ type Client interface {
 }
 
 type Adder interface {
-	Add(ctx context.Context) error
+	Add(ctx context.Context) (*repo.Entry, error)
 }
 
 type repoClient struct{}

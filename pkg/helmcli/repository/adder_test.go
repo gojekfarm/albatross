@@ -51,8 +51,7 @@ func initialiseAdder() *adder {
 
 func (s *AdderTestSuite) TestAddRepo() {
 	newAdder := initialiseAdder()
-
-	err := newAdder.Add(context.Background())
+	entry, err := newAdder.Add(context.Background())
 
 	suiteAssertion := s.Assert()
 	suiteAssertion.NoError(err)
@@ -65,6 +64,8 @@ func (s *AdderTestSuite) TestAddRepo() {
 	}
 	suiteAssertion.NoError(yaml.Unmarshal(b, &f))
 	repoFoundCount := 0
+	suiteAssertion.Equal(expectedRepo.Name, entry.Name)
+	suiteAssertion.Equal(expectedRepo.URL, entry.URL)
 	for _, repo := range f.Repositories {
 		if repo.Name == expectedRepo.Name {
 			suiteAssertion.Equal(expectedRepo, repo)
@@ -84,9 +85,10 @@ func (s *AdderTestSuite) TestAddDuplicateRepo() {
 	newAdder := initialiseAdder()
 	newAdder.Username = "abcd"
 	newAdder.Password = "1234"
-	err = newAdder.Add(context.Background())
+	entry, err := newAdder.Add(context.Background())
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), "repository name (influxdata) already exists, please specify a different name", err.Error())
+	assert.Nil(s.T(), entry)
 }
 
 func (s *AdderTestSuite) TestAddDuplicateRepoForceUpdate() {
@@ -97,7 +99,7 @@ func (s *AdderTestSuite) TestAddDuplicateRepoForceUpdate() {
 	newAdder.Password = "1234"
 	newAdder.ForceUpdate = true
 
-	err = newAdder.Add(context.Background())
+	entry, err := newAdder.Add(context.Background())
 
 	suiteAssertion := s.Assert()
 	suiteAssertion.NoError(err)
@@ -111,6 +113,10 @@ func (s *AdderTestSuite) TestAddDuplicateRepoForceUpdate() {
 		Password: "1234",
 	}
 	suiteAssertion.NoError(yaml.Unmarshal(b, &f))
+	suiteAssertion.Equal(expectedRepo.Name, entry.Name)
+	suiteAssertion.Equal(expectedRepo.URL, entry.URL)
+	suiteAssertion.Equal(expectedRepo.Username, entry.Username)
+	suiteAssertion.Equal(expectedRepo.Password, entry.Password)
 	repoFoundCount := 0
 	for _, repo := range f.Repositories {
 		if repo.Name == expectedRepo.Name {
@@ -133,7 +139,7 @@ func (s *AdderTestSuite) TestAddingToExistingConfig() {
 	err := copyUtil(testSampleConfigPath2, testConfigPath)
 	require.NoError(s.T(), err)
 	newAdder := initialiseAdder()
-	err = newAdder.Add(context.Background())
+	entry, err := newAdder.Add(context.Background())
 	require.NoError(s.T(), err)
 	b, err := ioutil.ReadFile(newAdder.RepoFile)
 	assert.NoError(s.T(), err)
@@ -143,6 +149,8 @@ func (s *AdderTestSuite) TestAddingToExistingConfig() {
 		URL:  "https://helm.influxdata.com/",
 	}
 	assert.NoError(s.T(), yaml.Unmarshal(b, &f))
+	assert.Equal(s.T(), expectedRepo.Name, entry.Name)
+	assert.Equal(s.T(), expectedRepo.URL, entry.URL)
 	repoFoundCount := 0
 	for _, repo := range f.Repositories {
 		if repo.Name == expectedRepo.Name {

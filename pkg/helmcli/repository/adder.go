@@ -26,10 +26,10 @@ type adder struct {
 	settings *cli.EnvSettings
 }
 
-func (o *adder) Add(ctx context.Context) error {
+func (o *adder) Add(ctx context.Context) (*repo.Entry, error) {
 	err := o.checkPrerequisite()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Acquire a file lock for process synchronization
@@ -41,7 +41,7 @@ func (o *adder) Add(ctx context.Context) error {
 		defer check(fileLock.Unlock)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	c := repo.Entry{
@@ -57,21 +57,21 @@ func (o *adder) Add(ctx context.Context) error {
 
 	f, err := o.initialiseRepoFile(c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = o.initialiseChartsFromRepository(c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	f.Update(&c)
 
 	if err := f.WriteFile(o.RepoFile, 0644); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &c, nil
 }
 
 func (o *adder) checkPrerequisite() error {

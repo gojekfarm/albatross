@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gojekfarm/albatross/pkg/logger"
@@ -15,35 +14,37 @@ import (
 // AddRequest is the body for PUT request to repository
 // swagger:model addRepoRequestBody
 type AddRequest struct {
-	Name string `json:"-"`
-	URL  string `json:"url"`
-	// Username string `json:"username"`
-	// Password string `json:"password"`
+	Name     string `json:"-"`
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 
 	// example: false
 	ForceUpdate bool `json:"force_update"`
-	// CertFile              string
-	// KeyFile               string
-	// CaFile                string
 
 	// example: false
 	InsecureSkipTLSverify bool `json:"skip_tls_verify"`
 }
 
 type addService interface {
-	Add(context.Context, AddRequest) error
+	Add(context.Context, AddRequest) (AddResponse, error)
 }
 
-// AddErrorResponse body of non 2xx response
-// swagger:model addRepoErrorResponseBody
-type AddErrorResponse struct {
-	Error string `json:"error"`
+// AddResponse common response body of add api
+// swagger:model addRepoResponseBody
+type AddResponse struct {
+	Error string `json:"error,omitempty"`
+	// Release release meta data, field is available only when status code is 2xx
+	Repository *Entry `json:"repository,omitempty"`
 }
 
-// AddOkResponse body of 2xx response
-// swagger:model addRepoOkResponseBody
-type AddOkResponse struct {
-	Message string `json:"message"`
+// Entry contains metadata about a helm repository entry object
+// swagger:model addRepoEntry
+type Entry struct {
+	Name     string `json:"-"`
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 const NAME string = "repository-name"
@@ -102,14 +103,13 @@ func AddHandler(s addService) http.Handler {
 
 		req.Name = vars[NAME]
 
-		err := s.Add(r.Context(), req)
+		resp, err := s.Add(r.Context(), req)
 
 		if err != nil {
 			logger.Errorf("[RepoAdd] error adding repo: %v", err)
 			respondAddError(w, "error adding repo", err, http.StatusInternalServerError)
 			return
 		}
-		resp := AddOkResponse{Message: fmt.Sprintf("Repo %s added successfully with url: %s", req.Name, req.URL)}
 		if err := json.NewEncoder(w).Encode(&resp); err != nil {
 			respondAddError(w, "error writing response: %v", err, http.StatusInternalServerError)
 			return
@@ -118,7 +118,7 @@ func AddHandler(s addService) http.Handler {
 }
 
 func respondAddError(w http.ResponseWriter, logprefix string, err error, errorCode int) {
-	response := AddErrorResponse{Error: err.Error()}
+	response := AddResponse{Error: err.Error()}
 	w.WriteHeader(errorCode)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		logger.Errorf("[AddRepo] %s %v", logprefix, err)

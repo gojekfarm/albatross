@@ -7,7 +7,9 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/helmcli/repository"
+	"helm.sh/helm/v3/pkg/repo"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -24,9 +26,12 @@ func (m *mockRepositoryClient) NewAdder(addFlags flags.AddFlags) (repository.Add
 
 type mockAdder struct{ mock.Mock }
 
-func (m *mockAdder) Add(ctx context.Context) error {
+func (m *mockAdder) Add(ctx context.Context) (*repo.Entry, error) {
 	args := m.Called(ctx)
-	return args.Error(0)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*repo.Entry), args.Error(1)
 }
 
 func TestServiceAddSuccessful(t *testing.T) {
@@ -41,12 +46,19 @@ func TestServiceAddSuccessful(t *testing.T) {
 		Name: "repoName",
 		URL:  "https://gojek.github.io/charts/incubator/",
 	}
+	mockAdd := &repo.Entry{
+		Name: "repoName",
+		URL: "https://gojek.github.io/charts/incubator/",
+	}
 	mockCli.On("NewAdder", addFlags).Return(adder, nil).Once()
-	adder.On("Add", mock.Anything).Return(nil).Once()
+	adder.On("Add", mock.Anything).Return(mockAdd, nil).Once()
 
-	err := s.Add(context.Background(), req)
+	resp, err := s.Add(context.Background(), req)
 
 	require.NoError(t, err)
+	assert.NotNil(t, resp.Repository)
+	assert.Equal(t, req.Name, resp.Repository.Name)
+	assert.Equal(t, req.URL, resp.Repository.URL)
 }
 
 func TestServiceNewAdderError(t *testing.T) {
@@ -65,9 +77,10 @@ func TestServiceNewAdderError(t *testing.T) {
 	adderError := errors.New("failed creating adder")
 	mockCli.On("NewAdder", addFlags).Return(nil, adderError)
 
-	err := s.Add(context.Background(), req)
+	resp, err := s.Add(context.Background(), req)
 
 	require.Error(t, adderError, err)
+	assert.Nil(t, resp.Repository)
 }
 
 func TestServiceAddError(t *testing.T) {
@@ -86,9 +99,10 @@ func TestServiceAddError(t *testing.T) {
 	}
 	addError := errors.New("error while adding repo")
 	mockCli.On("NewAdder", addFlags).Return(adder, nil).Once()
-	adder.On("Add", mock.Anything).Return(addError).Once()
+	adder.On("Add", mock.Anything).Return(nil, addError).Once()
 
-	err := s.Add(context.Background(), req)
+	resp, err := s.Add(context.Background(), req)
 
 	require.Error(t, addError, err)
+	assert.Nil(t, resp.Repository)
 }

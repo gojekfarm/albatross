@@ -23,9 +23,9 @@ type mockService struct {
 	mock.Mock
 }
 
-func (m *mockService) Add(ctx context.Context, req AddRequest) error {
+func (m *mockService) Add(ctx context.Context, req AddRequest) (AddResponse, error) {
 	args := m.Called(ctx, req)
-	return args.Error(0)
+	return args.Get(0).(AddResponse), args.Error(1)
 }
 
 type RepoAddTestSuite struct {
@@ -58,15 +58,25 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 	request := AddRequest{
 		Name:                  repoName,
 		URL:                   urlName,
+		Username:              "admin",
+		Password:              "123",
 		ForceUpdate:           true,
 		InsecureSkipTLSverify: true,
 	}
 
-	s.mockService.On("Add", mock.Anything, request).Return(nil)
+	mockAddResponse := AddResponse{
+		Repository: &Entry{
+			Name:     request.Name,
+			URL:      request.URL,
+			Username: request.Username,
+			Password: request.Password,
+		},
+	}
+	s.mockService.On("Add", mock.Anything, request).Return(mockAddResponse, nil)
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
-	expectedResponse := `{"message":"Repo gojek-incubator added successfully with url: https://gojek.github.io/charts/incubator/"}` + "\n"
+	expectedResponse := `{"repository":{"url":"https://gojek.github.io/charts/incubator/","username":"admin","password":"123"}}` + "\n"
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)
@@ -95,11 +105,13 @@ func (s *RepoAddTestSuite) TestRepoAddFailure() {
 
 	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/repositories/%s", s.server.URL, repoName), strings.NewReader(body))
 	request := AddRequest{
-		Name: repoName,
-		URL:  urlName,
+		Name:     repoName,
+		URL:      urlName,
+		Username: "admin",
+		Password: "123",
 	}
 
-	s.mockService.On("Add", mock.Anything, request).Return(errors.New("error adding repository"))
+	s.mockService.On("Add", mock.Anything, request).Return(AddResponse{}, errors.New("error adding repository"))
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusInternalServerError, resp.StatusCode)
@@ -110,6 +122,6 @@ func (s *RepoAddTestSuite) TestRepoAddFailure() {
 	s.mockService.AssertExpectations(s.T())
 }
 
-func TestInstallAPI(t *testing.T) {
+func TestRepoAddAPI(t *testing.T) {
 	suite.Run(t, new(RepoAddTestSuite))
 }
