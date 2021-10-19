@@ -60,6 +60,11 @@ func (o *adder) Add(ctx context.Context) (*repo.Entry, error) {
 		return nil, err
 	}
 
+	err = o.validateRepoFile(f, c)
+	if err != nil {
+		return nil, err
+	}
+
 	err = o.initialiseChartsFromRepository(c)
 	if err != nil {
 		return nil, err
@@ -94,21 +99,6 @@ func (o *adder) initialiseRepoFile(c repo.Entry) (*repo.File, error) {
 		return nil, err
 	}
 
-	// If the repo exists do one of two things:
-	// 1. If the configuration for the name is the same continue without error
-	// 2. When the config is different require --force-update
-	if !o.ForceUpdate && f.Has(o.Name) {
-		existing := f.Get(o.Name)
-		if c != *existing {
-			// The input coming in for the name is different from what is already
-			// configured. Return an error.
-			return nil, fmt.Errorf("repository name (%s) already exists, please use force_update to update or a different name to make a new entry", o.Name)
-		}
-
-		// The add is idempotent so do nothing
-		return &f, nil
-	}
-
 	return &f, nil
 }
 
@@ -124,6 +114,23 @@ func (o *adder) initialiseChartsFromRepository(c repo.Entry) error {
 	if _, err := r.DownloadIndexFile(); err != nil {
 		return fmt.Errorf("%w looks like %v is not a valid chart repository or cannot be reached", err, o.URL)
 	}
+	return nil
+}
+
+func (o *adder) validateRepoFile(f *repo.File, c repo.Entry) error {
+	// If the repo exists do one of two things:
+	// 1. If the configuration for the name is the same continue without error
+	// 2. When the config is different require --force-update
+	if !o.ForceUpdate && f.Has(o.Name) {
+		existing := f.Get(o.Name)
+		if c != *existing {
+			// The input coming in for the name is different from what is already
+			// configured. Return an error.
+			return fmt.Errorf("repository name (%s) already exists, please use force_update to update or a different name to make a new entry", o.Name)
+		}
+
+	}
+
 	return nil
 }
 
