@@ -550,6 +550,30 @@
       },
       "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
     },
+    "addRepoEntry": {
+      "description": "Entry contains metadata about a helm repository entry object",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-name": "Entry",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
     "addRepoErrorResponseBody": {
       "description": "AddErrorResponse body of non 2xx response",
       "type": "object",
@@ -560,19 +584,18 @@
         }
       },
       "x-go-name": "AddErrorResponse",
-      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
     },
     "addRepoOkResponseBody": {
       "description": "AddOkResponse body of 2xx response",
       "type": "object",
       "properties": {
-        "message": {
-          "type": "string",
-          "x-go-name": "Message"
+        "repository": {
+          "$ref": "#/definitions/addRepoEntry"
         }
       },
       "x-go-name": "AddOkResponse",
-      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+      "x-go-package": "github.com/gojekfarm/albatross/swagger"
     },
     "addRepoRequestBody": {
       "description": "AddRequest is the body for PUT request to repository",
@@ -583,6 +606,10 @@
           "x-go-name": "ForceUpdate",
           "example": false
         },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
         "skip_tls_verify": {
           "type": "boolean",
           "x-go-name": "InsecureSkipTLSverify",
@@ -591,9 +618,28 @@
         "url": {
           "type": "string",
           "x-go-name": "URL"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
         }
       },
       "x-go-name": "AddRequest",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
+    "addRepoResponseBody": {
+      "description": "AddResponse common response body of add api",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "repository": {
+          "$ref": "#/definitions/addRepoEntry"
+        }
+      },
+      "x-go-name": "AddResponse",
       "x-go-package": "github.com/gojekfarm/albatross/api/repository"
     },
     "globalFlags": {

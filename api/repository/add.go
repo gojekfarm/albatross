@@ -41,7 +41,7 @@ type AddResponse struct {
 // Entry contains metadata about a helm repository entry object
 // swagger:model addRepoEntry
 type Entry struct {
-	Name     string `json:"-"`
+	Name     string `json:"name"`
 	URL      string `json:"url"`
 	Username string `json:"username"`
 	Password string `json:"password"`
