@@ -55,22 +55,10 @@ func (o *adder) Add(ctx context.Context) (*repo.Entry, error) {
 		InsecureSkipTLSverify: o.InsecureSkipTLSverify,
 	}
 
-	f, err := o.initialiseRepoFile(c)
+	f, err := o.updateRepoEntryInFile(c)
 	if err != nil {
 		return nil, err
 	}
-
-	err = o.validateRepoFile(f, c)
-	if err != nil {
-		return nil, err
-	}
-
-	err = o.initialiseChartsFromRepository(c)
-	if err != nil {
-		return nil, err
-	}
-
-	f.Update(&c)
 
 	if err := f.WriteFile(o.RepoFile, 0644); err != nil {
 		return nil, err
@@ -88,7 +76,27 @@ func (o *adder) checkPrerequisite() error {
 	return nil
 }
 
-func (o *adder) initialiseRepoFile(c repo.Entry) (*repo.File, error) {
+func (o *adder) updateRepoEntryInFile(c repo.Entry) (*repo.File, error) {
+	f, err := o.initialiseRepoFile()
+	if err != nil {
+		return nil, err
+	}
+
+	err = o.validateRepoFile(f, c)
+	if err != nil {
+		return nil, err
+	}
+
+	err = o.initialiseChartsFromRepository(c)
+	if err != nil {
+		return nil, err
+	}
+
+	f.Update(&c)
+	return f, nil
+}
+
+func (o *adder) initialiseRepoFile() (*repo.File, error) {
 	b, err := ioutil.ReadFile(o.RepoFile)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
@@ -128,7 +136,6 @@ func (o *adder) validateRepoFile(f *repo.File, c repo.Entry) error {
 			// configured. Return an error.
 			return fmt.Errorf("repository name (%s) already exists, please use force_update to update or a different name to make a new entry", o.Name)
 		}
-
 	}
 
 	return nil
