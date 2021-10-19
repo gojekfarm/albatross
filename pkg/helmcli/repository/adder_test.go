@@ -87,7 +87,7 @@ func (s *AdderTestSuite) TestAddDuplicateRepo() {
 	newAdder.Password = "1234"
 	entry, err := newAdder.Add(context.Background())
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), "repository name (influxdata) already exists, please specify a different name", err.Error())
+	assert.Equal(s.T(), "repository name (influxdata) already exists, please use force_update to update or a different name to make a new entry", err.Error())
 	assert.Nil(s.T(), entry)
 }
 

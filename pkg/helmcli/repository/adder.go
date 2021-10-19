@@ -102,7 +102,7 @@ func (o *adder) initialiseRepoFile(c repo.Entry) (*repo.File, error) {
 		if c != *existing {
 			// The input coming in for the name is different from what is already
 			// configured. Return an error.
-			return nil, fmt.Errorf("repository name (%s) already exists, please specify a different name", o.Name)
+			return nil, fmt.Errorf("repository name (%s) already exists, please use force_update to update or a different name to make a new entry", o.Name)
 		}
 
 		// The add is idempotent so do nothing
