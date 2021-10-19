@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -76,10 +77,17 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusOK, resp.StatusCode)
-	expectedResponse := `{"repository":{"url":"https://gojek.github.io/charts/incubator/","username":"admin","password":"123"}}` + "\n"
+
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	assert.Equal(s.T(), expectedResponse, string(respBody))
 	require.NoError(s.T(), err)
+
+	parsedResponse := &AddResponse{}
+	err = json.Unmarshal(respBody, parsedResponse)
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), mockAddResponse.Repository.Name, parsedResponse.Repository.Name)
+	assert.Equal(s.T(), mockAddResponse.Repository.URL, parsedResponse.Repository.URL)
+	assert.Equal(s.T(), mockAddResponse.Repository.Username, parsedResponse.Repository.Username)
+	assert.Equal(s.T(), mockAddResponse.Repository.Password, parsedResponse.Repository.Password)
 	s.mockService.AssertExpectations(s.T())
 }
 

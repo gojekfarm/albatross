@@ -7,11 +7,11 @@ import (
 
 	"github.com/gojekfarm/albatross/pkg/helmcli/flags"
 	"github.com/gojekfarm/albatross/pkg/helmcli/repository"
-	"helm.sh/helm/v3/pkg/repo"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/repo"
 )
 
 type mockRepositoryClient struct{ mock.Mock }
@@ -48,7 +48,7 @@ func TestServiceAddSuccessful(t *testing.T) {
 	}
 	mockAdd := &repo.Entry{
 		Name: "repoName",
-		URL: "https://gojek.github.io/charts/incubator/",
+		URL:  "https://gojek.github.io/charts/incubator/",
 	}
 	mockCli.On("NewAdder", addFlags).Return(adder, nil).Once()
 	adder.On("Add", mock.Anything).Return(mockAdd, nil).Once()
