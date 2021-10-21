@@ -56,9 +56,9 @@ func TestServiceAddSuccessful(t *testing.T) {
 	resp, err := s.Add(context.Background(), req)
 
 	require.NoError(t, err)
-	assert.NotNil(t, resp.Repository)
-	assert.Equal(t, req.Name, resp.Repository.Name)
-	assert.Equal(t, req.URL, resp.Repository.URL)
+	assert.NotNil(t, resp)
+	assert.Equal(t, req.Name, resp.Name)
+	assert.Equal(t, req.URL, resp.URL)
 }
 
 func TestServiceNewAdderError(t *testing.T) {
@@ -80,7 +80,7 @@ func TestServiceNewAdderError(t *testing.T) {
 	resp, err := s.Add(context.Background(), req)
 
 	require.Error(t, adderError, err)
-	assert.Nil(t, resp.Repository)
+	assert.Equal(t, Entry{}, resp)
 }
 
 func TestServiceAddError(t *testing.T) {
@@ -104,5 +104,5 @@ func TestServiceAddError(t *testing.T) {
 	resp, err := s.Add(context.Background(), req)
 
 	require.Error(t, addError, err)
-	assert.Nil(t, resp.Repository)
+	assert.Equal(t, Entry{}, resp)
 }

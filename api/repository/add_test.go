@@ -24,9 +24,9 @@ type mockService struct {
 	mock.Mock
 }
 
-func (m *mockService) Add(ctx context.Context, req AddRequest) (AddResponse, error) {
+func (m *mockService) Add(ctx context.Context, req AddRequest) (Entry, error) {
 	args := m.Called(ctx, req)
-	return args.Get(0).(AddResponse), args.Error(1)
+	return args.Get(0).(Entry), args.Error(1)
 }
 
 type RepoAddTestSuite struct {
@@ -65,13 +65,11 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 		InsecureSkipTLSverify: true,
 	}
 
-	mockAddResponse := AddResponse{
-		Repository: &Entry{
-			Name:     request.Name,
-			URL:      request.URL,
-			Username: request.Username,
-			Password: request.Password,
-		},
+	mockAddResponse := Entry{
+		Name:     request.Name,
+		URL:      request.URL,
+		Username: request.Username,
+		Password: request.Password,
 	}
 	s.mockService.On("Add", mock.Anything, request).Return(mockAddResponse, nil)
 
@@ -81,13 +79,13 @@ func (s *RepoAddTestSuite) TestRepoAddSuccessFul() {
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	require.NoError(s.T(), err)
 
-	parsedResponse := &AddResponse{}
+	parsedResponse := &Entry{}
 	err = json.Unmarshal(respBody, parsedResponse)
 	require.NoError(s.T(), err)
-	assert.Equal(s.T(), mockAddResponse.Repository.Name, parsedResponse.Repository.Name)
-	assert.Equal(s.T(), mockAddResponse.Repository.URL, parsedResponse.Repository.URL)
-	assert.Equal(s.T(), mockAddResponse.Repository.Username, parsedResponse.Repository.Username)
-	assert.Equal(s.T(), mockAddResponse.Repository.Password, parsedResponse.Repository.Password)
+	assert.Equal(s.T(), mockAddResponse.Name, parsedResponse.Name)
+	assert.Equal(s.T(), mockAddResponse.URL, parsedResponse.URL)
+	assert.Equal(s.T(), mockAddResponse.Username, parsedResponse.Username)
+	assert.Equal(s.T(), mockAddResponse.Password, parsedResponse.Password)
 	s.mockService.AssertExpectations(s.T())
 }
 
@@ -119,7 +117,7 @@ func (s *RepoAddTestSuite) TestRepoAddFailure() {
 		Password: "123",
 	}
 
-	s.mockService.On("Add", mock.Anything, request).Return(AddResponse{}, errors.New("error adding repository"))
+	s.mockService.On("Add", mock.Anything, request).Return(Entry{}, errors.New("error adding repository"))
 
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusInternalServerError, resp.StatusCode)

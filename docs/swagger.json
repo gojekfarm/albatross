@@ -477,7 +477,7 @@
           "200": {
             "description": "The repository was added successfully",
             "schema": {
-              "$ref": "#/definitions/addRepoOkResponseBody"
+              "$ref": "#/definitions/addRepoEntry"
             }
           },
           "400": {
@@ -584,18 +584,7 @@
         }
       },
       "x-go-name": "AddErrorResponse",
-      "x-go-package": "github.com/gojekfarm/albatross/swagger"
-    },
-    "addRepoOkResponseBody": {
-      "description": "AddOkResponse body of 2xx response",
-      "type": "object",
-      "properties": {
-        "repository": {
-          "$ref": "#/definitions/addRepoEntry"
-        }
-      },
-      "x-go-name": "AddOkResponse",
-      "x-go-package": "github.com/gojekfarm/albatross/swagger"
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
     },
     "addRepoRequestBody": {
       "description": "AddRequest is the body for PUT request to repository",
@@ -625,21 +614,6 @@
         }
       },
       "x-go-name": "AddRequest",
-      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
-    },
-    "addRepoResponseBody": {
-      "description": "AddResponse common response body of add api",
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "string",
-          "x-go-name": "Error"
-        },
-        "repository": {
-          "$ref": "#/definitions/addRepoEntry"
-        }
-      },
-      "x-go-name": "AddResponse",
       "x-go-package": "github.com/gojekfarm/albatross/api/repository"
     },
     "globalFlags": {

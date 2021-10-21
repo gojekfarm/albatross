@@ -27,15 +27,13 @@ type AddRequest struct {
 }
 
 type addService interface {
-	Add(context.Context, AddRequest) (AddResponse, error)
+	Add(context.Context, AddRequest) (Entry, error)
 }
 
-// AddResponse common response body of add api
-// swagger:model addRepoResponseBody
-type AddResponse struct {
-	Error string `json:"error,omitempty"`
-	// Release release meta data, field is available only when status code is 2xx
-	Repository *Entry `json:"repository,omitempty"`
+// AddErrorResponse body of non 2xx response
+// swagger:model addRepoErrorResponseBody
+type AddErrorResponse struct {
+	Error string `json:"error"`
 }
 
 // Entry contains metadata about a helm repository entry object
@@ -74,7 +72,7 @@ const URLNamePlaceholder string = "repository_name"
 //   '200':
 //    description: "The repository was added successfully"
 //    schema:
-//     $ref: "#/definitions/addRepoOkResponseBody"
+//     $ref: "#/definitions/addRepoEntry"
 //   '400':
 //    description: "Invalid Request"
 //    schema:
@@ -118,7 +116,7 @@ func AddHandler(s addService) http.Handler {
 }
 
 func respondAddError(w http.ResponseWriter, logprefix string, err error, errorCode int) {
-	response := AddResponse{Error: err.Error()}
+	response := AddErrorResponse{Error: err.Error()}
 	w.WriteHeader(errorCode)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		logger.Errorf("[AddRepo] %s %v", logprefix, err)
