@@ -38,7 +38,7 @@ func (o *adder) Add(ctx context.Context) (*repo.Entry, error) {
 	defer cancel()
 	locked, err := fileLock.TryLockContext(lockCtx, time.Second)
 	if err == nil && locked {
-		defer check(fileLock.Unlock)
+		defer checkFileUnlock(fileLock.Unlock)
 	}
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (o *adder) validateRepoFile(f *repo.File, c repo.Entry) error {
 	return nil
 }
 
-func check(f func() error) {
+func checkFileUnlock(f func() error) {
 	if err := f(); err != nil {
 		logger.Errorf("Error while %v", err)
 	}
