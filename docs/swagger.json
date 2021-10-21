@@ -12,7 +12,7 @@
   "info": {
     "description": "Albatross is a helm cli wrapper and enables using helm via http calls",
     "title": "Albatross API.",
-    "version": "v1.0.3"
+    "version": "v1.1.0"
   },
   "paths": {
     "/clusters/{cluster}/namespaces/{namespace}/releases": {
@@ -441,6 +441,59 @@
           }
         }
       }
+    },
+    "/repositories/{repository_name}": {
+      "put": {
+        "description": "The endpoint is idempotent and a repository can be updated by using the force_update parameter to true",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Add/Update a chart repository to the server.",
+        "operationId": "addOperation",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "string",
+            "name": "repository_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/addRepoRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The repository was added successfully",
+            "schema": {
+              "$ref": "#/definitions/addRepoEntry"
+            }
+          },
+          "400": {
+            "description": "Invalid Request",
+            "schema": {
+              "$ref": "#/definitions/addRepoErrorResponseBody"
+            }
+          },
+          "500": {
+            "description": "Something went with the server",
+            "schema": {
+              "$ref": "#/definitions/addRepoErrorResponseBody"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -496,6 +549,72 @@
         }
       },
       "x-go-package": "github.com/gojekfarm/albatross/api/upgrade"
+    },
+    "addRepoEntry": {
+      "description": "Entry contains metadata about a helm repository entry object",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-name": "Entry",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
+    "addRepoErrorResponseBody": {
+      "description": "AddErrorResponse body of non 2xx response",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        }
+      },
+      "x-go-name": "AddErrorResponse",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
+    },
+    "addRepoRequestBody": {
+      "description": "AddRequest is the body for PUT request to repository",
+      "type": "object",
+      "properties": {
+        "force_update": {
+          "type": "boolean",
+          "x-go-name": "ForceUpdate",
+          "example": false
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "skip_tls_verify": {
+          "type": "boolean",
+          "x-go-name": "InsecureSkipTLSverify",
+          "example": false
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-name": "AddRequest",
+      "x-go-package": "github.com/gojekfarm/albatross/api/repository"
     },
     "globalFlags": {
       "description": "GlobalFlags flags which give context about kubernetes cluster to connect to",
