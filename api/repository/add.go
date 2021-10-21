@@ -47,7 +47,7 @@ type Entry struct {
 	Password string `json:"password"`
 }
 
-const NAME string = "repository_name"
+const URLNamePlaceholder string = "repository_name"
 
 // AddHandler handles a repo add/update request
 // swagger:operation PUT /repositories/{repository_name} repository addOperation
@@ -101,7 +101,7 @@ func AddHandler(s addService) http.Handler {
 			return
 		}
 
-		req.Name = vars[NAME]
+		req.Name = vars[URLNamePlaceholder]
 
 		resp, err := s.Add(r.Context(), req)
 

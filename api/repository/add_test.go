@@ -44,7 +44,7 @@ func (s *RepoAddTestSuite) SetupTest() {
 	s.recorder = httptest.NewRecorder()
 	s.mockService = new(mockService)
 	router := mux.NewRouter()
-	path := fmt.Sprintf("/repositories/{%s}", NAME)
+	path := fmt.Sprintf("/repositories/{%s}", URLNamePlaceholder)
 	router.Handle(path, AddHandler(s.mockService)).Methods(http.MethodPut)
 	s.server = httptest.NewServer(router)
 }

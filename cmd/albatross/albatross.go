@@ -75,5 +75,5 @@ func serveDocumentation(r *mux.Router) {
 func handleRepositoryRoutes(router *mux.Router) {
 	repoClient := helmRepository.NewClient()
 	repoService := repository.NewService(repoClient)
-	router.Handle(fmt.Sprintf("/{%s}", repository.NAME), ContentTypeMiddle(repository.AddHandler(repoService))).Methods(http.MethodPut)
+	router.Handle(fmt.Sprintf("/{%s}", repository.URLNamePlaceholder), ContentTypeMiddle(repository.AddHandler(repoService))).Methods(http.MethodPut)
 }
