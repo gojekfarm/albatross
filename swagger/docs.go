@@ -3,7 +3,7 @@
 // Albatross is a helm cli wrapper and enables using helm via http calls
 //
 //     Schemes: http
-//     Version: v1.1.0
+//     Version: v1.2.0
 //
 //     Consumes:
 //     - application/json
