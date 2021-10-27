@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"helm.sh/helm/v3/pkg/action"
+
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -118,6 +120,38 @@ func (s *InstallerTestSuite) TestReturnShouldBadRequestOnInvalidRequest() {
 	resp, err := http.DefaultClient.Do(req)
 	assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)
 	require.NoError(s.T(), err)
+}
+
+func (s *InstallerTestSuite) TestShouldReturnBadRequestWhenReleaseNameIsInvalid() {
+	chartName := "stable/redis-ha"
+	type testCase struct {
+		body             string
+		expectedResponse string
+	}
+
+	releaseNames := []string{".release", "", "super-long-name-is-here-and-will-fail-because-its-more-than-fity-three-characters"}
+
+	testCases := []testCase{
+		{
+			body:             fmt.Sprintf(`{"name":"%s","chart":"%s", "values": {"replicas": 2}, "flags": {}}`, releaseNames[0], chartName),
+			expectedResponse: fmt.Sprintf("{\"error\":\"release name %s must match regex %s\"}\n", releaseNames[0], action.ValidName.String()),
+		},
+		{
+			body:             fmt.Sprintf(`{"name":"%s","chart":"%s", "values": {"replicas": 2}, "flags": {}}`, releaseNames[1], chartName),
+			expectedResponse: "{\"error\":\"release name cannot be empty string\"}\n",
+		},
+		{
+			body:             fmt.Sprintf(`{"name":"%s","chart":"%s", "values": {"replicas": 2}, "flags": {}}`, releaseNames[2], chartName),
+			expectedResponse: fmt.Sprintf("{\"error\":\"release name %s exceeds max length of %d\"}\n", releaseNames[2], releaseNameMaxLen),
+		},
+	}
+	for _, tc := range testCases {
+		req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/clusters/minikube/namespaces/albatross/releases", s.server.URL), strings.NewReader(tc.body))
+		resp, _ := http.DefaultClient.Do(req)
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		assert.Equal(s.T(), http.StatusBadRequest, resp.StatusCode)
+		assert.Equal(s.T(), tc.expectedResponse, string(respBody))
+	}
 }
 
 func (s *InstallerTestSuite) TearDownTest() {
