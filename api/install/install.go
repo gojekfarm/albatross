@@ -3,7 +3,7 @@ package install
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,10 +17,9 @@ import (
 )
 
 const (
-	alreadyPresent = "cannot re-use a name that is still in use"
+	alreadyPresent    = "cannot re-use a name that is still in use"
+	releaseNameMaxLen = 53
 )
-
-var errInvalidReleaseName = errors.New("uninstall: invalid release name")
 
 // Request is the body for installing a release
 // swagger:model installRequestBody
@@ -132,7 +131,7 @@ func Handler(service service) http.Handler {
 		req.Flags.KubeContext = values["cluster"]
 		req.Flags.Namespace = values["namespace"]
 		if err := req.valid(); err != nil {
-			logger.Errorf("[Uninstall] error in request parameters: %v", err)
+			logger.Errorf("[Install] error in request parameters: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			respondInstallError(w, "", err, http.StatusBadRequest)
 			return
@@ -169,9 +168,13 @@ func respondInstallError(w http.ResponseWriter, logprefix string, err error, sta
 }
 
 func (req Request) valid() error {
-	releaseName := req.Name
-	if releaseName == "" || !action.ValidName.MatchString(releaseName) || len(releaseName) > 53 {
-		return errInvalidReleaseName
+	switch releaseName := req.Name; {
+	case releaseName == "":
+		return fmt.Errorf("release name cannot be empty string")
+	case !action.ValidName.MatchString(releaseName):
+		return fmt.Errorf("release name %s must match regex %s", releaseName, action.ValidName.String())
+	case len(releaseName) > releaseNameMaxLen:
+		return fmt.Errorf("release name %s exceeds max length of %d", releaseName, releaseNameMaxLen)
 	}
 	return nil
 }

@@ -12,7 +12,7 @@
   "info": {
     "description": "Albatross is a helm cli wrapper and enables using helm via http calls",
     "title": "Albatross API.",
-    "version": "v1.1.0"
+    "version": "v1.2.0"
   },
   "paths": {
     "/clusters/{cluster}/namespaces/{namespace}/releases": {
