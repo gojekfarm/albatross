@@ -12,6 +12,7 @@ Albatross wraps the helm package to expose helm operations as HTTP APIs.
 ### Prerequisites
 * Go >= version 1.12
 * Make sure gomodules is enabled(GO111MODULES=on) if the source path is part of GOPATH
+* Install [go-swagger](https://goswagger.io/install.html)
 
 ### Building from source
 Clone the repository and run:
